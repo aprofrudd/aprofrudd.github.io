@@ -1,0 +1,7 @@
+*.pdf
+*.docx
+*.rtf
+*.txt
+*.md
+*.Zone.Identifier
+.claude/
