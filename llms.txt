@@ -52,5 +52,5 @@ Over 100 media outputs providing expert commentary across broadcast, print and d
 - X/Twitter: https://x.com/ruddock_boxsci
 - GitHub: https://github.com/aprofrudd
 - Email: a.ruddock@shu.ac.uk
-- ORCID: TODO
+- ORCID: https://orcid.org/0000-0002-7001-9845
 - ResearchGate: TODO
