@@ -314,6 +314,30 @@ a:hover {
     letter-spacing: 0.5px;
 }
 
+/* Now Section */
+.now-list {
+    list-style: none;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.now-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.now-list li::before {
+    content: '\2022';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
 /* About Section */
 .about-content {
     max-width: 800px;
@@ -872,6 +896,66 @@ a.publication-link:hover .publication-title {
 .media-item-detail {
     font-size: 0.9rem;
     color: var(--text-secondary);
+}
+
+/* Available For Section */
+.available-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.available-item {
+    background: var(--background);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.available-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+}
+
+.available-item h3 {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.available-item p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* FAQ Section */
+.faq-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    background: var(--background);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.faq-question {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.faq-answer {
+    color: var(--text-secondary);
+    line-height: 1.7;
 }
 
 /* Contact Section */
