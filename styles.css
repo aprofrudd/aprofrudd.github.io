@@ -279,6 +279,41 @@ a:hover {
     border-radius: 2px;
 }
 
+/* At a Glance Section */
+.glance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.glance-item {
+    text-align: center;
+    padding: 1.25rem 1rem;
+    background: var(--background);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.glance-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1.2;
+}
+
+.glance-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 /* About Section */
 .about-content {
     max-width: 800px;
@@ -1006,6 +1041,11 @@ a.publication-link:hover .publication-title {
 
     .grant-item {
         flex-direction: column;
+    }
+
+    .glance-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 }
 

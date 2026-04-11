@@ -1,0 +1,294 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "Dr Alan Ruddock",
+    "label": "Associate Professor of Sport Physiology and Performance",
+    "image": "https://alanruddock.com/Staff%20Photo.jpg",
+    "email": "a.ruddock@shu.ac.uk",
+    "url": "https://alanruddock.com",
+    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 50+ peer-reviewed publications (h-index: 25) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Led scientific support for boxers in 15 world-title contests including Anthony Joshua OBE. Recipient of the CASES Applied Practitioner Award 2021.",
+    "location": {
+      "city": "Sheffield",
+      "region": "South Yorkshire",
+      "countryCode": "GB"
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "alanruddocksportscience",
+        "url": "https://www.linkedin.com/in/alanruddocksportscience/"
+      },
+      {
+        "network": "Google Scholar",
+        "url": "https://scholar.google.com/citations?user=liwS2XIAAAAJ&hl=en"
+      },
+      {
+        "network": "GitHub",
+        "username": "aprofrudd",
+        "url": "https://github.com/aprofrudd"
+      },
+      {
+        "network": "X",
+        "username": "ruddock_boxsci",
+        "url": "https://x.com/ruddock_boxsci"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Chartered Association of Sport and Exercise Sciences (CASES)",
+      "position": "Director & Chair of Physiology and Nutrition Division",
+      "startDate": "2024-01-01",
+      "highlights": [
+        "Providing strategic leadership for the Physiology and Nutrition Division",
+        "Overseeing professional standards and accreditation processes",
+        "Contributing to the governance and direction of the organisation"
+      ]
+    },
+    {
+      "name": "Sheffield Hallam University",
+      "position": "Associate Professor of Sport Physiology and Performance",
+      "url": "https://www.shu.ac.uk",
+      "startDate": "2023-01-01",
+      "highlights": [
+        "Course Leader for BSc Sport and Exercise Science managing 350 students and 30 staff",
+        "SHU Academic Board member (2021 - 2024)",
+        "Currently supervising 5 PhD candidates"
+      ]
+    },
+    {
+      "name": "Boxing Science",
+      "position": "Co-Founder",
+      "url": "https://boxingscience.co.uk",
+      "startDate": "2013-01-01",
+      "highlights": [
+        "Provides scientific support to boxers and combat athletes worldwide",
+        "Led scientific support for boxers in 15 world-title contests",
+        "Delivered workshops to over 500 coaches across UK, Europe, North America and Asia",
+        "Platform reaches 30,000 unique users per month"
+      ]
+    },
+    {
+      "name": "Sheffield Hallam University",
+      "position": "Ethics Lead, School of Sport and Physical Activity",
+      "startDate": "2019-01-01",
+      "highlights": [
+        "Leading research ethics governance for taught programmes",
+        "Ensuring ethical compliance across student research projects"
+      ]
+    },
+    {
+      "name": "Sheffield Hallam University",
+      "position": "Laboratory Director, School of Sport and Physical Activity",
+      "startDate": "2019-01-01",
+      "endDate": "2024-12-31",
+      "highlights": [
+        "Managed laboratory operations and equipment",
+        "Oversaw research and teaching laboratory activities"
+      ]
+    },
+    {
+      "name": "Birmingham Newman University",
+      "position": "Chief External Examiner",
+      "startDate": "2020-01-01",
+      "endDate": "2024-12-31",
+      "highlights": [
+        "Ensured academic standards and quality assurance",
+        "Reviewed assessment processes and student outcomes"
+      ]
+    },
+    {
+      "name": "Sheffield Hallam University",
+      "position": "Senior Lecturer",
+      "startDate": "2017-01-01",
+      "endDate": "2023-12-31"
+    },
+    {
+      "name": "Sheffield Hallam University",
+      "position": "Associate Lecturer",
+      "startDate": "2013-01-01",
+      "endDate": "2017-12-31"
+    },
+    {
+      "name": "Sheffield Hallam University",
+      "position": "Lab Technician",
+      "startDate": "2007-01-01",
+      "endDate": "2013-12-31"
+    }
+  ],
+  "education": [
+    {
+      "institution": "Sheffield Hallam University",
+      "url": "https://www.shu.ac.uk",
+      "area": "Sport Physiology",
+      "studyType": "Doctor of Philosophy (PhD)",
+      "endDate": "2017-01-01"
+    },
+    {
+      "institution": "Sheffield Hallam University",
+      "url": "https://www.shu.ac.uk",
+      "area": "Sport Science",
+      "studyType": "Master of Science (MSc)",
+      "endDate": "2007-01-01"
+    },
+    {
+      "institution": "Sheffield Hallam University",
+      "url": "https://www.shu.ac.uk",
+      "area": "Sport Science",
+      "studyType": "Bachelor of Science (Hons.)",
+      "endDate": "2005-01-01"
+    }
+  ],
+  "awards": [
+    {
+      "title": "CASES Applied Practitioner Award",
+      "date": "2021-01-01",
+      "awarder": "Chartered Association of Sport and Exercise Sciences (CASES)",
+      "summary": "For sustained, outstanding and innovative sport science service delivery"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "Accredited Fellow (Physiology – Scientific Support), CASES (FCASES)",
+      "issuer": "Chartered Association of Sport and Exercise Sciences"
+    },
+    {
+      "name": "Senior Fellow of the Higher Education Academy (SFHEA)",
+      "issuer": "Advance HE"
+    },
+    {
+      "name": "Chartered Scientist (CSci)",
+      "issuer": "The Science Council"
+    }
+  ],
+  "publications": [
+    {
+      "name": "Effects of a 5-Day Back Squat Overreaching Protocol on Strength Performance, Perceived Recovery and Wellness Responses: A Pilot Trial",
+      "publisher": "Journal of Functional Morphology and Kinesiology",
+      "releaseDate": "2025-01-01",
+      "url": "https://doi.org/10.3390/jfmk10020227"
+    },
+    {
+      "name": "Strength Training Practices in Amateur and Professional Boxing",
+      "publisher": "Journal of Strength and Conditioning Research",
+      "releaseDate": "2025-01-01",
+      "url": "https://doi.org/10.1519/JSC.0000000000005088"
+    },
+    {
+      "name": "Physiological and Nutritional Considerations for Elite Squash: A Systematic Review",
+      "publisher": "Journal of Science in Sport and Exercise",
+      "releaseDate": "2024-01-01",
+      "url": "https://doi.org/10.1007/s42978-024-00313-9"
+    },
+    {
+      "name": "Reliability of three landmine-punch-throw variations and their load-velocity relationships performed with the dominant and nondominant hands",
+      "publisher": "International Journal of Sports Physiology and Performance",
+      "releaseDate": "2024-01-01",
+      "url": "https://doi.org/10.1123/ijspp.2023-0235"
+    },
+    {
+      "name": "Strength and conditioning practices of judo athletes and S&C coaches: a survey-based investigation",
+      "publisher": "Journal of Strength and Conditioning Research",
+      "releaseDate": "2024-01-01",
+      "url": "https://doi.org/10.1519/JSC.0000000000004673"
+    },
+    {
+      "name": "Fluid balance, sodium losses and hydration practices of elite squash players during training",
+      "publisher": "Nutrients",
+      "releaseDate": "2023-01-01",
+      "url": "https://doi.org/10.3390/nu15071749"
+    },
+    {
+      "name": "\"Is it a slow day or a go day?\": the perceptions and applications of velocity-based training within elite strength and conditioning",
+      "publisher": "International Journal of Sports Science and Coaching",
+      "releaseDate": "2022-01-01",
+      "url": "https://doi.org/10.1177/17479541221099641"
+    },
+    {
+      "name": "The role of strength on punch impact force in boxing",
+      "publisher": "Journal of Strength and Conditioning Research",
+      "releaseDate": "2022-01-01",
+      "url": "https://doi.org/10.1519/JSC.0000000000004252"
+    },
+    {
+      "name": "\"I want to create so much stimulus that adaptation goes through the roof\": high-performance strength coaches' perceptions of planned overreaching",
+      "publisher": "Frontiers in Sports and Active Living",
+      "releaseDate": "2022-01-01",
+      "url": "https://doi.org/10.3389/fspor.2022.893581"
+    },
+    {
+      "name": "High-intensity conditioning for combat athletes: practical recommendations",
+      "publisher": "Applied Sciences",
+      "releaseDate": "2021-01-01",
+      "url": "https://doi.org/10.3390/app112210658"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Areas of Expertise",
+      "keywords": [
+        "Applied Physiology",
+        "Sport Performance",
+        "Thermoregulation",
+        "High-Intensity Interval Training",
+        "Strength & Conditioning",
+        "Combat Sports Science",
+        "Microvascular Function"
+      ]
+    },
+    {
+      "name": "Teaching & Supervision",
+      "keywords": [
+        "PhD Supervision",
+        "Module Leadership",
+        "CASES Supervised Experience Reviewer",
+        "Course Leadership"
+      ]
+    },
+    {
+      "name": "Editorial & Professional",
+      "keywords": [
+        "Academic Editor, PLOSone",
+        "Topic Editor, Frontiers",
+        "Chief Guest Editor, Applied Sciences",
+        "CASES Accreditation Reviewer"
+      ]
+    },
+    {
+      "name": "Peer Review",
+      "keywords": [
+        "Sports Medicine",
+        "EJSS",
+        "IJSPP",
+        "JSCR",
+        "Frontiers",
+        "Applied Sciences"
+      ]
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "fluency": "Native speaker"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Boxing Science",
+      "description": "Applied sport science consultancy supporting elite combat sport athletes worldwide",
+      "url": "https://boxingscience.co.uk",
+      "startDate": "2013-01-01",
+      "highlights": [
+        "Scientific support for 15 world-title boxing contests",
+        "Workshops delivered to 500+ coaches across UK, Europe, North America and Asia",
+        "30,000 unique users per month"
+      ],
+      "roles": ["Co-Founder"]
+    }
+  ],
+  "meta": {
+    "canonical": "https://alanruddock.com/resume.json",
+    "version": "v1.0.0",
+    "lastModified": "2026-04-11"
+  }
+}
