@@ -163,6 +163,12 @@
   ],
   "publications": [
     {
+      "name": "CASES Expert Statement on Guidance for Reporting of Physiological Assessments: Sport Performance Testing",
+      "publisher": "Chartered Association of Sport and Exercise Sciences",
+      "releaseDate": "2026-01-01",
+      "url": "https://doi.org/10.65650/vffb-se9t"
+    },
+    {
       "name": "Effects of a 5-Day Back Squat Overreaching Protocol on Strength Performance, Perceived Recovery and Wellness Responses: A Pilot Trial",
       "publisher": "Journal of Functional Morphology and Kinesiology",
       "releaseDate": "2025-01-01",
@@ -289,6 +295,6 @@
   "meta": {
     "canonical": "https://alanruddock.com/resume.json",
     "version": "v1.0.0",
-    "lastModified": "2026-04-11"
+    "lastModified": "2026-05-01"
   }
 }
