@@ -267,6 +267,26 @@ h1, h2, h3 {
   margin: 1rem 0;
 }
 
+.thanks .change-vote {
+  margin-top: 1.5rem;
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.thanks .change-vote:hover,
+.thanks .change-vote:focus-visible {
+  background: var(--accent);
+  color: var(--paper);
+}
+
 /* --- Projector layout --- */
 
 body.projector .main {

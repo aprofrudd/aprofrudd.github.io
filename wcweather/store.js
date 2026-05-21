@@ -51,8 +51,15 @@ function createLocalStore() {
     },
     onVotes(cb) { voteSubs.push(cb); cb(readVotes()); },
     addVote(stage, choice) {
+      const id = 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
       const v = readVotes();
-      v.push({stage, choice, ts: Date.now()});
+      v.push({id, stage, choice, ts: Date.now()});
+      writeVotes(v);
+      emitVotes();
+      return id;
+    },
+    removeVote(voteId) {
+      const v = readVotes().filter(x => x.id !== voteId);
       writeVotes(v);
       emitVotes();
     },
@@ -95,7 +102,12 @@ async function createFirebaseStore() {
       });
     },
     async addVote(stage, choice) {
-      await addDoc(votesCol, { stage, choice, ts: serverTimestamp() });
+      const ref = await addDoc(votesCol, { stage, choice, ts: serverTimestamp() });
+      return ref.id;
+    },
+    async removeVote(voteId) {
+      try { await deleteDoc(doc(db, 'wcweather_votes', voteId)); }
+      catch (e) { console.warn('[wcweather] removeVote failed:', e); }
     },
     async clearVotes() {
       // Bump the epoch first so phones unlock as soon as they see the change

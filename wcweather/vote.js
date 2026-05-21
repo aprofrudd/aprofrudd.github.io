@@ -19,7 +19,21 @@
 
   function votedKey(stageId) { return 'wcw_voted_' + stageId; }
   function hasVoted(stageId) { return localStorage.getItem(votedKey(stageId)) !== null; }
-  function markVoted(stageId, choice) { localStorage.setItem(votedKey(stageId), choice); }
+
+  function readVoted(stageId) {
+    const raw = localStorage.getItem(votedKey(stageId));
+    if (!raw) return null;
+    // Backward compatible — old format was just the choice id as a string
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && 'choice' in parsed) return parsed;
+    } catch (_) { /* fall through */ }
+    return { choice: raw, voteId: null };
+  }
+  function markVoted(stageId, choice, voteId) {
+    localStorage.setItem(votedKey(stageId), JSON.stringify({ choice, voteId: voteId || null }));
+  }
+  function clearVoted(stageId) { localStorage.removeItem(votedKey(stageId)); }
 
   function clearVotedFlags() {
     Object.keys(localStorage)
@@ -56,14 +70,38 @@
   function renderThanks(stage) {
     root.innerHTML = '';
     const wrap = el('div', 'thanks');
+    const v = readVoted(stage.id);
+    const choiceLabel = v ? labelForChoice(stage, v.choice) : '';
     wrap.innerHTML = `
       <h2>Got it.</h2>
       <span class="arrow">↑</span>
       <p>Look at the screen — your vote is in.</p>
+      ${choiceLabel ? `<p style="font-size:0.95rem;margin-top:0.5rem;color:#6b4a3e;">You picked <strong>${choiceLabel}</strong>.</p>` : ''}
+      <button type="button" class="change-vote">Change my vote</button>
       <p style="font-size:0.85rem;margin-top:1.5rem;color:#9a7d6f;">
-        Wait here. The next question will appear automatically.
+        The next question will appear automatically.
       </p>`;
+    wrap.querySelector('.change-vote').addEventListener('click', async () => {
+      const cur = readVoted(stage.id);
+      if (cur && cur.voteId) {
+        try { await store.removeVote(cur.voteId); } catch (e) { /* ignore */ }
+      }
+      clearVoted(stage.id);
+      render(currentStageIndex);
+    });
     root.appendChild(wrap);
+  }
+
+  function labelForChoice(stage, choiceId) {
+    if (stage.type === 'map') {
+      const c = window.CITIES.find(c => c.id === choiceId);
+      return c ? c.name : choiceId;
+    }
+    if (stage.type === 'mcq') {
+      const o = stage.options.find(o => o.id === choiceId);
+      return o ? o.label : choiceId;
+    }
+    return choiceId;
   }
 
   function renderWait(title) {
@@ -106,11 +144,15 @@
       btn.dataset.city = city.id;
       btn.dataset.dir  = city.labelDir || 's';
       btn.innerHTML = `<span class="dot"></span><span class="label">${city.name}</span>`;
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         if (hasVoted(stage.id)) return;
-        markVoted(stage.id, city.id);
-        store.addVote(stage.id, city.id);
+        // Mark optimistically with no ID, then update with the real ID once Firestore returns
+        markVoted(stage.id, city.id, null);
         renderThanks(stage);
+        try {
+          const voteId = await store.addVote(stage.id, city.id);
+          markVoted(stage.id, city.id, voteId);
+        } catch (e) { console.warn('[wcweather] vote failed:', e); }
       });
       pinsLayer.appendChild(btn);
     });
@@ -140,11 +182,14 @@
     stage.options.forEach(opt => {
       const b = el('button', 'mcq-option');
       b.textContent = opt.label;
-      b.addEventListener('click', () => {
+      b.addEventListener('click', async () => {
         if (hasVoted(stage.id)) return;
-        markVoted(stage.id, opt.id);
-        store.addVote(stage.id, opt.id);
+        markVoted(stage.id, opt.id, null);
         renderThanks(stage);
+        try {
+          const voteId = await store.addVote(stage.id, opt.id);
+          markVoted(stage.id, opt.id, voteId);
+        } catch (e) { console.warn('[wcweather] vote failed:', e); }
       });
       list.appendChild(b);
     });
