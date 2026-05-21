@@ -220,6 +220,69 @@ h1, h2, h3 {
   box-shadow: 0 0 0 6px var(--accent-soft), 0 2px 4px rgba(0,0,0,0.2);
 }
 
+/* --- City list (tap-friendly fallback below the map) --- */
+
+.tap-hint {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}
+
+.city-list {
+  display: none;       /* shown on small screens via media query */
+  margin-top: 1.5rem;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.city-list-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.city-list-heading {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding-left: 0.25rem;
+}
+
+.city-list-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.city-list-btn {
+  background: var(--paper);
+  border: 1.5px solid rgba(124, 74, 62, 0.25);
+  border-radius: 8px;
+  padding: 0.85rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--sans);
+  transition: border-color 120ms ease, background 120ms ease;
+  box-shadow: var(--shadow);
+  min-height: 48px;     /* generous tap target */
+}
+
+.city-list-btn:hover,
+.city-list-btn:focus-visible {
+  border-color: var(--accent);
+  background: var(--paper-dark);
+}
+
+.city-list-btn:active {
+  background: var(--accent-soft);
+}
+
 /* --- MCQ --- */
 
 .mcq-list {
@@ -619,11 +682,18 @@ body.projector .results-pane h3 {
 /* --- Responsive tweaks --- */
 
 @media (max-width: 700px) {
-  /* Don't clip labels that escape the map outline */
+  /* On mobile, the map is too tight for 16 labels — show the dots for
+     geographic context, but route voting through the city list below. */
   .map-wrap { overflow: visible; }
-  .pin .label { font-size: 0.6rem; padding: 1px 4px; }
-  .pin .dot { width: 11px; height: 11px; }
-  .pin::before { inset: -14px; }
+  .pin .label { display: none; }
+  .pin .dot { width: 14px; height: 14px; }
+  .pin::before { inset: -10px; }
+
+  .city-list { display: flex; }
+  .tap-hint { font-size: 0.9rem; }
+
+  /* The projector layout collapses to one column at this width too, so
+     don't blow up the results pane unnecessarily. */
   .header h1 { font-size: 1.2rem; }
   .results-row { grid-template-columns: 9rem 1fr 2.5rem; font-size: 0.85rem; }
 }

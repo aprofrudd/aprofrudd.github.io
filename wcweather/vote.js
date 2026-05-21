@@ -127,6 +127,16 @@
     `;
     root.appendChild(head);
 
+    async function castVote(cityId) {
+      if (hasVoted(stage.id)) return;
+      markVoted(stage.id, cityId, null);
+      renderThanks(stage);
+      try {
+        const voteId = await store.addVote(stage.id, cityId);
+        markVoted(stage.id, cityId, voteId);
+      } catch (e) { console.warn('[wcweather] vote failed:', e); }
+    }
+
     const mapWrap = el('div', 'map-wrap');
     const img = el('img', 'basemap');
     img.src = 'map.svg';
@@ -144,25 +154,43 @@
       btn.dataset.city = city.id;
       btn.dataset.dir  = city.labelDir || 's';
       btn.innerHTML = `<span class="dot"></span><span class="label">${city.name}</span>`;
-      btn.addEventListener('click', async () => {
-        if (hasVoted(stage.id)) return;
-        // Mark optimistically with no ID, then update with the real ID once Firestore returns
-        markVoted(stage.id, city.id, null);
-        renderThanks(stage);
-        try {
-          const voteId = await store.addVote(stage.id, city.id);
-          markVoted(stage.id, city.id, voteId);
-        } catch (e) { console.warn('[wcweather] vote failed:', e); }
-      });
+      btn.addEventListener('click', () => castVote(city.id));
       pinsLayer.appendChild(btn);
     });
 
     root.appendChild(mapWrap);
 
-    const note = el('div');
-    note.style.cssText = 'text-align:center;color:#6b4a3e;font-size:0.85rem;margin-top:1rem;';
+    const note = el('div', 'tap-hint');
     note.textContent = 'Tap the city you think will host the hottest match.';
     root.appendChild(note);
+
+    // City list — tap-friendly fallback for phones where map labels are tight.
+    // Hidden on desktop via CSS, visible on small screens.
+    const list = el('div', 'city-list');
+    list.setAttribute('aria-label', 'City list — tap to vote');
+    const COUNTRY_NAMES = { US: 'USA', CA: 'Canada', MX: 'Mexico' };
+    const grouped = { CA: [], US: [], MX: [] };
+    window.CITIES.forEach(c => grouped[c.country].push(c));
+
+    ['US', 'CA', 'MX'].forEach(cc => {
+      const group = el('div', 'city-list-group');
+      const heading = el('div', 'city-list-heading');
+      heading.textContent = COUNTRY_NAMES[cc];
+      group.appendChild(heading);
+
+      const row = el('div', 'city-list-row');
+      grouped[cc].forEach(city => {
+        const b = el('button', 'city-list-btn');
+        b.dataset.city = city.id;
+        b.textContent = city.name;
+        b.addEventListener('click', () => castVote(city.id));
+        row.appendChild(b);
+      });
+      group.appendChild(row);
+      list.appendChild(group);
+    });
+
+    root.appendChild(list);
   }
 
   function renderMcq(stage, qNumber) {
