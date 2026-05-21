@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Stylised North America base map.
+  viewBox 700×460 represents 70° longitude × 46° latitude.
+  Coord conversion:  x = (130 - lngAbs) * 10,  y = (60 - lat) * 10
+  Country outlines are simplified — recognisable, not survey-grade.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" preserveAspectRatio="none">
+  <defs>
+    <pattern id="usFlag" patternUnits="userSpaceOnUse" width="700" height="22">
+      <rect width="700" height="22" fill="#f5ede0"/>
+      <rect width="700" height="11" y="0" fill="#c0524a" opacity="0.55"/>
+    </pattern>
+    <pattern id="caFlag" patternUnits="userSpaceOnUse" width="700" height="460">
+      <rect width="700" height="460" fill="#e9b9b3"/>
+      <rect x="180" width="340" height="460" fill="#f5ede0"/>
+    </pattern>
+    <pattern id="mxFlag" patternUnits="userSpaceOnUse" width="180" height="460">
+      <rect width="60" height="460" fill="#8aa178"/>
+      <rect x="60" width="60" height="460" fill="#f5ede0"/>
+      <rect x="120" width="60" height="460" fill="#c0524a"/>
+    </pattern>
+  </defs>
+
+  <!-- Parchment background -->
+  <rect width="700" height="460" fill="#faf4e6"/>
+
+  <!-- Canada: top band -->
+  <path d="
+    M 0 0
+    L 700 0
+    L 700 130
+    L 650 130
+    L 615 145
+    L 580 155
+    L 540 165
+    L 500 170
+    L 470 165
+    L 440 158
+    L 410 148
+    L 380 132
+    L 60 110
+    L 30 70
+    L 10 30
+    L 0 0
+    Z" fill="url(#caFlag)" stroke="#7c4a3f" stroke-width="1.4" opacity="0.95"/>
+
+  <!-- USA: lower 48 with Florida + Maine -->
+  <path d="
+    M 60 110
+    L 380 132
+    L 410 148
+    L 440 158
+    L 470 165
+    L 500 170
+    L 540 165
+    L 580 155
+    L 615 145
+    L 650 130
+    L 680 138
+    L 690 152
+    L 660 170
+    L 615 185
+    L 580 200
+    L 545 220
+    L 525 250
+    L 510 285
+    L 500 320
+    L 495 350
+    L 485 360
+    L 475 348
+    L 470 322
+    L 470 298
+    L 460 282
+    L 440 282
+    L 410 285
+    L 380 290
+    L 348 295
+    L 322 310
+    L 308 335
+    L 295 348
+    L 280 338
+    L 265 322
+    L 245 305
+    L 215 290
+    L 180 285
+    L 155 282
+    L 138 282
+    L 118 268
+    L 95 240
+    L 80 215
+    L 70 185
+    L 60 155
+    L 55 130
+    L 60 110
+    Z" fill="url(#usFlag)" stroke="#7c4a3f" stroke-width="1.4" opacity="0.95"/>
+
+  <!-- Mexico: triangle with Yucatan and a Baja hint -->
+  <path d="
+    M 138 282
+    L 155 282
+    L 180 285
+    L 215 290
+    L 245 305
+    L 265 322
+    L 280 338
+    L 295 348
+    L 308 335
+    L 322 310
+    L 332 340
+    L 340 372
+    L 358 395
+    L 378 405
+    L 400 408
+    L 422 408
+    L 442 412
+    L 445 425
+    L 432 432
+    L 410 428
+    L 388 420
+    L 365 425
+    L 348 435
+    L 332 445
+    L 310 442
+    L 290 428
+    L 270 415
+    L 252 398
+    L 232 385
+    L 215 365
+    L 200 345
+    L 192 320
+    L 188 365
+    L 195 395
+    L 185 408
+    L 168 402
+    L 162 380
+    L 162 355
+    L 158 328
+    L 152 305
+    L 142 290
+    L 138 282
+    Z" fill="url(#mxFlag)" stroke="#7c4a3f" stroke-width="1.4" opacity="0.95"/>
+
+  <!-- Subtle paper texture overlay -->
+  <rect width="700" height="460" fill="#7c4a3f" opacity="0.04"/>
+</svg>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>World Cup 2026 — Projector</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body class="projector">
+  <div id="dev-banner" class="dev-banner" hidden></div>
+
+  <header class="header">
+    <div class="kicker">FIFA World Cup 2026 · Classroom Activity</div>
+    <h1>Where will the hottest match be — and what does the heat do to players?</h1>
+  </header>
+
+  <main class="main">
+    <div id="stage-pane" class="stage-pane"></div>
+    <aside id="results-pane" class="results-pane"></aside>
+  </main>
+
+  <div class="controls">
+    <button id="reset-btn" class="reset" title="Wipe all votes">Reset</button>
+    <button id="prev-btn">‹ Back</button>
+    <span id="stage-indicator" class="stage-indicator">— / —</span>
+    <button id="next-btn">Next ›</button>
+  </div>
+
+  <script src="cities.js"></script>
+  <script src="stages.js"></script>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="store.js"></script>
+  <script>
+    (function waitForStore() {
+      if (window.createStore) {
+        const s = document.createElement('script');
+        s.src = 'results.js';
+        document.body.appendChild(s);
+      } else {
+        setTimeout(waitForStore, 30);
+      }
+    })();
+  </script>
+</body>
+</html>
