@@ -65,10 +65,8 @@
       renderContent(stagePane, stage);
     }
 
-    // Join box only for stages where students vote
-    if (stage.type === 'map' || stage.type === 'mcq') {
-      renderJoinBox(stagePane);
-    }
+    // (The QR + URL now lives in the persistent top-right corner of the
+    // projector page, so we don't render an in-stage join box.)
   }
 
   function renderProjectorMap(parent, stage) {
