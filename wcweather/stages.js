@@ -43,8 +43,8 @@ const STAGES = [
       highlightTop: 3
     },
     quote: 'Three venues — Dallas, Houston, Monterrey — average above 32 °C. Monterrey is the only outdoor venue in that top three, and it also sits at 64% relative humidity.',
-    citation: 'Pacha, Watanabe, Hosokawa &amp; Casa, 2025 — Int. J. Biometeorology',
-    link: 'https://link.springer.com/article/10.1007/s00484-025-02852-4',
+    citation: 'Mullan, Barr, Brannigan et al., 2025 — Int J Biometeorol 69, 753–763',
+    link: 'https://doi.org/10.1007/s00484-025-02852-4',
     sideFigure: 'media/pacha-2025-wbgt-map.png',
     sideFigureCaption: 'Average WBGT (wet-bulb globe temperature) per host venue, June–July match window. Circle size scales with WBGT. The same data the table summarises, but mapped geographically.'
   },
