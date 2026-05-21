@@ -146,13 +146,31 @@ h1, h2, h3 {
   border: 1px solid rgba(124, 74, 62, 0.2);
   white-space: nowrap;
   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-  pointer-events: none;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 
   /* Default: 's' (label below dot) */
   top: calc(100% + 4px);
   left: 50%;
   transform: translateX(-50%);
 }
+
+/* Mirror the hover state across dot + label so either feels clickable */
+.pin:hover .label,
+.pin:focus-visible .label {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.pin.voted .label {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+/* Projector-side pins are just display, no pointer */
+.pin.disabled .label { cursor: default; }
+.pin.disabled:hover .label { background: var(--paper); border-color: rgba(124, 74, 62, 0.2); }
 
 .pin[data-dir="n"]  .label { top: auto; bottom: calc(100% + 4px); left: 50%;             transform: translateX(-50%); }
 .pin[data-dir="e"]  .label { top: 50%;  left: calc(100% + 6px);   right: auto;           transform: translateY(-50%); }
