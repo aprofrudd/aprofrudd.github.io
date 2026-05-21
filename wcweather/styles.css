@@ -608,6 +608,83 @@ body.projector .results-pane h3 {
   font-size: 0.95rem;
 }
 
+.content-stage cite a,
+.content-stage .paper-link a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.content-stage cite a:hover,
+.content-stage .paper-link a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.content-stage .paper-link {
+  margin-top: 1.25rem;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}
+
+/* --- Clean HTML table for content stages (e.g. paper data) --- */
+
+.content-table-wrap {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.content-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+}
+
+.content-table thead th {
+  text-align: left;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 700;
+  padding: 0.55rem 0.6rem 0.35rem;
+  border-bottom: 2px solid rgba(124, 74, 62, 0.18);
+  white-space: nowrap;
+}
+
+.content-table tbody td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid rgba(124, 74, 62, 0.08);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.content-table tbody td.rowlabel {
+  font-weight: 600;
+}
+
+.content-table tbody td:not(.rowlabel) {
+  text-align: right;
+}
+
+.content-table tbody tr.highlight {
+  background: var(--accent-soft);
+}
+
+.content-table tbody tr.highlight td.rowlabel {
+  color: var(--pin);
+}
+
+.content-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
 /* --- Persistent QR in the top-right corner of the projector --- */
 
 .qr-corner {

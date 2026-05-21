@@ -16,15 +16,47 @@ const STAGES = [
   },
 
   {
+    id: 'predicted-temps',
+    type: 'content',
+    title: 'What the science predicts',
+    blurb: 'Average match-day ambient temperature (Ta) and relative humidity (RH) at each host venue. Top three hottest are highlighted.',
+    table: {
+      headers: ['Host city', 'Ambient °C', 'RH %', 'Indoor'],
+      rows: [
+        ['Dallas',        '32.7', '47', 'Yes'],
+        ['Houston',       '32.0', '76', 'Yes'],
+        ['Monterrey',     '32.0', '64', 'No'],
+        ['Atlanta',       '29.7', '54', 'Yes'],
+        ['Miami',         '29.3', '71', 'No'],
+        ['Kansas City',   '28.9', '55', 'No'],
+        ['Philadelphia',  '28.2', '61', 'No'],
+        ['Guadalajara',   '27.4', '48', 'No'],
+        ['Los Angeles',   '26.8', '43', 'Yes'],
+        ['New York / NJ', '26.4', '68', 'No'],
+        ['Boston',        '25.5', '69', 'No'],
+        ['San Francisco', '24.5', '52', 'No'],
+        ['Toronto',       '23.9', '68', 'No'],
+        ['Seattle',       '20.6', '57', 'No'],
+        ['Mexico City',   '19.4', '57', 'No'],
+        ['Vancouver',     '19.1', '62', 'No']
+      ],
+      highlightTop: 3
+    },
+    quote: 'Three venues — Dallas, Houston, Monterrey — average above 32 °C. Monterrey is the only outdoor venue in that top three, and it also sits at 64% relative humidity.',
+    citation: 'Pacha, Watanabe, Hosokawa &amp; Casa, 2025 — Int. J. Biometeorology',
+    link: 'https://link.springer.com/article/10.1007/s00484-025-02852-4'
+  },
+
+  {
     id: 'how-hot',
     type: 'mcq',
-    title: 'How hot will it actually get on the pitch?',
-    blurb: 'Pitch-side dry-bulb temperature during a noon kick-off at the hottest venue.',
+    title: 'How hot does it actually feel on the pitch?',
+    blurb: 'Ambient temperature is one thing — on a sunny pitch in direct sun, the effective heat load (WBGT or "feels-like") can be considerably higher. What\'s your best guess for the gap?',
     options: [
-      { id: 'under-30', label: 'Under 30 °C' },
-      { id: '30-35',    label: '30–35 °C' },
-      { id: '35-40',    label: '35–40 °C' },
-      { id: 'over-40',  label: 'Over 40 °C' }
+      { id: 'same',       label: 'Roughly the same as ambient' },
+      { id: 'plus-3-5',   label: '+3 to +5 °C above ambient' },
+      { id: 'plus-5-10',  label: '+5 to +10 °C above ambient' },
+      { id: 'plus-10',    label: 'More than +10 °C above ambient' }
     ]
   },
 

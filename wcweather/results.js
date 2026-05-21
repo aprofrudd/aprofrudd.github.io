@@ -134,10 +134,11 @@
 
   function renderContent(parent, stage) {
     const wrap = el('div', 'content-stage');
-    const fig = el('div', 'figure-wrap');
-    wrap.appendChild(fig);
 
+    // 1) Figure (optional — image of a chart, paper figure, etc.)
     if (stage.figure) {
+      const fig = el('div', 'figure-wrap');
+      wrap.appendChild(fig);
       fetch(stage.figure, { method: 'HEAD' })
         .then(r => {
           if (r.ok) {
@@ -154,12 +155,67 @@
         });
     }
 
+    // 2) Table (optional — clean HTML table for displaying paper data
+    //    responsively. Use instead of a figure when you want themed,
+    //    accessible output rather than a screenshot.)
+    if (stage.table) {
+      const tWrap = el('div', 'content-table-wrap');
+      const tbl = el('table', 'content-table');
+      if (stage.table.headers) {
+        const thead = el('thead');
+        const tr = el('tr');
+        stage.table.headers.forEach(h => {
+          const th = el('th');
+          th.textContent = h;
+          tr.appendChild(th);
+        });
+        thead.appendChild(tr);
+        tbl.appendChild(thead);
+      }
+      const tbody = el('tbody');
+      const highlightTop = Number.isInteger(stage.table.highlightTop)
+        ? stage.table.highlightTop : 0;
+      (stage.table.rows || []).forEach((row, i) => {
+        const tr = el('tr');
+        if (i < highlightTop) tr.classList.add('highlight');
+        row.forEach((cell, ci) => {
+          const td = el('td');
+          td.textContent = cell;
+          if (ci === 0) td.classList.add('rowlabel');
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      tbl.appendChild(tbody);
+      tWrap.appendChild(tbl);
+      wrap.appendChild(tWrap);
+    }
+
+    // 3) Quote + citation (optional). Citation becomes a clickable
+    //    paper link when `stage.link` is set.
     if (stage.quote) {
       const q = el('blockquote');
       q.innerHTML = `“${stage.quote}”`;
-      if (stage.citation) q.innerHTML += `<cite>— ${stage.citation}</cite>`;
+      if (stage.citation) {
+        const cite = el('cite');
+        if (stage.link) {
+          const safe = String(stage.link).replace(/"/g, '&quot;');
+          cite.innerHTML = `— <a href="${safe}" target="_blank" rel="noopener">${stage.citation} ↗</a>`;
+        } else {
+          cite.textContent = `— ${stage.citation}`;
+        }
+        q.appendChild(cite);
+      }
       wrap.appendChild(q);
+    } else if (stage.link) {
+      // Surface the paper link even when there's no pull quote.
+      const linkP = el('p', 'paper-link');
+      const safe = String(stage.link).replace(/"/g, '&quot;');
+      const label = stage.citation || 'Read the paper';
+      linkP.innerHTML = `<a href="${safe}" target="_blank" rel="noopener">${label} ↗</a>`;
+      wrap.appendChild(linkP);
     }
+
     parent.appendChild(wrap);
   }
 
