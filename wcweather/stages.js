@@ -40,7 +40,7 @@ const STAGES = [
         ['Mexico City',   '19.4', '57', 'No'],
         ['Vancouver',     '19.1', '62', 'No']
       ],
-      highlightTop: 3
+      highlightTop: 5
     },
     quote: 'Three venues — Dallas, Houston, Monterrey — average above 32 °C. Monterrey is the only outdoor venue in that top three, and it also sits at 64% relative humidity.',
     citation: 'Mullan, Barr, Brannigan et al., 2025 — Int J Biometeorol 69, 753–763',
@@ -50,15 +50,17 @@ const STAGES = [
   },
 
   {
-    id: 'how-hot',
+    id: 'time-of-day',
     type: 'mcq',
-    title: 'How hot does it actually feel on the pitch?',
-    blurb: 'Ambient temperature is one thing — on a sunny pitch in direct sun, the effective heat load (WBGT or "feels-like") can be considerably higher. What\'s your best guess for the gap?',
+    title: 'In Monterrey and Miami, when is WBGT most likely to exceed 28 °C?',
+    blurb: 'Look at the Monterrey (MON) and Miami (MIA) panels in the figure — when do the orange bars (WBGT &gt; 28 °C) peak?',
+    figure: 'media/pacha-2025-figure-3.png',
+    figureCaption: 'Percentage of days during the match window in which average WBGT exceeded 26 °C (yellow), 28 °C (orange) or 32 °C (red), by hour of day, at each host venue. From Mullan et al., 2025.',
     options: [
-      { id: 'same',       label: 'Roughly the same as ambient' },
-      { id: 'plus-3-5',   label: '+3 to +5 °C above ambient' },
-      { id: 'plus-5-10',  label: '+5 to +10 °C above ambient' },
-      { id: 'plus-10',    label: 'More than +10 °C above ambient' }
+      { id: '9am',  label: '9 am' },
+      { id: '12pm', label: '12 pm' },
+      { id: '6pm',  label: '6 pm' },
+      { id: '9pm',  label: '9 pm' }
     ]
   },
 

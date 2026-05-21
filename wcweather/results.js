@@ -55,6 +55,21 @@
     if (stage.type === 'map') {
       renderProjectorMap(stagePane, stage);
     } else if (stage.type === 'mcq') {
+      // Optional figure shown above the option list — useful when the
+      // question requires students to read a chart to answer.
+      if (stage.figure) {
+        const figWrap = el('div', 'mcq-figure-wrap');
+        const img = el('img');
+        img.src = stage.figure;
+        img.alt = stage.figureCaption || '';
+        figWrap.appendChild(img);
+        if (stage.figureCaption) {
+          const cap = el('div', 'mcq-figure-caption');
+          cap.textContent = stage.figureCaption;
+          figWrap.appendChild(cap);
+        }
+        stagePane.appendChild(figWrap);
+      }
       const list = el('div', 'mcq-list');
       stage.options.forEach(opt => {
         const row = el('div', 'mcq-option disabled');
