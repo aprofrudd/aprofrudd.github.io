@@ -12,14 +12,19 @@
 // Vote shape: { stage: string, choice: string, ts: number }
 
 function createLocalStore() {
-  const STAGE_KEY = 'wcw_state_stage';
+  const STATE_KEY = 'wcw_state_stage';
   const VOTES_KEY = 'wcw_votes';
   const stageSubs = [];
   const voteSubs  = [];
 
-  function readStage() {
-    const raw = localStorage.getItem(STAGE_KEY);
-    return raw ? JSON.parse(raw).stage : 0;
+  function readState() {
+    const raw = localStorage.getItem(STATE_KEY);
+    if (!raw) return {stage: 0, epoch: 0};
+    const s = JSON.parse(raw);
+    return {stage: s.stage ?? 0, epoch: s.epoch ?? 0};
+  }
+  function writeState(state) {
+    localStorage.setItem(STATE_KEY, JSON.stringify({...state, ts: Date.now()}));
   }
   function readVotes() {
     const raw = localStorage.getItem(VOTES_KEY);
@@ -28,22 +33,21 @@ function createLocalStore() {
   function writeVotes(v) {
     localStorage.setItem(VOTES_KEY, JSON.stringify(v));
   }
-  function emitStage() { const s = readStage(); stageSubs.forEach(cb => cb({stage: s})); }
+  function emitState() { const s = readState(); stageSubs.forEach(cb => cb(s)); }
   function emitVotes() { const v = readVotes(); voteSubs.forEach(cb => cb(v)); }
 
-  // Same-page subscribers fire from setStage/addVote directly;
-  // cross-tab sync uses the storage event.
   window.addEventListener('storage', (e) => {
-    if (e.key === STAGE_KEY) emitStage();
+    if (e.key === STATE_KEY) emitState();
     if (e.key === VOTES_KEY) emitVotes();
   });
 
   return {
     isLive: false,
-    onStage(cb) { stageSubs.push(cb); cb({stage: readStage()}); },
+    onStage(cb) { stageSubs.push(cb); cb(readState()); },
     setStage(n) {
-      localStorage.setItem(STAGE_KEY, JSON.stringify({stage: n, ts: Date.now()}));
-      emitStage();
+      const cur = readState();
+      writeState({stage: n, epoch: cur.epoch});
+      emitState();
     },
     onVotes(cb) { voteSubs.push(cb); cb(readVotes()); },
     addVote(stage, choice) {
@@ -52,13 +56,19 @@ function createLocalStore() {
       writeVotes(v);
       emitVotes();
     },
-    clearVotes() { writeVotes([]); emitVotes(); }
+    clearVotes() {
+      writeVotes([]);
+      const cur = readState();
+      writeState({stage: cur.stage, epoch: (cur.epoch || 0) + 1});
+      emitState();
+      emitVotes();
+    }
   };
 }
 
 async function createFirebaseStore() {
   const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-  const { getFirestore, doc, collection, onSnapshot, setDoc, addDoc, getDocs, deleteDoc, serverTimestamp }
+  const { getFirestore, doc, collection, onSnapshot, setDoc, addDoc, getDoc, getDocs, deleteDoc, serverTimestamp }
     = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
   const app = initializeApp(window.FIREBASE_CONFIG);
@@ -70,8 +80,8 @@ async function createFirebaseStore() {
     isLive: true,
     onStage(cb) {
       onSnapshot(stateRef, (snap) => {
-        const data = snap.exists() ? snap.data() : {stage: 0};
-        cb({stage: data.stage ?? 0});
+        const data = snap.exists() ? snap.data() : {stage: 0, epoch: 0};
+        cb({stage: data.stage ?? 0, epoch: data.epoch ?? 0});
       });
     },
     async setStage(n) {
@@ -88,6 +98,11 @@ async function createFirebaseStore() {
       await addDoc(votesCol, { stage, choice, ts: serverTimestamp() });
     },
     async clearVotes() {
+      // Bump the epoch first so phones unlock as soon as they see the change
+      const cur = (await getDoc(stateRef));
+      const epoch = (cur.exists() && typeof cur.data().epoch === 'number') ? cur.data().epoch + 1 : 1;
+      await setDoc(stateRef, { epoch, ts: serverTimestamp() }, { merge: true });
+      // Then delete the votes
       const snap = await getDocs(votesCol);
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
     }

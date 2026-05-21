@@ -14,10 +14,32 @@
   }
 
   let currentStageIndex = -1;
+  let currentEpoch = null;
+  const EPOCH_KEY = 'wcw_epoch';
 
   function votedKey(stageId) { return 'wcw_voted_' + stageId; }
   function hasVoted(stageId) { return localStorage.getItem(votedKey(stageId)) !== null; }
   function markVoted(stageId, choice) { localStorage.setItem(votedKey(stageId), choice); }
+
+  function clearVotedFlags() {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('wcw_voted_'))
+      .forEach(k => localStorage.removeItem(k));
+  }
+
+  function syncEpoch(epoch) {
+    if (epoch == null) return;
+    const seen = localStorage.getItem(EPOCH_KEY);
+    if (seen === null) {
+      localStorage.setItem(EPOCH_KEY, String(epoch));
+      return;
+    }
+    if (Number(seen) !== Number(epoch)) {
+      // Teacher reset — unlock this phone for the new session
+      clearVotedFlags();
+      localStorage.setItem(EPOCH_KEY, String(epoch));
+    }
+  }
 
   function el(tag, cls, html) {
     const e = document.createElement(tag);
@@ -152,8 +174,11 @@
     }
   }
 
-  store.onStage(({stage}) => {
-    if (stage !== currentStageIndex) {
+  store.onStage(({stage, epoch}) => {
+    const epochChanged = currentEpoch !== null && currentEpoch !== epoch;
+    syncEpoch(epoch);
+    currentEpoch = epoch ?? currentEpoch;
+    if (stage !== currentStageIndex || epochChanged) {
       currentStageIndex = stage;
       render(stage);
     }
