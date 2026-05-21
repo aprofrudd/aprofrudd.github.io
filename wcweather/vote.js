@@ -30,7 +30,12 @@
   function syncEpoch(epoch) {
     if (epoch == null) return;
     const seen = localStorage.getItem(EPOCH_KEY);
+    const hasVotedFlags = Object.keys(localStorage).some(k => k.startsWith('wcw_voted_'));
     if (seen === null) {
+      // First load with epoch-aware code. If this device has voted flags
+      // from an earlier session (pre-epoch code, or before a reset we
+      // missed), treat them as stale and clear them.
+      if (hasVotedFlags) clearVotedFlags();
       localStorage.setItem(EPOCH_KEY, String(epoch));
       return;
     }
