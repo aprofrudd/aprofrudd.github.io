@@ -1,19 +1,26 @@
-// Storage abstraction. Same API whether we're talking to Firebase Firestore
-// or the localStorage fallback (used while FIREBASE_CONFIG is the placeholder
-// or for offline content design).
+// Storage abstraction for the classroom-poll-site engine.
+// Same public API whether we're talking to Firebase Firestore or the
+// localStorage fallback (used during local-dev / before Firebase is set up).
 //
-// Public surface (returned by createStore()):
-//   onStage(cb)        - subscribe to stage index changes; cb({stage}) fires now + on change
-//   setStage(n)        - set current stage (projector only)
-//   onVotes(cb)        - subscribe to all votes; cb(votes[]) fires now + on change
-//   addVote(stage,id)  - record a vote
-//   clearVotes()       - wipe all votes (reset)
+// Reads window.LESSON_ID (set by lesson.config.js) so multiple lessons can
+// share a single Firebase project without their votes colliding.
 //
-// Vote shape: { stage: string, choice: string, ts: number }
+// Public surface returned by createStore():
+//   onStage(cb)             - subscribe to {stage, epoch} changes
+//   setStage(n)             - set current stage index (projector only)
+//   onVotes(cb)             - subscribe to all votes; cb(votes[])
+//   addVote(stage, choice)  - record a vote; returns the new vote's id
+//   removeVote(voteId)      - delete a single vote (used by "Change my vote")
+//   clearVotes()            - wipe all votes and bump epoch (teacher reset)
+//
+// Vote shape: { id, stage: string, choice: string, ts }
+// State doc shape: { stage: int, epoch: int, ts }
+
+const LESSON_ID = window.LESSON_ID || 'lesson';
+const STATE_KEY = LESSON_ID + '_state_stage';
+const VOTES_KEY = LESSON_ID + '_votes';
 
 function createLocalStore() {
-  const STATE_KEY = 'wcw_state_stage';
-  const VOTES_KEY = 'wcw_votes';
   const stageSubs = [];
   const voteSubs  = [];
 
@@ -80,8 +87,10 @@ async function createFirebaseStore() {
 
   const app = initializeApp(window.FIREBASE_CONFIG);
   const db  = getFirestore(app);
-  const stateRef = doc(db, 'wcweather', 'state');
-  const votesCol = collection(db, 'wcweather_votes');
+  // Lesson-scoped Firestore paths: each lesson lives in its own state doc
+  // and votes collection so multiple lessons can share one project safely.
+  const stateRef = doc(db, LESSON_ID, 'state');
+  const votesCol = collection(db, LESSON_ID + '_votes');
 
   return {
     isLive: true,
@@ -106,15 +115,15 @@ async function createFirebaseStore() {
       return ref.id;
     },
     async removeVote(voteId) {
-      try { await deleteDoc(doc(db, 'wcweather_votes', voteId)); }
-      catch (e) { console.warn('[wcweather] removeVote failed:', e); }
+      try { await deleteDoc(doc(db, LESSON_ID + '_votes', voteId)); }
+      catch (e) { console.warn('[' + LESSON_ID + '] removeVote failed:', e); }
     },
     async clearVotes() {
-      // Bump the epoch first so phones unlock as soon as they see the change
+      // Bump epoch first so phones unlock as soon as they see the change.
       const cur = (await getDoc(stateRef));
       const epoch = (cur.exists() && typeof cur.data().epoch === 'number') ? cur.data().epoch + 1 : 1;
       await setDoc(stateRef, { epoch, ts: serverTimestamp() }, { merge: true });
-      // Then delete the votes
+      // Then delete the votes.
       const snap = await getDocs(votesCol);
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
     }
@@ -125,7 +134,7 @@ async function createStore() {
   if (window.IS_LIVE) {
     try { return await createFirebaseStore(); }
     catch (e) {
-      console.warn('[wcweather] Firebase init failed, falling back to localStorage:', e);
+      console.warn('[' + LESSON_ID + '] Firebase init failed, falling back to localStorage:', e);
       return createLocalStore();
     }
   }

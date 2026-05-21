@@ -1,9 +1,15 @@
 // Phone-side controller. Subscribes to the current stage, renders the right
 // UI for it, and writes the vote. One vote per stage per device — enforced
-// via localStorage. After voting, the student sees a "look at the screen"
-// message until the projector advances.
+// via localStorage. After voting, the student sees "Got it" with a
+// "Change my vote" button. When the teacher advances the stage on the
+// projector, every connected phone re-renders.
+//
+// Lesson-agnostic engine code — uses window.LESSON_ID (set by
+// lesson.config.js) so multiple lessons can coexist on the same origin
+// without clobbering each other's localStorage.
 
 (async function () {
+  const LESSON_ID = window.LESSON_ID || 'lesson';
   const root  = document.getElementById('stage-root');
   const dev   = document.getElementById('dev-banner');
   const store = await window.createStore();
@@ -15,15 +21,15 @@
 
   let currentStageIndex = -1;
   let currentEpoch = null;
-  const EPOCH_KEY = 'wcw_epoch';
+  const EPOCH_KEY  = LESSON_ID + '_epoch';
+  const VOTED_PREFIX = LESSON_ID + '_voted_';
 
-  function votedKey(stageId) { return 'wcw_voted_' + stageId; }
+  function votedKey(stageId) { return VOTED_PREFIX + stageId; }
   function hasVoted(stageId) { return localStorage.getItem(votedKey(stageId)) !== null; }
 
   function readVoted(stageId) {
     const raw = localStorage.getItem(votedKey(stageId));
     if (!raw) return null;
-    // Backward compatible — old format was just the choice id as a string
     try {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object' && 'choice' in parsed) return parsed;
@@ -37,24 +43,24 @@
 
   function clearVotedFlags() {
     Object.keys(localStorage)
-      .filter(k => k.startsWith('wcw_voted_'))
+      .filter(k => k.startsWith(VOTED_PREFIX))
       .forEach(k => localStorage.removeItem(k));
   }
 
   function syncEpoch(epoch) {
     if (epoch == null) return;
     const seen = localStorage.getItem(EPOCH_KEY);
-    const hasVotedFlags = Object.keys(localStorage).some(k => k.startsWith('wcw_voted_'));
+    const hasVotedFlags = Object.keys(localStorage).some(k => k.startsWith(VOTED_PREFIX));
     if (seen === null) {
-      // First load with epoch-aware code. If this device has voted flags
-      // from an earlier session (pre-epoch code, or before a reset we
-      // missed), treat them as stale and clear them.
+      // First load with epoch-aware code. If this device has voted flags from
+      // an earlier session (pre-epoch code, or before a reset we missed),
+      // treat them as stale and clear them so the student can vote afresh.
       if (hasVotedFlags) clearVotedFlags();
       localStorage.setItem(EPOCH_KEY, String(epoch));
       return;
     }
     if (Number(seen) !== Number(epoch)) {
-      // Teacher reset — unlock this phone for the new session
+      // Teacher reset — unlock this phone for the new session.
       clearVotedFlags();
       localStorage.setItem(EPOCH_KEY, String(epoch));
     }
@@ -94,7 +100,7 @@
 
   function labelForChoice(stage, choiceId) {
     if (stage.type === 'map') {
-      const c = window.CITIES.find(c => c.id === choiceId);
+      const c = (window.CITIES || []).find(c => c.id === choiceId);
       return c ? c.name : choiceId;
     }
     if (stage.type === 'mcq') {
@@ -123,30 +129,31 @@
         Question 1
       </div>
       <h2 style="font-family:Georgia,serif;font-size:1.25rem;margin:0.25rem 0 0.5rem;">${stage.title}</h2>
-      <p style="color:#6b4a3e;font-size:0.9rem;margin:0;">${stage.blurb}</p>
+      <p style="color:#6b4a3e;font-size:0.9rem;margin:0;">${stage.blurb || ''}</p>
     `;
     root.appendChild(head);
 
-    async function castVote(cityId) {
+    async function castVote(choiceId) {
       if (hasVoted(stage.id)) return;
-      markVoted(stage.id, cityId, null);
+      markVoted(stage.id, choiceId, null);
       renderThanks(stage);
       try {
-        const voteId = await store.addVote(stage.id, cityId);
-        markVoted(stage.id, cityId, voteId);
-      } catch (e) { console.warn('[wcweather] vote failed:', e); }
+        const voteId = await store.addVote(stage.id, choiceId);
+        markVoted(stage.id, choiceId, voteId);
+      } catch (e) { console.warn('[' + LESSON_ID + '] vote failed:', e); }
     }
 
+    const cities = window.CITIES || [];
     const mapWrap = el('div', 'map-wrap');
     const img = el('img', 'basemap');
-    img.src = 'map.svg';
-    img.alt = 'North America map';
+    img.src = (stage.map || 'map.svg');
+    img.alt = 'Map';
     mapWrap.appendChild(img);
 
     const pinsLayer = el('div', 'pins');
     mapWrap.appendChild(pinsLayer);
 
-    window.CITIES.forEach(city => {
+    cities.forEach(city => {
       const btn = el('button', 'pin');
       btn.style.left = city.x + '%';
       btn.style.top  = city.y + '%';
@@ -161,36 +168,47 @@
     root.appendChild(mapWrap);
 
     const note = el('div', 'tap-hint');
-    note.textContent = 'Tap the city you think will host the hottest match.';
+    note.textContent = stage.tapHint || 'Tap the marker you want to pick.';
     root.appendChild(note);
 
-    // City list — tap-friendly fallback for phones where map labels are tight.
-    // Hidden on desktop via CSS, visible on small screens.
-    const list = el('div', 'city-list');
-    list.setAttribute('aria-label', 'City list — tap to vote');
-    const COUNTRY_NAMES = { US: 'USA', CA: 'Canada', MX: 'Mexico' };
-    const grouped = { CA: [], US: [], MX: [] };
-    window.CITIES.forEach(c => grouped[c.country].push(c));
+    // Tap-friendly fallback list — labels overlap badly when 16+ pins are
+    // squeezed into a phone-width map, so we hide labels on small screens
+    // and route voting through a grouped list of buttons below the map.
+    if (cities.length) {
+      const list = el('div', 'city-list');
+      list.setAttribute('aria-label', 'Pick from a list');
 
-    ['US', 'CA', 'MX'].forEach(cc => {
-      const group = el('div', 'city-list-group');
-      const heading = el('div', 'city-list-heading');
-      heading.textContent = COUNTRY_NAMES[cc];
-      group.appendChild(heading);
-
-      const row = el('div', 'city-list-row');
-      grouped[cc].forEach(city => {
-        const b = el('button', 'city-list-btn');
-        b.dataset.city = city.id;
-        b.textContent = city.name;
-        b.addEventListener('click', () => castVote(city.id));
-        row.appendChild(b);
+      // Group by `country` when present (mirrors the wcweather worked example)
+      // or just render one ungrouped list otherwise.
+      const groups = new Map();
+      cities.forEach(c => {
+        const key = c.country || '__all__';
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(c);
       });
-      group.appendChild(row);
-      list.appendChild(group);
-    });
 
-    root.appendChild(list);
+      const COUNTRY_NAMES = { US: 'USA', CA: 'Canada', MX: 'Mexico' };
+      groups.forEach((items, key) => {
+        const group = el('div', 'city-list-group');
+        if (key !== '__all__') {
+          const heading = el('div', 'city-list-heading');
+          heading.textContent = COUNTRY_NAMES[key] || key;
+          group.appendChild(heading);
+        }
+        const row = el('div', 'city-list-row');
+        items.forEach(city => {
+          const b = el('button', 'city-list-btn');
+          b.dataset.city = city.id;
+          b.textContent = city.name;
+          b.addEventListener('click', () => castVote(city.id));
+          row.appendChild(b);
+        });
+        group.appendChild(row);
+        list.appendChild(group);
+      });
+
+      root.appendChild(list);
+    }
   }
 
   function renderMcq(stage, qNumber) {
@@ -217,7 +235,7 @@
         try {
           const voteId = await store.addVote(stage.id, opt.id);
           markVoted(stage.id, opt.id, voteId);
-        } catch (e) { console.warn('[wcweather] vote failed:', e); }
+        } catch (e) { console.warn('[' + LESSON_ID + '] vote failed:', e); }
       });
       list.appendChild(b);
     });
@@ -240,11 +258,10 @@
     switch (stage.type) {
       case 'map': renderMap(stage); break;
       case 'mcq': {
-        // Count which MCQ this is for the Question N header
-        const mcqIdx = stages
+        const qIdx = stages
           .slice(0, stageIndex + 1)
           .filter(s => s.type === 'mcq' || s.type === 'map').length;
-        renderMcq(stage, mcqIdx);
+        renderMcq(stage, qIdx);
         break;
       }
       case 'media':   renderWait(stage.title); break;

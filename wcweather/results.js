@@ -1,7 +1,11 @@
-// Projector-side controller. Renders the active stage (question text + media)
-// on the left, live results on the right, and provides Next/Prev/Reset.
+// Projector-side controller. Renders the active stage (question + media) on
+// the left, live results on the right, and provides Next/Prev/Reset.
+// Lesson-agnostic — uses window.LESSON_ID for any localStorage namespacing.
 
 (async function () {
+  const LESSON_ID = window.LESSON_ID || 'lesson';
+  const VOTED_PREFIX = LESSON_ID + '_voted_';
+
   const stagePane    = document.getElementById('stage-pane');
   const resultsPane  = document.getElementById('results-pane');
   const stageIndic   = document.getElementById('stage-indicator');
@@ -51,7 +55,6 @@
     if (stage.type === 'map') {
       renderProjectorMap(stagePane, stage);
     } else if (stage.type === 'mcq') {
-      // Show option text on the projector too — students see their list mirrored
       const list = el('div', 'mcq-list');
       stage.options.forEach(opt => {
         const row = el('div', 'mcq-option disabled');
@@ -64,26 +67,24 @@
     } else if (stage.type === 'content') {
       renderContent(stagePane, stage);
     }
-
-    // (The QR + URL now lives in the persistent top-right corner of the
-    // projector page, so we don't render an in-stage join box.)
+    // QR + URL live in the persistent top-right corner of the projector page.
   }
 
   function renderProjectorMap(parent, stage) {
+    const cities = window.CITIES || [];
     const mapWrap = el('div', 'map-wrap');
     const img = el('img', 'basemap');
-    img.src = 'map.svg';
+    img.src = (stage.map || 'map.svg');
     img.alt = '';
     mapWrap.appendChild(img);
 
     const pinsLayer = el('div', 'pins');
     mapWrap.appendChild(pinsLayer);
 
-    // Compute vote counts for this stage by city
     const counts = countsForStage(stage.id);
     const max = Math.max(0, ...Object.values(counts));
 
-    window.CITIES.forEach(city => {
+    cities.forEach(city => {
       const pin = el('div', 'pin disabled');
       pin.style.left = city.x + '%';
       pin.style.top  = city.y + '%';
@@ -109,7 +110,7 @@
     function makePlaceholder() {
       const ph = el('div', 'video-placeholder');
       ph.innerHTML = `
-        <div style="font-size:1.2rem;margin-bottom:0.4rem;">Manim animation goes here</div>
+        <div style="font-size:1.2rem;margin-bottom:0.4rem;">Video goes here</div>
         <div>Drop your file at <code>${stage.video}</code></div>`;
       return ph;
     }
@@ -136,20 +137,22 @@
     const fig = el('div', 'figure-wrap');
     wrap.appendChild(fig);
 
-    fetch(stage.figure, { method: 'HEAD' })
-      .then(r => {
-        if (r.ok) {
-          const img = el('img');
-          img.src = stage.figure;
-          img.alt = '';
-          fig.appendChild(img);
-        } else throw new Error('missing');
-      })
-      .catch(() => {
-        const ph = el('div', 'figure-placeholder');
-        ph.textContent = `Drop a figure at ${stage.figure}`;
-        fig.appendChild(ph);
-      });
+    if (stage.figure) {
+      fetch(stage.figure, { method: 'HEAD' })
+        .then(r => {
+          if (r.ok) {
+            const img = el('img');
+            img.src = stage.figure;
+            img.alt = '';
+            fig.appendChild(img);
+          } else throw new Error('missing');
+        })
+        .catch(() => {
+          const ph = el('div', 'figure-placeholder');
+          ph.textContent = `Drop a figure at ${stage.figure}`;
+          fig.appendChild(ph);
+        });
+    }
 
     if (stage.quote) {
       const q = el('blockquote');
@@ -158,42 +161,6 @@
       wrap.appendChild(q);
     }
     parent.appendChild(wrap);
-  }
-
-  function renderJoinBox(parent) {
-    const url = window.location.origin + window.location.pathname.replace('results.html', '');
-    const box = el('div', 'join-box');
-    box.innerHTML = `
-      <div class="qr"></div>
-      <div class="join-text">
-        <strong>Vote on your phone</strong>
-        Scan or go to <code>${url}</code>
-      </div>`;
-    parent.appendChild(box);
-    drawQr(box.querySelector('.qr'), url);
-  }
-
-  function drawQr(slot, text) {
-    // 1) Static qr.png if shipped alongside the site (preferred for prod)
-    // 2) qrcode CDN if reachable
-    // 3) Big URL fallback — students type it
-    const img = document.createElement('img');
-    img.src = 'qr.png';
-    img.alt = 'QR code to join the lesson';
-    img.onload = () => slot.appendChild(img);
-    img.onerror = () => {
-      if (window.QRCode && window.QRCode.toCanvas) {
-        const canvas = document.createElement('canvas');
-        slot.appendChild(canvas);
-        window.QRCode.toCanvas(canvas, text, {
-          width: 180, margin: 1,
-          color: { dark: '#3a261e', light: '#ffffff' }
-        });
-      } else {
-        slot.classList.add('qr-fallback');
-        slot.innerHTML = `<div class="qr-fallback-inner">QR<br><small>type URL →</small></div>`;
-      }
-    };
   }
 
   function countsForStage(stageId) {
@@ -228,12 +195,12 @@
 
     let options;
     if (stage.type === 'map') {
-      options = window.CITIES.map(c => ({ id: c.id, label: c.name }));
+      const cities = window.CITIES || [];
+      options = cities.map(c => ({ id: c.id, label: c.name }));
     } else {
       options = stage.options;
     }
 
-    // Sort by count desc, but keep zero-count options in their natural order at the bottom
     options.sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0));
 
     if (total === 0) {
@@ -276,14 +243,17 @@
     if (currentStage < stagesTotal() - 1) store.setStage(currentStage + 1);
   });
   resetBtn.addEventListener('click', () => {
-    const ok = confirm('Reset all votes? This wipes every recorded vote across every stage.');
+    const ok = confirm('Reset all votes? This wipes every recorded vote across every stage and unlocks every phone.');
     if (!ok) return;
     store.clearVotes();
-    // Also clear voted flags so the projector's own browser can vote again if testing
-    Object.keys(localStorage).filter(k => k.startsWith('wcw_voted_')).forEach(k => localStorage.removeItem(k));
+    // Also clear voted flags on the projector's own browser so testing isn't
+    // blocked by stale localStorage.
+    Object.keys(localStorage)
+      .filter(k => k.startsWith(VOTED_PREFIX))
+      .forEach(k => localStorage.removeItem(k));
   });
 
-  // Keyboard: right/left arrows advance the lesson
+  // Keyboard: arrows advance the lesson.
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
