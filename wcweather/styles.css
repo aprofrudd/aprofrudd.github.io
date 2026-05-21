@@ -466,6 +466,26 @@ body.projector .results-pane h3 {
   font-size: 0.95rem;
 }
 
+/* Optional reference image in the results pane on content stages.
+   Used to put a paper figure or supporting visual next to the main
+   table/quote in the stage pane. */
+.side-figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  background: var(--paper-dark);
+}
+
+.side-figure-caption {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  line-height: 1.4;
+}
+
 /* --- Projector controls --- */
 
 .controls {
@@ -655,6 +675,13 @@ body.projector .results-pane h3 {
   padding: 0.55rem 0.6rem 0.35rem;
   border-bottom: 2px solid rgba(124, 74, 62, 0.18);
   white-space: nowrap;
+}
+
+/* Right-align non-first column headers so they sit above the numeric
+   data they describe. First column header stays left-aligned over the
+   row labels. */
+.content-table thead th:not(:first-child) {
+  text-align: right;
 }
 
 .content-table tbody td {

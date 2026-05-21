@@ -238,6 +238,25 @@
 
     if (!stage) return;
 
+    // Content stages can optionally show a reference figure in the side
+    // pane (e.g. a paper figure that complements the main table or quote).
+    if (stage.type === 'content' && stage.sideFigure) {
+      h.textContent = stage.sideFigureCaption ? '' : 'Reference';
+      if (!h.textContent) h.remove();
+      const sideWrap = el('div', 'side-figure');
+      const img = el('img');
+      img.src = stage.sideFigure;
+      img.alt = stage.sideFigureCaption || '';
+      sideWrap.appendChild(img);
+      if (stage.sideFigureCaption) {
+        const cap = el('div', 'side-figure-caption');
+        cap.textContent = stage.sideFigureCaption;
+        sideWrap.appendChild(cap);
+      }
+      resultsPane.appendChild(sideWrap);
+      return;
+    }
+
     if (stage.type === 'media' || stage.type === 'content') {
       const note = el('div', 'results-empty');
       note.textContent = 'No vote on this stage — discussion / viewing.';
