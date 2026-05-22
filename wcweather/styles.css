@@ -333,6 +333,23 @@ h1, h2, h3 {
   box-shadow: var(--shadow);
 }
 
+/* Two-line MCQ option (label + sublabel). Used for fixture cards
+   where each option shows a matchup on top and venue · time below. */
+.mcq-option-label {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.mcq-option-sublabel {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
 .mcq-option:hover,
 .mcq-option:focus-visible {
   border-color: var(--accent);
@@ -453,6 +470,9 @@ body.projector .results-pane h3 {
 .results-row .name {
   color: var(--ink);
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .results-row .bar {

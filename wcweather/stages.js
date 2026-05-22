@@ -65,6 +65,22 @@ const STAGES = [
   },
 
   {
+    id: 'fixtures',
+    type: 'mcq',
+    title: 'Look at the games scheduled in Monterrey and Miami. Based on local kickoff time, which fixture do you think will be played in the hottest conditions?',
+    blurb: 'All kickoffs are in the evening — but look at Figure 3 from the last question: Miami\'s WBGT exceedance bars are still elevated at 18:00.',
+    options: [
+      { id: 'sa-uru-mia-1800',  label: '🇸🇦 Saudi Arabia v Uruguay 🇺🇾',     sublabel: 'Miami · 18:00' },
+      { id: 'swe-tun-mty-2000', label: '🇸🇪 Sweden v Tunisia 🇹🇳',           sublabel: 'Monterrey · 20:00' },
+      { id: 'tun-jpn-mty-2200', label: '🇹🇳 Tunisia v Japan 🇯🇵',            sublabel: 'Monterrey · 22:00' },
+      { id: 'uru-cpv-mia-1800', label: '🇺🇾 Uruguay v Cape Verde 🇨🇻',       sublabel: 'Miami · 18:00' },
+      { id: 'sco-bra-mia-1800', label: '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland v Brazil 🇧🇷',          sublabel: 'Miami · 18:00' },
+      { id: 'rsa-kor-mty-1900', label: '🇿🇦 South Africa v South Korea 🇰🇷', sublabel: 'Monterrey · 19:00' },
+      { id: 'col-prt-mia-1930', label: '🇨🇴 Colombia v Portugal 🇵🇹',        sublabel: 'Miami · 19:30' }
+    ]
+  },
+
+  {
     id: 'body-response',
     type: 'mcq',
     title: 'What happens to the body when it gets hot?',

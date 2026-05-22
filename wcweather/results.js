@@ -73,7 +73,16 @@
       const list = el('div', 'mcq-list');
       stage.options.forEach(opt => {
         const row = el('div', 'mcq-option disabled');
-        row.textContent = opt.label;
+        if (opt.sublabel) {
+          const main = el('span', 'mcq-option-label');
+          main.textContent = opt.label;
+          const sub  = el('span', 'mcq-option-sublabel');
+          sub.textContent = opt.sublabel;
+          row.appendChild(main);
+          row.appendChild(sub);
+        } else {
+          row.textContent = opt.label;
+        }
         list.appendChild(row);
       });
       stagePane.appendChild(list);

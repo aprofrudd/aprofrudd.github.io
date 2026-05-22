@@ -227,7 +227,18 @@
     const list = el('div', 'mcq-list');
     stage.options.forEach(opt => {
       const b = el('button', 'mcq-option');
-      b.textContent = opt.label;
+      // Two-line option support: `label` on top, optional muted `sublabel`
+      // below. Used e.g. for fixture cards (matchup + venue · kickoff).
+      if (opt.sublabel) {
+        const main = el('span', 'mcq-option-label');
+        main.textContent = opt.label;
+        const sub  = el('span', 'mcq-option-sublabel');
+        sub.textContent = opt.sublabel;
+        b.appendChild(main);
+        b.appendChild(sub);
+      } else {
+        b.textContent = opt.label;
+      }
       b.addEventListener('click', async () => {
         if (hasVoted(stage.id)) return;
         markVoted(stage.id, opt.id, null);
