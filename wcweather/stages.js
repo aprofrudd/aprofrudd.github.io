@@ -67,8 +67,9 @@ const STAGES = [
   {
     id: 'fixtures',
     type: 'mcq',
-    title: 'Look at the games scheduled in Monterrey and Miami. Based on local kickoff time, which fixture do you think will be played in the hottest conditions?',
-    blurb: 'All kickoffs are in the evening — but look at Figure 3 from the last question: Miami\'s WBGT exceedance bars are still elevated at 18:00.',
+    title: 'Look at the games scheduled in Monterrey and Miami. Based on local kickoff time, which three fixtures do you think will be played in the hottest conditions?',
+    blurb: 'Pick up to three. All kickoffs are in the evening — but look at Figure 3 from the last question: Miami\'s WBGT exceedance bars are still elevated at 18:00.',
+    maxSelect: 3,
     options: [
       { id: 'sa-uru-mia-1800',  label: '🇸🇦 Saudi Arabia v Uruguay 🇺🇾',     sublabel: 'Miami · 18:00' },
       { id: 'swe-tun-mty-2000', label: '🇸🇪 Sweden v Tunisia 🇹🇳',           sublabel: 'Monterrey · 20:00' },

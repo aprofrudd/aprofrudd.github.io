@@ -356,7 +356,8 @@ h1, h2, h3 {
   background: var(--paper-dark);
 }
 
-.mcq-option.voted {
+.mcq-option.voted,
+.mcq-option.selected {
   border-color: var(--accent);
   background: var(--accent-soft);
   font-weight: 600;
@@ -365,6 +366,60 @@ h1, h2, h3 {
 .mcq-option.disabled {
   cursor: default;
   opacity: 0.75;
+}
+
+/* Brief shake/flash when the student tries to pick more than maxSelect */
+@keyframes mcq-limit-flash {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-3px); }
+  75%      { transform: translateX(3px); }
+}
+.mcq-option.limit-flash {
+  animation: mcq-limit-flash 0.4s ease;
+  border-color: var(--accent);
+}
+
+/* Multi-select footer: pick counter + submit button */
+.mcq-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.75rem auto 0;
+  max-width: 640px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.mcq-counter {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.mcq-submit {
+  background: var(--accent);
+  color: var(--paper);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: background 120ms ease, opacity 120ms ease;
+  min-height: 44px;
+}
+
+.mcq-submit:hover:not([disabled]),
+.mcq-submit:focus-visible:not([disabled]) {
+  background: var(--ink);
+}
+
+.mcq-submit[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* --- Phone post-vote state --- */

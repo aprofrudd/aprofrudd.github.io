@@ -27,17 +27,27 @@
   function votedKey(stageId) { return VOTED_PREFIX + stageId; }
   function hasVoted(stageId) { return localStorage.getItem(votedKey(stageId)) !== null; }
 
+  // Voted state on the device.
+  // Always normalised to {choices: [], voteIds: []} (arrays). Single-select
+  // stages have one entry; multi-select stages have up to maxSelect entries.
+  // Backwards-compatible with the older single-shape {choice, voteId}.
   function readVoted(stageId) {
     const raw = localStorage.getItem(votedKey(stageId));
     if (!raw) return null;
     try {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object' && 'choice' in parsed) return parsed;
+      if (parsed && Array.isArray(parsed.choices)) return parsed;
+      if (parsed && 'choice' in parsed) {
+        return { choices: [parsed.choice], voteIds: [parsed.voteId || null] };
+      }
     } catch (_) { /* fall through */ }
-    return { choice: raw, voteId: null };
+    return { choices: [raw], voteIds: [null] };
   }
-  function markVoted(stageId, choice, voteId) {
-    localStorage.setItem(votedKey(stageId), JSON.stringify({ choice, voteId: voteId || null }));
+  function markVoted(stageId, choices, voteIds) {
+    localStorage.setItem(votedKey(stageId), JSON.stringify({
+      choices: Array.isArray(choices) ? choices : [choices],
+      voteIds: Array.isArray(voteIds) ? voteIds : [voteIds || null]
+    }));
   }
   function clearVoted(stageId) { localStorage.removeItem(votedKey(stageId)); }
 
@@ -77,21 +87,37 @@
     root.innerHTML = '';
     const wrap = el('div', 'thanks');
     const v = readVoted(stage.id);
-    const choiceLabel = v ? labelForChoice(stage, v.choice) : '';
+    const choices = (v && v.choices) || [];
+    const labels = choices.map(c => labelForChoice(stage, c)).filter(Boolean);
+
+    let picksHtml = '';
+    if (labels.length === 1) {
+      picksHtml = `<p style="font-size:0.95rem;margin-top:0.5rem;color:#6b4a3e;">You picked <strong>${labels[0]}</strong>.</p>`;
+    } else if (labels.length > 1) {
+      const items = labels.map(l => `<li>${l}</li>`).join('');
+      picksHtml = `
+        <div style="margin-top:0.75rem;color:#6b4a3e;font-size:0.95rem;">
+          <div>You picked:</div>
+          <ul style="text-align:left;margin:0.3rem auto 0;display:inline-block;padding-left:1.25rem;">${items}</ul>
+        </div>`;
+    }
+
     wrap.innerHTML = `
       <h2>Got it.</h2>
       <span class="arrow">↑</span>
       <p>Look at the screen — your vote is in.</p>
-      ${choiceLabel ? `<p style="font-size:0.95rem;margin-top:0.5rem;color:#6b4a3e;">You picked <strong>${choiceLabel}</strong>.</p>` : ''}
+      ${picksHtml}
       <button type="button" class="change-vote">Change my vote</button>
       <p style="font-size:0.85rem;margin-top:1.5rem;color:#9a7d6f;">
         The next question will appear automatically.
       </p>`;
     wrap.querySelector('.change-vote').addEventListener('click', async () => {
       const cur = readVoted(stage.id);
-      if (cur && cur.voteId) {
-        try { await store.removeVote(cur.voteId); } catch (e) { /* ignore */ }
-      }
+      const ids = (cur && cur.voteIds) || [];
+      // Delete every vote this device cast for this stage in parallel
+      await Promise.all(ids.filter(Boolean).map(id =>
+        store.removeVote(id).catch(() => {})
+      ));
       clearVoted(stage.id);
       render(currentStageIndex);
     });
@@ -224,11 +250,15 @@
     `;
     root.appendChild(head);
 
+    const maxSelect = Math.max(1, Number(stage.maxSelect || 1));
+    const isMulti   = maxSelect > 1;
+
     const list = el('div', 'mcq-list');
-    stage.options.forEach(opt => {
-      const b = el('button', 'mcq-option');
-      // Two-line option support: `label` on top, optional muted `sublabel`
-      // below. Used e.g. for fixture cards (matchup + venue · kickoff).
+    const buttons = new Map();   // opt.id → button element (used to toggle .selected)
+    const selected = new Set();  // selected opt.ids while the student is choosing
+
+    // Helper to render label + optional sublabel inside an option button.
+    function fillOption(b, opt) {
       if (opt.sublabel) {
         const main = el('span', 'mcq-option-label');
         main.textContent = opt.label;
@@ -239,13 +269,80 @@
       } else {
         b.textContent = opt.label;
       }
+    }
+
+    if (isMulti) {
+      // Multi-select flow: tap to toggle, submit when ready.
+      const counter = el('div', 'mcq-counter');
+      const submit  = el('button', 'mcq-submit');
+      submit.type = 'button';
+      submit.disabled = true;
+
+      function refresh() {
+        counter.textContent = `${selected.size} of ${maxSelect} selected`;
+        submit.textContent = selected.size > 0
+          ? `Submit ${selected.size} pick${selected.size > 1 ? 's' : ''}`
+          : 'Submit';
+        submit.disabled = selected.size < 1;
+      }
+
+      stage.options.forEach(opt => {
+        const b = el('button', 'mcq-option');
+        b.type = 'button';
+        fillOption(b, opt);
+        b.addEventListener('click', () => {
+          if (selected.has(opt.id)) {
+            selected.delete(opt.id);
+            b.classList.remove('selected');
+          } else {
+            if (selected.size >= maxSelect) {
+              b.classList.add('limit-flash');
+              setTimeout(() => b.classList.remove('limit-flash'), 400);
+              return;
+            }
+            selected.add(opt.id);
+            b.classList.add('selected');
+          }
+          refresh();
+        });
+        buttons.set(opt.id, b);
+        list.appendChild(b);
+      });
+
+      refresh();
+      root.appendChild(list);
+      const footer = el('div', 'mcq-footer');
+      footer.appendChild(counter);
+      footer.appendChild(submit);
+      root.appendChild(footer);
+
+      submit.addEventListener('click', async () => {
+        if (hasVoted(stage.id) || selected.size < 1) return;
+        const choices = Array.from(selected);
+        // Lock optimistically with no IDs, then write votes and patch in IDs.
+        markVoted(stage.id, choices, choices.map(() => null));
+        renderThanks(stage);
+        try {
+          const voteIds = await Promise.all(
+            choices.map(c => store.addVote(stage.id, c))
+          );
+          markVoted(stage.id, choices, voteIds);
+        } catch (e) { console.warn('[' + LESSON_ID + '] vote failed:', e); }
+      });
+      return;
+    }
+
+    // Single-select fast path (unchanged behaviour).
+    stage.options.forEach(opt => {
+      const b = el('button', 'mcq-option');
+      fillOption(b, opt);
       b.addEventListener('click', async () => {
         if (hasVoted(stage.id)) return;
-        markVoted(stage.id, opt.id, null);
+        markVoted(stage.id, [opt.id], [null]);
         renderThanks(stage);
         try {
           const voteId = await store.addVote(stage.id, opt.id);
-          markVoted(stage.id, opt.id, voteId);
+          markVoted(stage.id, [opt.id], [voteId]);
         } catch (e) { console.warn('[' + LESSON_ID + '] vote failed:', e); }
       });
       list.appendChild(b);
