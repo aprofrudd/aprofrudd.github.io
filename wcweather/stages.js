@@ -86,7 +86,7 @@ const STAGES = [
     type: 'content',
     title: 'Scotland v Brazil, Miami — when a player overheats',
     blurb: 'Two escalating syndromes. Exertional heat illness (amber) is the warning stage. Exertional heat stroke (red) is a medical emergency.',
-    figure: 'media/heat-illness-infographic.svg',
+    figure: 'media/heat-illness-infographic.jpeg',
     citation: 'Signs from Esh, Carter, Bougault et al., 2026 — Sports Medicine, Table 1',
     link: 'https://doi.org/10.1007/s40279-026-02398-4'
   },
@@ -97,7 +97,7 @@ const STAGES = [
     title: 'Which THREE of these signs do you think are the most serious?',
     blurb: 'Pick up to three. We’ll compare your picks with what the medicine treats as genuinely life-threatening.',
     maxSelect: 3,
-    figure: 'media/heat-illness-infographic.svg',
+    figure: 'media/heat-illness-infographic.jpeg',
     figureCaption: 'Exertional heat illness (amber) vs exertional heat stroke (red). From Esh et al., 2026.',
     options: [
       { id: 'dizziness',   label: 'Dizziness' },
