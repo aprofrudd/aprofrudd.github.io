@@ -31,11 +31,19 @@
       </div>
     </div>
 
+    <div id="edit-panel" class="edit-panel"></div>
+
     <div class="actions">
       <button id="save-btn" class="save-btn" type="button">⬇ Save my poster (PNG)</button>
       <span id="save-status" class="save-status"></span>
     </div>
     <p class="hint">Tip: on a phone you can also press and hold the poster to save the image.</p>
+
+    <div class="enter-box">
+      <button id="enter-btn" class="enter-btn" type="button" disabled>🏆 Enter the competition</button>
+      <span id="enter-status" class="enter-status"></span>
+      <p id="enter-consent" class="enter-consent"></p>
+    </div>
 
     <div class="poster-frame" id="poster-frame">
       <div class="poster-scaler" id="poster-scaler">
@@ -48,6 +56,8 @@
   <script src="cities.js"></script>
   <script src="stages.js"></script>
   <script src="poster-template.js"></script>
+  <script src="firebase-config.js"></script>
+  <script type="module" src="store.js"></script>
   <script src="vendor/html2canvas.min.js"></script>
   <script src="poster.js"></script>
 </body>

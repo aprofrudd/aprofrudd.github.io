@@ -15,6 +15,17 @@
 window.POSTER = {
   defaultTitle: 'How hot will the 2026 FIFA World Cup be — and can players cope?',
 
+  // Poster header kicker + byline suffix.
+  kicker: 'FIFA World Cup 2026 · Heat & Player Health',
+
+  // "Enter the competition" button + consent wording.
+  competition: {
+    bylineTag:   'CASES Outreach 2026',
+    entryLabel:  '🏆 Enter the competition',
+    enteredLabel:'Entered ✓ — good luck!',
+    consent:     'Entering sends your name, school and poster text to your teacher for the CASES Outreach competition. Your answers are not shared with anyone else.'
+  },
+
   // Per-stage maps: choice id -> mid-sentence prose fragment.
   // `a.<key>` in the sections is built by poster.js from these.
   answers: [

@@ -76,6 +76,16 @@ function createLocalStore() {
       writeState({stage: cur.stage, epoch: (cur.epoch || 0) + 1});
       emitState();
       emitVotes();
+    },
+    // Competition entries. In local-dev these stay on the device (no teacher
+    // collection) — the button still works for testing.
+    submitPoster(payload) {
+      const KEY = LESSON_ID + '_posters';
+      let arr = [];
+      try { arr = JSON.parse(localStorage.getItem(KEY)) || []; } catch (_) {}
+      arr.push({ ...payload, ts: Date.now() });
+      localStorage.setItem(KEY, JSON.stringify(arr));
+      return 'local_' + Date.now();
     }
   };
 }
@@ -126,6 +136,14 @@ async function createFirebaseStore() {
       // Then delete the votes.
       const snap = await getDocs(votesCol);
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    },
+    // Competition entries — written to a per-lesson, write-only collection.
+    // Security rules deny read/update/delete; the teacher retrieves entries
+    // from the Firebase console.
+    async submitPoster(payload) {
+      const postersCol = collection(db, LESSON_ID + '_posters');
+      const ref = await addDoc(postersCol, { ...payload, ts: serverTimestamp() });
+      return ref.id;
     }
   };
 }

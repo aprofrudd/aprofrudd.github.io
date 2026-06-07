@@ -86,6 +86,14 @@
   const titleInput  = document.getElementById('f-title');
   const saveBtn     = document.getElementById('save-btn');
   const statusEl    = document.getElementById('save-status');
+  const editPanel   = document.getElementById('edit-panel');
+  const enterBtn    = document.getElementById('enter-btn');
+  const enterConsent= document.getElementById('enter-consent');
+  const enterStatus = document.getElementById('enter-status');
+
+  const comp = T.competition || {};
+  const KICKER    = T.kicker || 'Research Poster';
+  const BYLINE_TAG = comp.bylineTag || '';
 
   const answers = buildAnswers();
   const identity = readIdentity();
@@ -94,6 +102,20 @@
   nameInput.value   = identity.name   || '';
   schoolInput.value = identity.school || '';
   titleInput.value  = identity.title  || T.defaultTitle || '';
+
+  // ---- per-section edits (student-authored overrides) ---------------------
+  const EDITS_KEY = LESSON_ID + '_poster_edits';
+  function readEdits() { try { return JSON.parse(localStorage.getItem(EDITS_KEY)) || {}; } catch (_) { return {}; } }
+  function writeEdits(e) { localStorage.setItem(EDITS_KEY, JSON.stringify(e)); }
+  let edits = readEdits();
+
+  function generatedText(sec) {
+    return typeof sec.body === 'function' ? sec.body(answers) : (sec.body || '');
+  }
+  function sectionText(i, sec) {
+    const e = edits[String(i)];
+    return (e != null && e !== '') ? e : generatedText(sec);
+  }
 
   function esc(s) {
     return String(s == null ? '' : s)
@@ -105,17 +127,17 @@
     const school = schoolInput.value.trim()  || 'Your school';
     const title  = titleInput.value.trim()   || T.defaultTitle || '';
 
-    const bylineBits = [name, school, 'CASES Outreach 2026'].filter(Boolean);
+    const bylineBits = [name, school, BYLINE_TAG].filter(Boolean);
 
     let html = '';
     html += `<header class="p-head">
-      <div class="p-kicker">FIFA World Cup 2026 · Heat &amp; Player Health</div>
+      <div class="p-kicker">${esc(KICKER)}</div>
       <h1 class="p-title">${esc(title)}</h1>
       <div class="p-byline">${esc(bylineBits.join('  ·  '))}</div>
     </header>`;
 
     html += '<div class="p-body">';
-    (T.sections || []).forEach(sec => {
+    (T.sections || []).forEach((sec, i) => {
       html += `<section class="p-section">
         <h2 class="p-h2">${esc(sec.heading)}</h2>`;
       if (sec.figure) {
@@ -124,8 +146,7 @@
           ${sec.figureCaption ? `<figcaption>${esc(sec.figureCaption)}</figcaption>` : ''}
         </figure>`;
       }
-      const bodyText = typeof sec.body === 'function' ? sec.body(answers) : (sec.body || '');
-      html += `<p class="p-text">${esc(bodyText)}</p></section>`;
+      html += `<p class="p-text">${esc(sectionText(i, sec))}</p></section>`;
     });
     html += '</div>';
 
@@ -167,17 +188,118 @@
 
   function refresh() { renderPoster(); fitPoster(); }
 
+  // ---- edit panel: one textarea per section -------------------------------
+  function buildEditPanel() {
+    if (!editPanel) return;
+    editPanel.innerHTML = '<h2 class="edit-heading">Add your own detail</h2>' +
+      '<p class="edit-intro">Each section is filled in from your answers. Edit any of them to add more — your changes show on the poster straight away.</p>';
+    (T.sections || []).forEach((sec, i) => {
+      const block = document.createElement('div');
+      block.className = 'edit-block';
+      const id = 'edit-' + i;
+      block.innerHTML = `
+        <div class="edit-row">
+          <label for="${id}">${esc(sec.heading)}</label>
+          <button type="button" class="edit-reset" data-i="${i}">Reset</button>
+        </div>
+        <textarea id="${id}" rows="3" data-i="${i}"></textarea>`;
+      editPanel.appendChild(block);
+      const ta = block.querySelector('textarea');
+      ta.value = sectionText(i, sec);
+      ta.addEventListener('input', () => {
+        const gen = generatedText(sec);
+        if (ta.value === gen || ta.value.trim() === '') { delete edits[String(i)]; }
+        else { edits[String(i)] = ta.value; }
+        writeEdits(edits);
+        refresh();
+      });
+      block.querySelector('.edit-reset').addEventListener('click', () => {
+        delete edits[String(i)];
+        writeEdits(edits);
+        ta.value = generatedText(sec);
+        refresh();
+      });
+    });
+  }
+
   [nameInput, schoolInput, titleInput].forEach(input => {
-    input.addEventListener('input', () => { persist(); refresh(); });
+    input.addEventListener('input', () => { persist(); refresh(); updateEnterEnabled(); });
   });
   window.addEventListener('resize', fitPoster);
   // Re-fit once figures load (they change the poster height).
   posterEl.addEventListener('load', fitPoster, true);
 
+  buildEditPanel();
   refresh();
   // A couple of delayed re-fits to catch async image layout.
   setTimeout(fitPoster, 200);
   setTimeout(fitPoster, 800);
+
+  // ---- enter the competition ----------------------------------------------
+  const ENTERED_KEY = LESSON_ID + '_entered';
+  let entered = localStorage.getItem(ENTERED_KEY) !== null;
+
+  if (enterBtn) enterBtn.textContent = comp.entryLabel || '🏆 Enter the competition';
+  if (enterConsent) enterConsent.textContent = comp.consent ||
+    'Entering sends your name, school and poster to your teacher.';
+
+  function updateEnterEnabled() {
+    if (!enterBtn) return;
+    const ready = !!(nameInput.value.trim() && schoolInput.value.trim());
+    enterBtn.disabled = !ready;
+    enterBtn.title = ready ? '' : 'Add your name and school first';
+  }
+
+  function setEnteredUI() {
+    if (!enterBtn) return;
+    enterBtn.textContent = comp.enteredLabel || 'Entered ✓ — good luck!';
+    enterBtn.classList.add('entered');
+  }
+  if (entered) setEnteredUI();
+  updateEnterEnabled();
+
+  // Lazily create the store only when needed (single addDoc, no listeners).
+  // store.js is a deferred module, so window.createStore may not exist yet at
+  // load — wait for it on first use.
+  let _storeP = null;
+  function getStore() {
+    if (!_storeP) {
+      _storeP = (async () => {
+        for (let i = 0; i < 150 && !window.createStore; i++) {
+          await new Promise(res => setTimeout(res, 30));
+        }
+        if (!window.createStore) throw new Error('store unavailable');
+        return window.createStore();
+      })();
+    }
+    return _storeP;
+  }
+
+  if (enterBtn) enterBtn.addEventListener('click', async () => {
+    if (enterBtn.disabled) return;
+    enterBtn.disabled = true;
+    enterStatus.textContent = 'Entering…';
+    const payload = {
+      name:   nameInput.value.trim(),
+      school: schoolInput.value.trim(),
+      title:  titleInput.value.trim() || T.defaultTitle || '',
+      sections: (T.sections || []).map((s, i) => ({ heading: s.heading, text: sectionText(i, s) })),
+      answers
+    };
+    try {
+      const store = await getStore();
+      await store.submitPoster(payload);
+      localStorage.setItem(ENTERED_KEY, String(Date.now()));
+      entered = true;
+      setEnteredUI();
+      enterStatus.textContent = 'You’re entered! Good luck.';
+    } catch (e) {
+      console.warn('[poster] entry failed:', e);
+      enterStatus.textContent = 'Could not enter — check your connection and try again.';
+    } finally {
+      updateEnterEnabled();
+    }
+  });
 
   // ---- PNG export ---------------------------------------------------------
 
