@@ -374,7 +374,22 @@
       }
       case 'media':   renderWait(stage.title); break;
       case 'content': renderWait(stage.title); break;
+      case 'poster':  renderPosterCta(stage); break;
     }
+  }
+
+  function renderPosterCta(stage) {
+    root.innerHTML = '';
+    const wrap = el('div', 'thanks');
+    wrap.innerHTML = `
+      <h2>${stage.title || 'Build your poster'}</h2>
+      <span class="arrow" style="font-size:2.2rem;">🎓</span>
+      <p>${stage.blurb || 'Turn your answers into a poster you can keep.'}</p>
+      <a class="poster-cta" href="${stage.href || 'poster.html'}">Create my poster →</a>
+      <p style="font-size:0.85rem;margin-top:1.5rem;color:#9a7d6f;">
+        It opens on this phone using the answers you gave today.
+      </p>`;
+    root.appendChild(wrap);
   }
 
   store.onStage(({stage, epoch}) => {

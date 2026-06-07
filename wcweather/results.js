@@ -90,6 +90,8 @@
       renderMedia(stagePane, stage);
     } else if (stage.type === 'content') {
       renderContent(stagePane, stage);
+    } else if (stage.type === 'poster') {
+      renderPosterInstructions(stagePane, stage);
     }
     // QR + URL live in the persistent top-right corner of the projector page.
   }
@@ -125,6 +127,18 @@
     });
 
     parent.appendChild(mapWrap);
+  }
+
+  function renderPosterInstructions(parent, stage) {
+    const posterUrl = window.location.origin +
+      window.location.pathname.replace('results.html', '') + (stage.href || 'poster.html');
+    const wrap = el('div', 'poster-instructions');
+    wrap.innerHTML = `
+      <div class="poster-emoji">🎓</div>
+      <p class="poster-lead">On your phone, tap <strong>“Create my poster”</strong> — or scan the QR and add <code>/${stage.href || 'poster.html'}</code>.</p>
+      <p class="poster-sub">Your poster is built from the answers you gave today. Add your name and school, then save it as an image for the CASES Outreach competition.</p>
+      <div class="poster-url">${posterUrl}</div>`;
+    parent.appendChild(wrap);
   }
 
   function renderMedia(parent, stage) {
@@ -278,6 +292,13 @@
         sideWrap.appendChild(cap);
       }
       resultsPane.appendChild(sideWrap);
+      return;
+    }
+
+    if (stage.type === 'poster') {
+      const note = el('div', 'results-empty');
+      note.textContent = 'Everyone is building their own poster.';
+      resultsPane.appendChild(note);
       return;
     }
 

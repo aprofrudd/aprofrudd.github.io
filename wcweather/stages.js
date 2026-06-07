@@ -176,6 +176,14 @@ const STAGES = [
       { id: 'too-few',        label: 'No — need more breaks per half' },
       { id: 'reschedule',     label: 'Move the kick-off — afternoon games can’t be made safe by breaks' }
     ]
+  },
+
+  {
+    id: 'poster',
+    type: 'poster',
+    title: 'Build your research poster',
+    blurb: 'Turn your answers into an academic poster for the CASES Outreach competition.',
+    href: 'poster.html'
   }
 ];
 
