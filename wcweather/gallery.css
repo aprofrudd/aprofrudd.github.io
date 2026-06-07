@@ -1,0 +1,121 @@
+/* Teacher gallery. Relies on poster.css (loaded first) for the :root palette
+   and the .p-* poster element styles. Here we add the gallery chrome and the
+   .poster container box (poster.css scopes that box to #poster, which the
+   gallery's class="poster" nodes don't match). */
+
+body.gallery {
+  background: #e7ddc6;
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+}
+
+.g-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.1rem 1.5rem;
+  background: var(--paper);
+  border-bottom: 1px solid rgba(124,74,62,0.15);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.g-kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+#g-title {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  margin: 0.2rem 0 0;
+}
+.g-auth { display: flex; align-items: center; gap: 0.75rem; }
+.g-user { font-size: 0.9rem; color: var(--ink-soft); }
+.g-signin, .g-signout {
+  font: inherit;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  border: 0;
+}
+.g-signin { background: var(--accent); color: #fff; }
+.g-signin:hover { background: var(--ink); }
+.g-signout { background: transparent; color: var(--ink-soft); border: 1.5px solid rgba(124,74,62,0.3); }
+.g-badge {
+  font-size: 0.85rem;
+  color: #6b4a3e;
+  background: #fff5d4;
+  border: 1px solid #e7d39e;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+
+.g-status {
+  padding: 0.9rem 1.5rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.g-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding: 0 1.5rem 3rem;
+  align-items: start;
+}
+
+.g-card {
+  background: var(--paper);
+  border-radius: 10px;
+  box-shadow: 0 3px 14px rgba(58,38,30,0.16);
+  overflow: hidden;
+}
+.g-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid rgba(124,74,62,0.12);
+}
+.g-card-meta { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.g-card-meta strong { font-size: 0.98rem; color: var(--ink); }
+.g-card-meta span { font-size: 0.8rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.g-card-meta .g-card-ts { font-size: 0.72rem; opacity: 0.8; }
+.g-dl {
+  flex-shrink: 0;
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.g-dl:hover { background: var(--ink); }
+
+.g-frame { width: 100%; overflow: hidden; }
+.g-scaler {
+  transform-origin: top left;
+  transform: scale(var(--poster-scale, 0.32));
+  width: 1000px;
+}
+
+/* The poster container box (poster.css scopes this to #poster only). */
+.poster {
+  width: 1000px;
+  min-height: 1414px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 56px 60px 48px;
+  display: flex;
+  flex-direction: column;
+}
