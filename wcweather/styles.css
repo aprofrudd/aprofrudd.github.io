@@ -701,6 +701,25 @@ body.projector .results-pane h3 {
   font-size: 0.8rem;
 }
 
+.controls .auth-btn {
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.82rem;
+  padding: 0.45rem 0.9rem;
+}
+.controls .auth-btn:hover { background: var(--accent); }
+
+.controls .auth-who {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  padding: 0 0.4rem;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.controls .auth-who:empty { display: none; }
+
 .controls .reset:hover {
   color: var(--accent);
   background: transparent;

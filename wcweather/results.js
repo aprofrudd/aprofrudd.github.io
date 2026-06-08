@@ -13,6 +13,14 @@
   const nextBtn      = document.getElementById('next-btn');
   const resetBtn     = document.getElementById('reset-btn');
   const dev          = document.getElementById('dev-banner');
+  const authBtn      = document.getElementById('auth-btn');
+  const authWho      = document.getElementById('auth-who');
+
+  // Only a signed-in teacher may drive the lesson. Students who open this page
+  // can watch the live results but the controls do nothing for them — enforced
+  // by Firestore rules (state writes require the teacher's account), with the
+  // UI lock below as the visible half.
+  let isTeacher = false;
 
   const store = await window.createStore();
   if (!store.isLive) {
@@ -345,8 +353,10 @@
   }
 
   function renderControls() {
-    prevBtn.disabled = currentStage <= 0;
-    nextBtn.disabled = currentStage >= stagesTotal() - 1;
+    const locked = store.isLive && !isTeacher;
+    prevBtn.disabled = locked || currentStage <= 0;
+    nextBtn.disabled = locked || currentStage >= stagesTotal() - 1;
+    resetBtn.disabled = locked;
     stageIndic.textContent = `${currentStage + 1} / ${stagesTotal()}`;
   }
 
@@ -363,6 +373,7 @@
     if (currentStage < stagesTotal() - 1) store.setStage(currentStage + 1);
   });
   resetBtn.addEventListener('click', () => {
+    if (resetBtn.disabled) return;
     const ok = confirm('Reset all votes? This wipes every recorded vote across every stage and unlocks every phone.');
     if (!ok) return;
     store.clearVotes();
@@ -379,6 +390,43 @@
     if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
     if (e.key === 'ArrowLeft'  && !prevBtn.disabled) prevBtn.click();
   });
+
+  // --- Teacher sign-in gate ------------------------------------------------
+  // In live mode the controls are locked until the teacher signs in with
+  // Google. The Firestore SDK attaches the signed-in user's token to writes,
+  // and the security rules only accept stage writes from the teacher's email —
+  // so a student opening this page can watch but cannot drive the lesson.
+  async function setupAuth() {
+    if (!store.isLive) {
+      // Local-dev: no backend auth; controls work for testing.
+      isTeacher = true;
+      if (authBtn) authBtn.hidden = true;
+      if (authWho) authWho.hidden = true;
+      renderControls();
+      return;
+    }
+    try {
+      const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } =
+        await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+      const auth = getAuth();   // default app — store.js already initialised it
+      if (authBtn) authBtn.addEventListener('click', () => {
+        if (auth.currentUser) signOut(auth);
+        else signInWithPopup(auth, new GoogleAuthProvider())
+               .catch(e => { if (authWho) authWho.textContent = 'Sign-in failed: ' + e.code; });
+      });
+      onAuthStateChanged(auth, (user) => {
+        isTeacher = !!user;
+        if (authBtn) authBtn.textContent = user ? 'Sign out' : 'Sign in to control';
+        if (authWho) authWho.textContent = user
+          ? (user.email || 'signed in')
+          : 'View-only — sign in to control the lesson';
+        renderControls();
+      });
+    } catch (e) {
+      console.warn('[' + LESSON_ID + '] auth setup failed:', e);
+    }
+  }
+  setupAuth();
 
   store.onStage(({stage}) => { currentStage = stage; rerender(); });
   store.onVotes((votes)   => { allVotes = votes; rerender(); });
