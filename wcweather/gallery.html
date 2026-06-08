@@ -10,20 +10,22 @@
 </head>
 <body class="gallery">
   <header class="g-head">
-    <div>
-      <div class="g-kicker">Teacher view · entries</div>
-      <h1 id="g-title">Poster competition entries</h1>
+    <div class="g-head-left">
+      <div class="header-logos">
+        <img class="brand-logo brand-school" src="media/school-logo.png" alt="School"
+             onerror="this.style.display='none'">
+        <img class="brand-logo brand-cases" src="media/cases-logo.png" alt="CASES">
+      </div>
+      <div>
+        <div class="g-kicker">Teacher view · entries</div>
+        <h1 id="g-title">Poster competition entries</h1>
+      </div>
     </div>
     <div class="g-auth" id="g-auth"></div>
   </header>
 
   <div id="g-status" class="g-status">Loading…</div>
   <div id="g-grid" class="g-grid"></div>
-
-  <a class="cases-badge" href="https://www.cases.org.uk" target="_blank" rel="noopener"
-     title="CASES — Chartered Association of Sport and Exercise Sciences">
-    <img src="media/cases-logo.png" alt="CASES">
-  </a>
 
   <script src="lesson.config.js"></script>
   <script src="poster-template.js"></script>

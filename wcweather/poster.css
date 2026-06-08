@@ -151,24 +151,17 @@ html, body {
 }
 .edit-panel textarea:focus { outline: none; border-color: var(--accent); }
 
-/* CASES logo badge (fixed corner) */
-.cases-badge {
-  position: fixed;
-  left: 1rem;
-  bottom: 1rem;
-  width: 96px;
-  background: rgba(250, 244, 230, 0.92);
-  border: 1px solid rgba(124, 74, 62, 0.15);
-  border-radius: 8px;
-  padding: 6px 8px;
-  box-shadow: 0 2px 8px rgba(58, 38, 30, 0.15);
-  z-index: 30;
-  display: block;
+/* Institutional logos in the banner */
+.header-logos {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
 }
-.cases-badge img { width: 100%; height: auto; display: block; }
-.cases-badge:hover { background: rgba(250, 244, 230, 1); }
+.brand-logo { height: 46px; width: auto; display: block; }
+.intro-logos { justify-content: center; margin-bottom: 0.85rem; }
+.g-head-left { display: flex; align-items: center; gap: 1rem; }
 @media (max-width: 700px) {
-  .cases-badge { width: 72px; left: 0.5rem; bottom: 0.5rem; }
+  .brand-logo { height: 34px; }
 }
 
 .actions {

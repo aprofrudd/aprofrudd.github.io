@@ -44,7 +44,24 @@ h1, h2, h3 {
   padding: 1rem 1.25rem;
   border-bottom: 1px solid rgba(124, 74, 62, 0.15);
   background: var(--paper);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
+
+/* Institutional logos in the banner, next to the title */
+.header-logos {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-shrink: 0;
+}
+.brand-logo {
+  height: 46px;
+  width: auto;
+  display: block;
+}
+.header-text { min-width: 0; }
 
 .header .kicker {
   font-size: 0.7rem;
@@ -975,28 +992,6 @@ body.projector .results-pane h3 {
   font-size: 0.9rem;
 }
 
-/* --- CASES logo badge (fixed corner, used on projector/poster/gallery) --- */
-
-.cases-badge {
-  position: fixed;
-  left: 1rem;
-  bottom: 1rem;
-  width: 96px;
-  background: rgba(250, 244, 230, 0.92);
-  border: 1px solid rgba(124, 74, 62, 0.15);
-  border-radius: 8px;
-  padding: 6px 8px;
-  box-shadow: 0 2px 8px rgba(58, 38, 30, 0.15);
-  z-index: 30;
-  display: block;
-}
-.cases-badge img { width: 100%; height: auto; display: block; }
-.cases-badge:hover { background: rgba(250, 244, 230, 1); }
-
-@media (max-width: 700px) {
-  .cases-badge { width: 76px; left: 0.6rem; bottom: 0.6rem; }
-}
-
 /* --- CASES Outreach "about" footer (phone home) --- */
 
 .lesson-about {
@@ -1005,14 +1000,6 @@ body.projector .results-pane h3 {
   border-top: 1px solid rgba(124, 74, 62, 0.15);
   text-align: center;
   background: var(--paper);
-}
-
-.lesson-about .cases-logo {
-  width: 100%;
-  max-width: 220px;
-  height: auto;
-  margin: 0 auto 0.9rem;
-  display: block;
 }
 
 .lesson-about p {
@@ -1048,6 +1035,9 @@ body.projector .results-pane h3 {
 /* --- Responsive tweaks --- */
 
 @media (max-width: 700px) {
+  .brand-logo { height: 34px; }
+  .header { gap: 0.7rem; }
+
   /* On mobile, the map is too tight for 16 labels — show the dots for
      geographic context, but route voting through the city list below. */
   .map-wrap { overflow: visible; }
