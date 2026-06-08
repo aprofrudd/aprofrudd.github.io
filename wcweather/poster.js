@@ -129,8 +129,15 @@
 
     const bylineBits = [name, school, BYLINE_TAG].filter(Boolean);
 
+    const logos = Array.isArray(T.logos) ? T.logos : [];
+    const logosHtml = logos.length
+      ? `<div class="p-logos">${logos.map(s =>
+          `<img src="${esc(s)}" alt="" crossorigin="anonymous" onerror="this.style.display='none'">`).join('')}</div>`
+      : '';
+
     let html = '';
-    html += `<header class="p-head">
+    html += `<header class="p-head${logos.length ? ' p-head-logos' : ''}">
+      ${logosHtml}
       <div class="p-kicker">${esc(KICKER)}</div>
       <h1 class="p-title">${esc(title)}</h1>
       <div class="p-byline">${esc(bylineBits.join('  ·  '))}</div>

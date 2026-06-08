@@ -261,9 +261,27 @@ html, body {
 }
 
 .p-head {
+  position: relative;
   border-bottom: 4px solid var(--accent);
   padding-bottom: 20px;
   margin-bottom: 26px;
+}
+/* Reserve space for the corner logos only when there are logos */
+.p-head.p-head-logos { padding-right: 210px; }
+
+/* Small institutional logos in the poster's top-right corner */
+.p-logos {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.p-logos img {
+  height: 34px;
+  width: auto;
+  display: block;
 }
 .p-kicker {
   font-size: 16px;

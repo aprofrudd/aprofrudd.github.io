@@ -18,6 +18,10 @@ window.POSTER = {
   // Poster header kicker + byline suffix.
   kicker: 'FIFA World Cup 2026 · Heat & Player Health',
 
+  // Small logos shown in the poster's top-right corner (and captured into the
+  // downloaded PNG). Order = left→right.
+  logos: ['media/school-logo.png', 'media/cases-logo.png'],
+
   // "Enter the competition" button + consent wording.
   competition: {
     bylineTag:   'CASES Outreach 2026',
