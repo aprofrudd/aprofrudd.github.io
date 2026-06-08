@@ -975,6 +975,43 @@ body.projector .results-pane h3 {
   font-size: 0.9rem;
 }
 
+/* --- CASES Outreach "about" footer (phone home) --- */
+
+.lesson-about {
+  margin-top: auto;
+  padding: 1.5rem 1.25rem 2rem;
+  border-top: 1px solid rgba(124, 74, 62, 0.15);
+  text-align: center;
+  background: var(--paper);
+}
+
+.lesson-about .cases-logo {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  margin: 0 auto 0.9rem;
+  display: block;
+}
+
+.lesson-about p {
+  max-width: 32rem;
+  margin: 0 auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.lesson-about .cases-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.lesson-about .cases-link:hover { text-decoration: underline; }
+
 /* --- Phone QR/instructions banner --- */
 
 .dev-banner {
