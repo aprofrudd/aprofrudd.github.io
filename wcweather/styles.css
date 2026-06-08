@@ -975,6 +975,28 @@ body.projector .results-pane h3 {
   font-size: 0.9rem;
 }
 
+/* --- CASES logo badge (fixed corner, used on projector/poster/gallery) --- */
+
+.cases-badge {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  width: 96px;
+  background: rgba(250, 244, 230, 0.92);
+  border: 1px solid rgba(124, 74, 62, 0.15);
+  border-radius: 8px;
+  padding: 6px 8px;
+  box-shadow: 0 2px 8px rgba(58, 38, 30, 0.15);
+  z-index: 30;
+  display: block;
+}
+.cases-badge img { width: 100%; height: auto; display: block; }
+.cases-badge:hover { background: rgba(250, 244, 230, 1); }
+
+@media (max-width: 700px) {
+  .cases-badge { width: 76px; left: 0.6rem; bottom: 0.6rem; }
+}
+
 /* --- CASES Outreach "about" footer (phone home) --- */
 
 .lesson-about {
