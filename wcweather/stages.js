@@ -19,7 +19,7 @@ const STAGES = [
     id: 'predicted-temps',
     type: 'content',
     title: 'What the science predicts',
-    blurb: 'Average match-day ambient temperature (Ta) and relative humidity (RH) at each host venue. Top three hottest are highlighted.',
+    blurb: 'Average match-day ambient temperature (Ta) and relative humidity (RH) at each host venue. The five hottest are highlighted.',
     table: {
       headers: ['Host city', 'Ambient °C', 'RH %', 'Indoor'],
       rows: [
