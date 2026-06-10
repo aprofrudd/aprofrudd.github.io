@@ -125,55 +125,32 @@ const STAGES = [
   },
 
   {
-    id: 'performance',
+    id: 'fifa-break',
     type: 'mcq',
-    title: 'What happens to performance?',
-    blurb: 'Compared to a 20 °C match, how do high-intensity actions change in 35+ °C?',
+    title: 'Are these measures enough?',
+    blurb: 'You’ve seen what FIFA does — cooling breaks, WBGT monitoring, climate-controlled benches. Based on everything today, is it enough to keep players safe?',
     options: [
-      { id: 'no-change',  label: 'No meaningful change' },
-      { id: 'sprint-down',label: 'Sprint distance falls but technical actions hold up' },
-      { id: 'both-down',  label: 'Both running and technical actions fall' },
-      { id: 'tactical',   label: 'Players just pace themselves — tempo drops' }
+      { id: 'yes-enough',     label: 'Yes — these measures are enough' },
+      { id: 'too-short',      label: 'No — the cooling breaks are too short' },
+      { id: 'too-few',        label: 'No — players need more breaks per half' },
+      { id: 'reschedule',     label: 'No — afternoon games can’t be made safe by breaks alone' }
     ]
   },
 
   {
-    id: 'heat-balance',
-    type: 'media',
-    title: 'The heat balance equation',
-    blurb: 'S = M − (E ± R ± C ± K) − W',
-    video: 'media/heat-balance.mp4',
-    poster: 'media/heat-balance-poster.png'
-  },
-
-  {
-    id: 'core-temp',
-    type: 'media',
-    title: 'Core temperature and sweat rate',
-    blurb: 'What rising ambient temperature does to core temperature, sweat rate, and the cardiovascular response.',
-    video: 'media/core-temp.mp4',
-    poster: 'media/core-temp-poster.png'
-  },
-
-  {
-    id: 'paper',
-    type: 'content',
-    title: 'The evidence — players at risk',
-    figure: 'media/paper-figure.png',
-    quote: 'Pull quote from the research paper / FIFPRO letter goes here. Replace with the exact wording you want to project.',
-    citation: 'Author et al., Year'
-  },
-
-  {
-    id: 'fifa-break',
+    id: 'recommendations',
     type: 'mcq',
-    title: 'Is FIFA’s cooling break enough?',
-    blurb: 'FIFA mandates a 3-minute cooling break per half when WBGT exceeds 32 °C. Based on what we’ve just seen — is that enough?',
+    title: 'You’re advising FIFA — what would you bring in? (pick 3)',
+    blurb: 'Pick the three changes you think would best protect players in extreme heat.',
+    maxSelect: 3,
     options: [
-      { id: 'yes-enough',     label: 'Yes — 3 minutes per half is enough' },
-      { id: 'too-short',      label: 'No — the break is too short' },
-      { id: 'too-few',        label: 'No — need more breaks per half' },
-      { id: 'reschedule',     label: 'Move the kick-off — afternoon games can’t be made safe by breaks' }
+      { id: 'longer-breaks', label: 'Longer or more frequent cooling breaks' },
+      { id: 'reschedule',    label: 'Move kick-offs to the evening or night' },
+      { id: 'longer-half',   label: 'Extend half-time in extreme heat' },
+      { id: 'indoor',        label: 'Play at indoor / air-conditioned venues' },
+      { id: 'acclimatise',   label: 'Heat-acclimatisation training beforehand' },
+      { id: 'hydration',     label: 'Aggressive hydration & ice strategies' },
+      { id: 'postpone',      label: 'Postpone matches above a heat limit' }
     ]
   },
 

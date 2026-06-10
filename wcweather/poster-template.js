@@ -56,10 +56,22 @@ window.POSTER = {
     { key: 'fifaVerdict',  stage: 'fifa-break',   type: 'single',
       fallback: 'more needs to be done to keep players safe',
       phrases: {
-        'yes-enough': 'a 3-minute cooling break per half is enough to keep players safe',
-        'too-short':  'the 3-minute cooling break is too short to keep players safe',
-        'too-few':    'players need more than one cooling break per half',
-        'reschedule': 'afternoon kick-offs cannot be made safe by breaks alone and should be rescheduled'
+        'yes-enough': 'these measures are enough to keep players safe',
+        'too-short':  'the cooling breaks are too short to keep players safe',
+        'too-few':    'players need more cooling breaks per half',
+        'reschedule': 'afternoon kick-offs cannot be made safe by breaks alone'
+      } },
+
+    { key: 'recommendations', stage: 'recommendations', type: 'list',
+      fallback: 'longer cooling breaks and rescheduling games to cooler times of day',
+      phrases: {
+        'longer-breaks': 'longer or more frequent cooling breaks',
+        'reschedule':    'moving kick-offs to the evening or night',
+        'longer-half':   'extending half-time in extreme heat',
+        'indoor':        'playing at indoor or air-conditioned venues',
+        'acclimatise':   'heat-acclimatisation training beforehand',
+        'hydration':     'aggressive hydration and ice strategies',
+        'postpone':      'postponing matches above a heat limit'
       } }
   ],
 
@@ -82,7 +94,7 @@ window.POSTER = {
     },
     {
       heading: 'My Conclusion',
-      body: a => `FIFA currently mandates a 3-minute cooling break per half when the WBGT exceeds 32 °C. Having looked at the evidence, I concluded that ${a.fifaVerdict}. Protecting players in extreme heat is a growing challenge for global sport.`
+      body: a => `FIFA’s measures to protect players include cooling breaks, WBGT monitoring and climate-controlled benches. Having looked at the evidence, I concluded that ${a.fifaVerdict}. To better protect players I would recommend ${a.recommendations}. Protecting players in extreme heat is a growing challenge for global sport.`
     }
   ],
 
