@@ -48,12 +48,9 @@ window.POSTER = {
         dizziness:   'dizziness',
         headache:    'headache',
         nausea:      'nausea',
-        weakness:    'unsteadiness and weakness',
         tachycardia: 'a racing heart',
         cramps:      'muscle cramps',
-        fatigue:     'fatigue',
-        cns:         'CNS dysfunction (confusion, collapse, seizure)',
-        'high-tc':   'a core temperature above 40 °C'
+        cns:         'confusion, collapse or seizure'
       } },
 
     { key: 'fifaVerdict',  stage: 'fifa-break',   type: 'single',

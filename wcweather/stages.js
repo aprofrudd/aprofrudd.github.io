@@ -103,26 +103,25 @@ const STAGES = [
       { id: 'dizziness',   label: 'Dizziness' },
       { id: 'headache',    label: 'Headache' },
       { id: 'nausea',      label: 'Nausea' },
-      { id: 'weakness',    label: 'Unsteadiness & general weakness' },
       { id: 'tachycardia', label: 'Tachycardia (racing heart)' },
       { id: 'cramps',      label: 'Muscle cramps' },
-      { id: 'fatigue',     label: 'Fatigue' },
-      { id: 'cns',         label: 'CNS dysfunction — confusion, collapse, seizure' },
-      { id: 'high-tc',     label: 'Core temperature ≥ 40 °C' }
+      { id: 'cns',         label: 'Confusion, collapse, seizure' }
     ]
   },
 
   {
-    id: 'body-response',
-    type: 'mcq',
-    title: 'What happens to the body when it gets hot?',
-    blurb: 'Pick the response you think dominates during 90 minutes of football in the heat.',
-    options: [
-      { id: 'skin-bf-up', label: 'Skin blood flow rises and core temperature rises' },
-      { id: 'sweat-only', label: 'Sweat rate rises but core temperature stays flat' },
-      { id: 'cv-drift',   label: 'Cardiovascular drift — heart rate climbs at the same workload' },
-      { id: 'all-above',  label: 'All of the above' }
-    ]
+    id: 'fifa-measures',
+    type: 'content',
+    title: 'So what is FIFA doing about it?',
+    blurb: 'Football’s governing body has brought in measures to protect players in the heat. Three of the main ones:',
+    table: {
+      headers: ['Measure', 'What it does'],
+      rows: [
+        ['Cooling breaks', '~3-minute breaks in each half when it’s hot, so players can drink and lower their body temperature'],
+        ['WBGT monitoring', 'Heat stress (Wet-Bulb Globe Temperature) is measured pitch-side to decide when cooling breaks apply'],
+        ['Climate-controlled benches', 'Air-cooled substitute and bench areas that limit heat gain when players are off the pitch']
+      ]
+    }
   },
 
   {
