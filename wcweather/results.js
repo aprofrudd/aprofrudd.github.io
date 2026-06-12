@@ -417,8 +417,10 @@
       onAuthStateChanged(auth, (user) => {
         isTeacher = !!user;
         if (authBtn) authBtn.textContent = user ? 'Sign out' : 'Sign in to control';
+        // Don't show the email on the projector (it's in front of the class);
+        // just confirm the signed-in state.
         if (authWho) authWho.textContent = user
-          ? (user.email || 'signed in')
+          ? 'Signed in'
           : 'View-only - sign in to control the lesson';
         renderControls();
       });

@@ -190,7 +190,8 @@
       status('Sign in with the Google account you authorised in the Firestore rules.');
     }
     function showSignedIn(user) {
-      authEl.innerHTML = `<span class="g-user">${esc(user.email || 'signed in')}</span>
+      // Don't print the email (in case the screen is shared); just confirm.
+      authEl.innerHTML = `<span class="g-user">Signed in</span>
         <button type="button" class="g-signout">Sign out</button>`;
       authEl.querySelector('.g-signout').addEventListener('click', () => signOut(auth));
     }
