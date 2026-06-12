@@ -88,6 +88,7 @@ body.gallery {
 .g-card-meta strong { font-size: 0.98rem; color: var(--ink); }
 .g-card-meta span { font-size: 0.8rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .g-card-meta .g-card-ts { font-size: 0.72rem; opacity: 0.8; }
+.g-card-actions { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
 .g-dl {
   flex-shrink: 0;
   background: var(--accent);
@@ -101,6 +102,20 @@ body.gallery {
   cursor: pointer;
 }
 .g-dl:hover { background: var(--ink); }
+.g-del {
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid rgba(124,74,62,0.3);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.g-del:hover:not([disabled]) { background: var(--accent); color: #fff; border-color: var(--accent); }
+.g-del[disabled] { opacity: 0.5; cursor: progress; }
 
 .g-frame { width: 100%; overflow: hidden; }
 .g-scaler {

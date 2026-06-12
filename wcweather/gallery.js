@@ -24,6 +24,11 @@
   const statusEl = document.getElementById('g-status');
   const gridEl   = document.getElementById('g-grid');
 
+  // Set per data-source (Firebase / local). Given a rendered entry, removes it
+  // from the backing store and resolves; null until a source is wired up.
+  let removeEntry = null;
+  let localEntries = [];
+
   function status(msg) { statusEl.textContent = msg; }
   function esc(s) {
     return String(s == null ? '' : s)
@@ -109,7 +114,10 @@
             <span>${esc([entry.school, entry.year].filter(Boolean).join(' · '))}</span>
             <span class="g-card-ts">${esc(tsToText(entry.ts))}</span>
           </div>
-          <button type="button" class="g-dl" data-i="${i}">⬇ PNG</button>
+          <div class="g-card-actions">
+            <button type="button" class="g-dl" data-i="${i}">⬇ PNG</button>
+            <button type="button" class="g-del" data-i="${i}">🗑 Delete</button>
+          </div>
         </div>
         <div class="g-frame" id="g-frame-${i}">
           <div class="g-scaler" id="g-scaler-${i}">
@@ -119,6 +127,7 @@
       gridEl.appendChild(card);
       card.querySelector('.poster').innerHTML = posterHTML(entry);
       card.querySelector('.g-dl').addEventListener('click', () => downloadCard(i, entry));
+      card.querySelector('.g-del').addEventListener('click', e => handleDelete(entry, card, e.currentTarget));
     });
 
     fitCards();
@@ -161,10 +170,39 @@
     } catch (e) { console.warn('[gallery] download failed:', e); }
   }
 
+  async function handleDelete(entry, card, btn) {
+    if (!removeEntry) return;
+    const who = entry.name ? `"${entry.name}"` : 'this entry';
+    if (!window.confirm(`Permanently delete ${who}? This cannot be undone.`)) return;
+    btn.disabled = true;
+    btn.textContent = 'Deleting…';
+    try {
+      await removeEntry(entry);
+      card.remove();
+      const remaining = gridEl.querySelectorAll('.g-card').length;
+      status(remaining
+        ? remaining + ' ' + (remaining === 1 ? 'entry' : 'entries')
+        : 'No entries yet.');
+    } catch (e) {
+      console.warn('[gallery] delete failed:', e);
+      btn.disabled = false;
+      btn.textContent = '🗑 Delete';
+      status('Could not delete - your Firestore rules may not allow delete yet. (' + e.message + ')');
+    }
+  }
+
   // ---- data sources -------------------------------------------------------
   function loadLocal() {
     let arr = [];
     try { arr = JSON.parse(localStorage.getItem(LESSON_ID + '_posters')) || []; } catch (_) {}
+    localEntries = arr;
+    removeEntry = async (entry) => {
+      const i = localEntries.indexOf(entry);
+      if (i >= 0) {
+        localEntries.splice(i, 1);
+        localStorage.setItem(LESSON_ID + '_posters', JSON.stringify(localEntries));
+      }
+    };
     authEl.innerHTML = '<span class="g-badge">Local-dev mode - showing entries on this device</span>';
     renderGallery(arr);
   }
@@ -174,12 +212,13 @@
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } =
       await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-    const { getFirestore, collection, getDocs } =
+    const { getFirestore, collection, getDocs, doc, deleteDoc } =
       await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
     const app  = initializeApp(window.FIREBASE_CONFIG);
     const auth = getAuth(app);
     const db   = getFirestore(app);
+    removeEntry = async (entry) => { await deleteDoc(doc(db, LESSON_ID + '_posters', entry.__id)); };
 
     function showSignedOut() {
       authEl.innerHTML = '<button type="button" class="g-signin">Sign in with Google</button>';
@@ -203,7 +242,7 @@
       status('Loading entries…');
       try {
         const snap = await getDocs(collection(db, LESSON_ID + '_posters'));
-        const entries = []; snap.forEach(d => entries.push(d.data()));
+        const entries = []; snap.forEach(d => { const data = d.data(); data.__id = d.id; entries.push(data); });
         renderGallery(entries);
       } catch (e) {
         gridEl.innerHTML = '';
