@@ -117,6 +117,18 @@ body.gallery {
 .g-del:hover:not([disabled]) { background: var(--accent); color: #fff; border-color: var(--accent); }
 .g-del[disabled] { opacity: 0.5; cursor: progress; }
 
+/* Per-card error strip - delete failures must be visible AT the card, not
+   only in the top status line (which is off-screen when scrolled down). */
+.g-card-err {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8c2318;
+  background: rgba(192, 82, 74, 0.1);
+  border-bottom: 1px solid rgba(124, 74, 62, 0.12);
+}
+.g-card-err:empty { display: none; }
+
 .g-frame { width: 100%; overflow: hidden; }
 .g-scaler {
   transform-origin: top left;

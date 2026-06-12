@@ -170,14 +170,38 @@
     } catch (e) { console.warn('[gallery] download failed:', e); }
   }
 
+  // Error strip shown ON the card itself - the top status line is off-screen
+  // when the teacher is scrolled down at a card, so a failure there reads as
+  // "nothing happened".
+  function cardError(card) {
+    let strip = card.querySelector('.g-card-err');
+    if (!strip) {
+      strip = document.createElement('div');
+      strip.className = 'g-card-err';
+      card.querySelector('.g-card-head').after(strip);
+    }
+    return strip;
+  }
+
   async function handleDelete(entry, card, btn) {
-    if (!removeEntry) return;
     const who = entry.name ? `"${entry.name}"` : 'this entry';
+    const errEl = cardError(card);
+    errEl.textContent = '';
+    if (!removeEntry) {
+      errEl.textContent = 'Delete is not ready - reload the page and try again.';
+      return;
+    }
     if (!window.confirm(`Permanently delete ${who}? This cannot be undone.`)) return;
     btn.disabled = true;
     btn.textContent = 'Deleting…';
     try {
-      await removeEntry(entry);
+      // Firestore's deleteDoc only settles on server acknowledgement, so it
+      // hangs forever offline - race a timeout to surface that as an error.
+      await Promise.race([
+        removeEntry(entry),
+        new Promise((_, rej) => setTimeout(
+          () => rej(new Error('timed out - check your internet connection and reload')), 10000))
+      ]);
       card.remove();
       const remaining = gridEl.querySelectorAll('.g-card').length;
       status(remaining
@@ -187,7 +211,11 @@
       console.warn('[gallery] delete failed:', e);
       btn.disabled = false;
       btn.textContent = '🗑 Delete';
-      status('Could not delete - your Firestore rules may not allow delete yet. (' + e.message + ')');
+      const msg = /permission|insufficient/i.test(e.message || '')
+        ? 'Not allowed - the Firestore rules need "allow delete" for your account (see firebase-setup). (' + e.message + ')'
+        : 'Could not delete - ' + e.message;
+      errEl.textContent = msg;
+      status('Could not delete ' + who + ' - ' + e.message);
     }
   }
 
@@ -242,6 +270,8 @@
       status('Loading entries…');
       try {
         const snap = await getDocs(collection(db, LESSON_ID + '_posters'));
+        // Signed out while the read was in flight - don't repopulate the grid.
+        if (auth.currentUser !== user) return;
         const entries = []; snap.forEach(d => { const data = d.data(); data.__id = d.id; entries.push(data); });
         renderGallery(entries);
       } catch (e) {
