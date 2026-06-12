@@ -53,6 +53,8 @@ html, body {
   max-width: 36rem;
   line-height: 1.45;
 }
+.intro .intro-recap { margin-top: 0.5rem; font-weight: 600; }
+.intro .intro-recap a { color: var(--accent); }
 
 /* --- the entry form --- */
 

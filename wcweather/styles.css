@@ -507,6 +507,15 @@ h1, h2, h3 {
   color: var(--accent);
   word-break: break-all;
 }
+.poster-instructions .poster-home {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(124, 74, 62, 0.18);
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+.poster-instructions .poster-url--home { font-size: 0.95rem; }
 
 .thanks .change-vote {
   margin-top: 1.5rem;
@@ -1047,6 +1056,14 @@ body.projector .results-pane h3 {
 }
 
 .lesson-about .cases-link:hover { text-decoration: underline; }
+
+.lesson-about .lesson-home-links {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 1.25rem;
+}
+.lesson-about .lesson-home-links a { color: var(--accent); }
 
 /* --- Phone QR/instructions banner --- */
 

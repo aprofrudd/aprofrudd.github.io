@@ -138,14 +138,19 @@
   }
 
   function renderPosterInstructions(parent, stage) {
-    const posterUrl = window.location.origin +
-      window.location.pathname.replace('results.html', '') + (stage.href || 'poster.html');
+    // Derive the lesson folder from the current path by stripping whatever file
+    // we're on (results.html, results, index.html...) so the links are always
+    // <folder>/poster.html and <folder>/lesson.html - never "resultsposter.html".
+    const base = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+    const posterUrl = base + (stage.href || 'poster.html');
+    const lessonUrl = base + (stage.recapHref || 'lesson.html');
     const wrap = el('div', 'poster-instructions');
     wrap.innerHTML = `
       <div class="poster-emoji">🎓</div>
-      <p class="poster-lead">On your phone, tap <strong>“Create my poster”</strong> - or scan the QR and add <code>/${stage.href || 'poster.html'}</code>.</p>
+      <p class="poster-lead">On your phone, tap <strong>“Create my poster”</strong> - or open the link below.</p>
+      <div class="poster-url">${posterUrl}</div>
       <p class="poster-sub">Your poster is built from the answers you gave today. Add your name and school, then save it as an image for the CASES Outreach competition.</p>
-      <div class="poster-url">${posterUrl}</div>`;
+      <p class="poster-home">Want to finish at home? Everything from today's lesson is here:<br><span class="poster-url poster-url--home">${lessonUrl}</span></p>`;
     parent.appendChild(wrap);
   }
 
