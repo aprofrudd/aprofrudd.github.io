@@ -99,6 +99,7 @@ window.POSTER = {
   sections: [
     {
       heading: 'The Problem',
+      wide: true,
       body: a => `The 2026 FIFA World Cup will be played across the USA, Canada and Mexico in June and July - the hottest months of the year. Before seeing any data, I predicted that the hottest match would be played in ${a.hotCity}. From the fixture list, the games I judged most exposed to heat were ${a.hotFixtures}.`
     },
     {
@@ -115,6 +116,7 @@ window.POSTER = {
     },
     {
       heading: 'My Conclusion',
+      wide: true,
       body: a => `FIFA’s measures to protect players include cooling breaks, WBGT monitoring and climate-controlled benches. Having looked at the evidence, I concluded that ${a.fifaVerdict}. To better protect players I would recommend ${a.recommendations}. Protecting players in extreme heat is a growing challenge for global sport.`
     }
   ],

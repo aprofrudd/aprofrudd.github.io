@@ -33,7 +33,8 @@
   // ---- build one poster's inner HTML from a stored entry ------------------
   function posterHTML(entry) {
     const title = entry.title || T.defaultTitle || '';
-    const bylineBits = [entry.name, entry.school, BYLINE_TAG].filter(Boolean);
+    const schoolLine = entry.year ? `${entry.school}, ${entry.year}` : entry.school;
+    const bylineBits = [entry.name, schoolLine, BYLINE_TAG].filter(Boolean);
     const templSections = T.sections || [];
 
     const logos = Array.isArray(T.logos) ? T.logos : [];
@@ -51,7 +52,7 @@
 
     (entry.sections || []).forEach((sec, i) => {
       const tmpl = templSections[i] || {};
-      html += `<section class="p-section"><h2 class="p-h2">${esc(sec.heading)}</h2>`;
+      html += `<section class="p-section${tmpl.wide ? ' p-section--wide' : ''}"><h2 class="p-h2">${esc(sec.heading)}</h2>`;
       if (tmpl.figure) {
         html += `<figure class="p-figure">
           <img src="${esc(tmpl.figure)}" alt="" crossorigin="anonymous">
@@ -105,7 +106,7 @@
         <div class="g-card-head">
           <div class="g-card-meta">
             <strong>${esc(entry.name || '-')}</strong>
-            <span>${esc(entry.school || '')}</span>
+            <span>${esc([entry.school, entry.year].filter(Boolean).join(' · '))}</span>
             <span class="g-card-ts">${esc(tsToText(entry.ts))}</span>
           </div>
           <button type="button" class="g-dl" data-i="${i}">⬇ PNG</button>

@@ -83,6 +83,7 @@
   const posterEl = document.getElementById('poster');
   const nameInput   = document.getElementById('f-name');
   const schoolInput = document.getElementById('f-school');
+  const yearInput   = document.getElementById('f-year');
   const titleInput  = document.getElementById('f-title');
   const saveBtn     = document.getElementById('save-btn');
   const statusEl    = document.getElementById('save-status');
@@ -101,6 +102,7 @@
   // Seed the inputs from any saved identity.
   nameInput.value   = identity.name   || '';
   schoolInput.value = identity.school || '';
+  yearInput.value   = identity.year   || '';
   titleInput.value  = identity.title  || T.defaultTitle || '';
 
   // ---- per-section edits (student-authored overrides) ---------------------
@@ -125,9 +127,11 @@
   function renderPoster() {
     const name   = nameInput.value.trim()   || 'Your name';
     const school = schoolInput.value.trim()  || 'Your school';
+    const year   = yearInput.value.trim();
     const title  = titleInput.value.trim()   || T.defaultTitle || '';
 
-    const bylineBits = [name, school, BYLINE_TAG].filter(Boolean);
+    const schoolLine = year ? `${school}, ${year}` : school;
+    const bylineBits = [name, schoolLine, BYLINE_TAG].filter(Boolean);
 
     const logos = Array.isArray(T.logos) ? T.logos : [];
     const logosHtml = logos.length
@@ -145,7 +149,7 @@
 
     html += '<div class="p-body">';
     (T.sections || []).forEach((sec, i) => {
-      html += `<section class="p-section">
+      html += `<section class="p-section${sec.wide ? ' p-section--wide' : ''}">
         <h2 class="p-h2">${esc(sec.heading)}</h2>`;
       if (sec.figure) {
         html += `<figure class="p-figure">
@@ -174,6 +178,7 @@
     writeIdentity({
       name: nameInput.value.trim(),
       school: schoolInput.value.trim(),
+      year: yearInput.value.trim(),
       title: titleInput.value.trim()
     });
   }
@@ -229,7 +234,7 @@
     });
   }
 
-  [nameInput, schoolInput, titleInput].forEach(input => {
+  [nameInput, schoolInput, yearInput, titleInput].forEach(input => {
     input.addEventListener('input', () => { persist(); refresh(); updateEnterEnabled(); });
   });
   window.addEventListener('resize', fitPoster);
@@ -289,6 +294,7 @@
     const payload = {
       name:   nameInput.value.trim(),
       school: schoolInput.value.trim(),
+      year:   yearInput.value.trim(),
       title:  titleInput.value.trim() || T.defaultTitle || '',
       sections: (T.sections || []).map((s, i) => ({ heading: s.heading, text: sectionText(i, s) })),
       answers

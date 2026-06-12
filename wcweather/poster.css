@@ -1,4 +1,4 @@
-/* Personalised academic poster — World Cup 2026 heat lesson.
+/* Personalised academic poster - World Cup 2026 heat lesson.
    Reuses the lesson palette but tightened to read as a conference poster.
    The poster node itself is a fixed 1000×1414 (A-series √2 portrait) so the
    html2canvas export is predictable; the page scales it to fit the phone. */
@@ -249,7 +249,7 @@ html, body {
   width: 1000px;              /* must match #poster width */
 }
 
-/* The actual poster — fixed size for predictable export. */
+/* The actual poster - fixed size for predictable export. */
 #poster {
   width: 1000px;
   min-height: 1414px;
@@ -307,9 +307,13 @@ html, body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 26px 34px;
+  align-items: start;          /* short sections keep their natural height */
   flex: 1;
 }
 .p-section { break-inside: avoid; }
+/* Text-only lead/closing sections span both columns so they don't sit beside a
+   tall figure section (which left a gap underneath them). */
+.p-section--wide { grid-column: 1 / -1; }
 .p-h2 {
   font-family: var(--serif);
   font-size: 26px;
