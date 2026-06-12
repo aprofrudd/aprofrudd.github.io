@@ -42,6 +42,18 @@ window.POSTER = {
       fallback: 'the middle of the day',
       phrases: { '9am': '9 am', '12pm': 'midday', '6pm': '6 pm', '9pm': '9 pm' } },
 
+    { key: 'hotFixtures',  stage: 'fixtures',     type: 'list',
+      fallback: 'the evening kick-offs in Miami and Monterrey',
+      phrases: {
+        'sa-uru-mia-1800':  'Saudi Arabia v Uruguay in Miami',
+        'swe-tun-mty-2000': 'Sweden v Tunisia in Monterrey',
+        'tun-jpn-mty-2200': 'Tunisia v Japan in Monterrey',
+        'uru-cpv-mia-1800': 'Uruguay v Cape Verde in Miami',
+        'sco-bra-mia-1800': 'Scotland v Brazil in Miami',
+        'rsa-kor-mty-1900': 'South Africa v South Korea in Monterrey',
+        'col-prt-mia-1930': 'Colombia v Portugal in Miami'
+      } },
+
     { key: 'seriousSigns', stage: 'most-serious', type: 'list',
       fallback: 'several warning signs',
       phrases: {
@@ -51,6 +63,15 @@ window.POSTER = {
         tachycardia: 'a racing heart',
         cramps:      'muscle cramps',
         cns:         'confusion, collapse or seizure'
+      } },
+
+    { key: 'performance',  stage: 'performance-effect', type: 'single',
+      fallback: 'changes how hard players are able to run',
+      phrases: {
+        'less-highint': 'cuts the high-intensity running and sprinting that decide matches',
+        'less-total':   'reduces the total distance players can cover',
+        'no-change':    'has little measurable effect on how players move',
+        'more-sprint':  'pushes players to sprint even more to finish games quickly'
       } },
 
     { key: 'fifaVerdict',  stage: 'fifa-break',   type: 'single',
@@ -78,7 +99,7 @@ window.POSTER = {
   sections: [
     {
       heading: 'The Problem',
-      body: a => `The 2026 FIFA World Cup will be played across the USA, Canada and Mexico in June and July - the hottest months of the year. Before seeing any data, I predicted that the hottest match would be played in ${a.hotCity}.`
+      body: a => `The 2026 FIFA World Cup will be played across the USA, Canada and Mexico in June and July - the hottest months of the year. Before seeing any data, I predicted that the hottest match would be played in ${a.hotCity}. From the fixture list, the games I judged most exposed to heat were ${a.hotFixtures}.`
     },
     {
       heading: 'The Evidence',
@@ -90,7 +111,7 @@ window.POSTER = {
       heading: 'Players at Risk',
       figure: 'media/heat-illness-infographic.jpeg',
       figureCaption: 'Heat illness can escalate to heat stroke (Esh et al., 2026).',
-      body: a => `Focusing on Scotland v Brazil in Miami, I identified ${a.seriousSigns} as the most serious signs of heat illness. Left unchecked, exertional heat illness can escalate to exertional heat stroke - a medical emergency that can be fatal within minutes (Esh et al., 2026).`
+      body: a => `Focusing on Scotland v Brazil in Miami, I identified ${a.seriousSigns} as the most serious signs of heat illness. Left unchecked, exertional heat illness can escalate to exertional heat stroke - a medical emergency that can be fatal within minutes (Esh et al., 2026). Heat does not only threaten health: looking at performance data from the 2014 World Cup (Nassis et al., 2015), I concluded that heat ${a.performance}.`
     },
     {
       heading: 'My Conclusion',
@@ -100,7 +121,8 @@ window.POSTER = {
 
   references: [
     'Mullan, D., Barr, I., Brannigan, N. et al. (2025). Extreme heat risk and the potential implications for the scheduling of football matches at the 2026 FIFA World Cup. International Journal of Biometeorology, 69, 753-763.',
-    'Esh, C.J., Carter, S., Bougault, V. et al. (2026). The 2026 Men’s FIFA Football World Cup: Evidence-Based Guidelines to Protect Player Health and Performance from Environmental Challenges. Sports Medicine.'
+    'Esh, C.J., Carter, S., Bougault, V. et al. (2026). The 2026 Men’s FIFA Football World Cup: Evidence-Based Guidelines to Protect Player Health and Performance from Environmental Challenges. Sports Medicine.',
+    'Nassis, G.P., Brito, J., Dvorak, J. et al. (2015). The association of environmental heat stress with performance: analysis of the 2014 FIFA World Cup Brazil. British Journal of Sports Medicine, 49(9), 609-613.'
   ],
 
   footer: 'Created in Dr Alan Ruddock’s World Cup Heat lesson · Sheffield Hallam University'
