@@ -13,7 +13,7 @@
 //     Never invent author lists, years, or page numbers.
 
 window.POSTER = {
-  defaultTitle: 'How hot will the 2026 FIFA World Cup be — and can players cope?',
+  defaultTitle: 'How hot will the 2026 FIFA World Cup be - and can players cope?',
 
   // Poster header kicker + byline suffix.
   kicker: 'FIFA World Cup 2026 · Heat & Player Health',
@@ -26,7 +26,7 @@ window.POSTER = {
   competition: {
     bylineTag:   'CASES Outreach 2026',
     entryLabel:  '🏆 Enter the competition',
-    enteredLabel:'Entered ✓ — good luck!',
+    enteredLabel:'Entered ✓ - good luck!',
     consent:     'Entering sends your name, school and poster text to your teacher for the CASES Outreach competition. Your answers are not shared with anyone else.'
   },
 
@@ -34,7 +34,7 @@ window.POSTER = {
   // `a.<key>` in the sections is built by poster.js from these.
   answers: [
     // map stage: the chosen city's name is resolved from cities.js, so no
-    // phrase map needed — poster.js handles `map` stages directly.
+    // phrase map needed - poster.js handles `map` stages directly.
     { key: 'hotCity',      stage: 'hottest-city', type: 'cityName',
       fallback: 'one of the southern venues' },
 
@@ -78,19 +78,19 @@ window.POSTER = {
   sections: [
     {
       heading: 'The Problem',
-      body: a => `The 2026 FIFA World Cup will be played across the USA, Canada and Mexico in June and July — the hottest months of the year. Before seeing any data, I predicted that the hottest match would be played in ${a.hotCity}.`
+      body: a => `The 2026 FIFA World Cup will be played across the USA, Canada and Mexico in June and July - the hottest months of the year. Before seeing any data, I predicted that the hottest match would be played in ${a.hotCity}.`
     },
     {
       heading: 'The Evidence',
       figure: 'media/pacha-2025-wbgt-map.png',
       figureCaption: 'Average WBGT per host venue (Mullan et al., 2025).',
-      body: a => `Research by Mullan et al. (2025) predicted average match-day temperatures above 32 °C at the three hottest venues — Dallas, Houston and Monterrey. Heat stress is measured using the Wet-Bulb Globe Temperature (WBGT), and the danger threshold is most often exceeded around ${a.timeOfDay}.`
+      body: a => `Research by Mullan et al. (2025) predicted average match-day temperatures above 32°C at the three hottest venues - Dallas, Houston and Monterrey. Heat stress is measured using the Wet-Bulb Globe Temperature (WBGT), and the danger threshold is most often exceeded around ${a.timeOfDay}.`
     },
     {
       heading: 'Players at Risk',
       figure: 'media/heat-illness-infographic.jpeg',
       figureCaption: 'Heat illness can escalate to heat stroke (Esh et al., 2026).',
-      body: a => `Focusing on Scotland v Brazil in Miami, I identified ${a.seriousSigns} as the most serious signs of heat illness. Left unchecked, exertional heat illness can escalate to exertional heat stroke — a medical emergency that can be fatal within minutes (Esh et al., 2026).`
+      body: a => `Focusing on Scotland v Brazil in Miami, I identified ${a.seriousSigns} as the most serious signs of heat illness. Left unchecked, exertional heat illness can escalate to exertional heat stroke - a medical emergency that can be fatal within minutes (Esh et al., 2026).`
     },
     {
       heading: 'My Conclusion',
@@ -99,7 +99,7 @@ window.POSTER = {
   ],
 
   references: [
-    'Mullan, D., Barr, I., Brannigan, N. et al. (2025). Extreme heat risk and the potential implications for the scheduling of football matches at the 2026 FIFA World Cup. International Journal of Biometeorology, 69, 753–763.',
+    'Mullan, D., Barr, I., Brannigan, N. et al. (2025). Extreme heat risk and the potential implications for the scheduling of football matches at the 2026 FIFA World Cup. International Journal of Biometeorology, 69, 753-763.',
     'Esh, C.J., Carter, S., Bougault, V. et al. (2026). The 2026 Men’s FIFA Football World Cup: Evidence-Based Guidelines to Protect Player Health and Performance from Environmental Challenges. Sports Medicine.'
   ],
 

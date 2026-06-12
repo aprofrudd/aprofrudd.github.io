@@ -1,4 +1,4 @@
-// Teacher gallery — reads the competition entries and re-renders each as a
+// Teacher gallery - reads the competition entries and re-renders each as a
 // finished poster with a per-entry PNG download.
 //
 // Two modes (mirrors the rest of the engine):
@@ -6,7 +6,7 @@
 //     allowed only for the authorised email (Firestore rules). Reads the
 //     <LESSON_ID>_posters collection.
 //   - LOCAL-DEV: reads entries from localStorage (<LESSON_ID>_posters) with no
-//     auth — for testing the rendering.
+//     auth - for testing the rendering.
 //
 // The poster markup mirrors poster.js so entries render identically. Figures,
 // references, footer and kicker come from poster-template.js (window.POSTER);
@@ -104,7 +104,7 @@
       card.innerHTML = `
         <div class="g-card-head">
           <div class="g-card-meta">
-            <strong>${esc(entry.name || '—')}</strong>
+            <strong>${esc(entry.name || '-')}</strong>
             <span>${esc(entry.school || '')}</span>
             <span class="g-card-ts">${esc(tsToText(entry.ts))}</span>
           </div>
@@ -164,7 +164,7 @@
   function loadLocal() {
     let arr = [];
     try { arr = JSON.parse(localStorage.getItem(LESSON_ID + '_posters')) || []; } catch (_) {}
-    authEl.innerHTML = '<span class="g-badge">Local-dev mode — showing entries on this device</span>';
+    authEl.innerHTML = '<span class="g-badge">Local-dev mode - showing entries on this device</span>';
     renderGallery(arr);
   }
 
@@ -205,7 +205,7 @@
         renderGallery(entries);
       } catch (e) {
         gridEl.innerHTML = '';
-        status('Could not read entries — this Google account may not be authorised in the Firestore rules. (' + e.message + ')');
+        status('Could not read entries - this Google account may not be authorised in the Firestore rules. (' + e.message + ')');
       }
     });
   }

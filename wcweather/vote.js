@@ -1,10 +1,10 @@
 // Phone-side controller. Subscribes to the current stage, renders the right
-// UI for it, and writes the vote. One vote per stage per device — enforced
+// UI for it, and writes the vote. One vote per stage per device - enforced
 // via localStorage. After voting, the student sees "Got it" with a
 // "Change my vote" button. When the teacher advances the stage on the
 // projector, every connected phone re-renders.
 //
-// Lesson-agnostic engine code — uses window.LESSON_ID (set by
+// Lesson-agnostic engine code - uses window.LESSON_ID (set by
 // lesson.config.js) so multiple lessons can coexist on the same origin
 // without clobbering each other's localStorage.
 
@@ -16,7 +16,7 @@
 
   if (!store.isLive) {
     dev.hidden = false;
-    dev.textContent = 'Local-dev mode (no Firebase) — votes stored on this device only.';
+    dev.textContent = 'Local-dev mode (no Firebase) - votes stored on this device only.';
   }
 
   let currentStageIndex = -1;
@@ -70,7 +70,7 @@
       return;
     }
     if (Number(seen) !== Number(epoch)) {
-      // Teacher reset — unlock this phone for the new session.
+      // Teacher reset - unlock this phone for the new session.
       clearVotedFlags();
       localStorage.setItem(EPOCH_KEY, String(epoch));
     }
@@ -105,7 +105,7 @@
     wrap.innerHTML = `
       <h2>Got it.</h2>
       <span class="arrow">↑</span>
-      <p>Look at the screen — your vote is in.</p>
+      <p>Look at the screen - your vote is in.</p>
       ${picksHtml}
       <button type="button" class="change-vote">Change my vote</button>
       <p style="font-size:0.85rem;margin-top:1.5rem;color:#9a7d6f;">
@@ -197,7 +197,7 @@
     note.textContent = stage.tapHint || 'Tap the marker you want to pick.';
     root.appendChild(note);
 
-    // Tap-friendly fallback list — labels overlap badly when 16+ pins are
+    // Tap-friendly fallback list - labels overlap badly when 16+ pins are
     // squeezed into a phone-width map, so we hide labels on small screens
     // and route voting through a grouped list of buttons below the map.
     if (cities.length) {

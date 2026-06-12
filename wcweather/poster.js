@@ -8,7 +8,7 @@
 //
 // Everything here is lesson-agnostic; the lesson supplies window.POSTER
 // (poster-template.js), window.STAGES (stages.js) and optionally window.CITIES
-// (cities.js). Nothing is read from or written to Firebase — names/schools
+// (cities.js). Nothing is read from or written to Firebase - names/schools
 // stay on the device.
 
 (function () {
@@ -199,7 +199,7 @@
   function buildEditPanel() {
     if (!editPanel) return;
     editPanel.innerHTML = '<h2 class="edit-heading">Add your own detail</h2>' +
-      '<p class="edit-intro">Each section is filled in from your answers. Edit any of them to add more — your changes show on the poster straight away.</p>';
+      '<p class="edit-intro">Each section is filled in from your answers. Edit any of them to add more - your changes show on the poster straight away.</p>';
     (T.sections || []).forEach((sec, i) => {
       const block = document.createElement('div');
       block.className = 'edit-block';
@@ -259,7 +259,7 @@
 
   function setEnteredUI() {
     if (!enterBtn) return;
-    enterBtn.textContent = comp.enteredLabel || 'Entered ✓ — good luck!';
+    enterBtn.textContent = comp.enteredLabel || 'Entered ✓ - good luck!';
     enterBtn.classList.add('entered');
   }
   if (entered) setEnteredUI();
@@ -267,7 +267,7 @@
 
   // Lazily create the store only when needed (single addDoc, no listeners).
   // store.js is a deferred module, so window.createStore may not exist yet at
-  // load — wait for it on first use.
+  // load - wait for it on first use.
   let _storeP = null;
   function getStore() {
     if (!_storeP) {
@@ -302,7 +302,7 @@
       enterStatus.textContent = 'You’re entered! Good luck.';
     } catch (e) {
       console.warn('[poster] entry failed:', e);
-      enterStatus.textContent = 'Could not enter — check your connection and try again.';
+      enterStatus.textContent = 'Could not enter - check your connection and try again.';
     } finally {
       updateEnterEnabled();
     }
@@ -317,7 +317,7 @@
 
   saveBtn.addEventListener('click', async () => {
     if (!window.html2canvas) {
-      statusEl.textContent = 'Export library failed to load — try reloading the page.';
+      statusEl.textContent = 'Export library failed to load - try reloading the page.';
       return;
     }
     saveBtn.disabled = true;
@@ -356,7 +356,7 @@
       statusEl.textContent = 'Saved! Check your downloads.';
     } catch (e) {
       console.warn('[poster] export failed:', e);
-      statusEl.textContent = 'Could not save automatically — long-press the poster to save the image instead.';
+      statusEl.textContent = 'Could not save automatically - long-press the poster to save the image instead.';
     } finally {
       saveBtn.disabled = false;
     }

@@ -1,6 +1,6 @@
 // Projector-side controller. Renders the active stage (question + media) on
 // the left, live results on the right, and provides Next/Prev/Reset.
-// Lesson-agnostic — uses window.LESSON_ID for any localStorage namespacing.
+// Lesson-agnostic - uses window.LESSON_ID for any localStorage namespacing.
 
 (async function () {
   const LESSON_ID = window.LESSON_ID || 'lesson';
@@ -17,7 +17,7 @@
   const authWho      = document.getElementById('auth-who');
 
   // Only a signed-in teacher may drive the lesson. Students who open this page
-  // can watch the live results but the controls do nothing for them — enforced
+  // can watch the live results but the controls do nothing for them - enforced
   // by Firestore rules (state writes require the teacher's account), with the
   // UI lock below as the visible half.
   let isTeacher = false;
@@ -25,7 +25,7 @@
   const store = await window.createStore();
   if (!store.isLive) {
     dev.hidden = false;
-    dev.textContent = 'Local-dev mode (no Firebase) — votes only sync between tabs on this device.';
+    dev.textContent = 'Local-dev mode (no Firebase) - votes only sync between tabs on this device.';
   }
 
   let currentStage = 0;
@@ -63,7 +63,7 @@
     if (stage.type === 'map') {
       renderProjectorMap(stagePane, stage);
     } else if (stage.type === 'mcq') {
-      // Optional figure shown above the option list — useful when the
+      // Optional figure shown above the option list - useful when the
       // question requires students to read a chart to answer.
       if (stage.figure) {
         const figWrap = el('div', 'mcq-figure-wrap');
@@ -143,7 +143,7 @@
     const wrap = el('div', 'poster-instructions');
     wrap.innerHTML = `
       <div class="poster-emoji">🎓</div>
-      <p class="poster-lead">On your phone, tap <strong>“Create my poster”</strong> — or scan the QR and add <code>/${stage.href || 'poster.html'}</code>.</p>
+      <p class="poster-lead">On your phone, tap <strong>“Create my poster”</strong> - or scan the QR and add <code>/${stage.href || 'poster.html'}</code>.</p>
       <p class="poster-sub">Your poster is built from the answers you gave today. Add your name and school, then save it as an image for the CASES Outreach competition.</p>
       <div class="poster-url">${posterUrl}</div>`;
     parent.appendChild(wrap);
@@ -181,7 +181,7 @@
   function renderContent(parent, stage) {
     const wrap = el('div', 'content-stage');
 
-    // 1) Figure (optional — image of a chart, paper figure, etc.)
+    // 1) Figure (optional - image of a chart, paper figure, etc.)
     if (stage.figure) {
       const fig = el('div', 'figure-wrap');
       wrap.appendChild(fig);
@@ -201,7 +201,7 @@
         });
     }
 
-    // 2) Table (optional — clean HTML table for displaying paper data
+    // 2) Table (optional - clean HTML table for displaying paper data
     //    responsively. Use instead of a figure when you want themed,
     //    accessible output rather than a screenshot.)
     if (stage.table) {
@@ -246,9 +246,9 @@
         const cite = el('cite');
         if (stage.link) {
           const safe = String(stage.link).replace(/"/g, '&quot;');
-          cite.innerHTML = `— <a href="${safe}" target="_blank" rel="noopener">${stage.citation} ↗</a>`;
+          cite.innerHTML = `- <a href="${safe}" target="_blank" rel="noopener">${stage.citation} ↗</a>`;
         } else {
-          cite.textContent = `— ${stage.citation}`;
+          cite.textContent = `- ${stage.citation}`;
         }
         q.appendChild(cite);
       }
@@ -312,7 +312,7 @@
 
     if (stage.type === 'media' || stage.type === 'content') {
       const note = el('div', 'results-empty');
-      note.textContent = 'No vote on this stage — discussion / viewing.';
+      note.textContent = 'No vote on this stage - discussion / viewing.';
       resultsPane.appendChild(note);
       return;
     }
@@ -394,7 +394,7 @@
   // --- Teacher sign-in gate ------------------------------------------------
   // In live mode the controls are locked until the teacher signs in with
   // Google. The Firestore SDK attaches the signed-in user's token to writes,
-  // and the security rules only accept stage writes from the teacher's email —
+  // and the security rules only accept stage writes from the teacher's email -
   // so a student opening this page can watch but cannot drive the lesson.
   async function setupAuth() {
     if (!store.isLive) {
@@ -408,7 +408,7 @@
     try {
       const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } =
         await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-      const auth = getAuth();   // default app — store.js already initialised it
+      const auth = getAuth();   // default app - store.js already initialised it
       if (authBtn) authBtn.addEventListener('click', () => {
         if (auth.currentUser) signOut(auth);
         else signInWithPopup(auth, new GoogleAuthProvider())
@@ -419,7 +419,7 @@
         if (authBtn) authBtn.textContent = user ? 'Sign out' : 'Sign in to control';
         if (authWho) authWho.textContent = user
           ? (user.email || 'signed in')
-          : 'View-only — sign in to control the lesson';
+          : 'View-only - sign in to control the lesson';
         renderControls();
       });
     } catch (e) {

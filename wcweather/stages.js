@@ -12,7 +12,7 @@ const STAGES = [
     type: 'map',
     title: 'Where will the hottest match be?',
     blurb: 'Pick the World Cup 2026 host city you think will see the highest pitch-side temperature during a match.',
-    // options for map stages are the city ids — populated automatically from CITIES
+    // options for map stages are the city ids - populated automatically from CITIES
   },
 
   {
@@ -42,20 +42,20 @@ const STAGES = [
       ],
       highlightTop: 5
     },
-    quote: 'Three venues — Dallas, Houston, Monterrey — average above 32 °C. Monterrey is the only outdoor venue in that top three, and it also sits at 64% relative humidity.',
-    citation: 'Mullan, Barr, Brannigan et al., 2025 — Int J Biometeorol 69, 753–763',
+    quote: 'Three venues - Dallas, Houston, Monterrey - average above 32°C. Monterrey is the only outdoor venue in that top three, and it also sits at 64% relative humidity.',
+    citation: 'Mullan, Barr, Brannigan et al., 2025 - Int J Biometeorol 69, 753-763',
     link: 'https://doi.org/10.1007/s00484-025-02852-4',
     sideFigure: 'media/pacha-2025-wbgt-map.png',
-    sideFigureCaption: 'Average WBGT (wet-bulb globe temperature) per host venue, June–July match window. Circle size scales with WBGT. The same data the table summarises, but mapped geographically.'
+    sideFigureCaption: 'Average WBGT (wet-bulb globe temperature) per host venue, June-July match window. Circle size scales with WBGT. The same data the table summarises, but mapped geographically.'
   },
 
   {
     id: 'time-of-day',
     type: 'mcq',
-    title: 'In Monterrey and Miami, when is WBGT most likely to exceed 28 °C?',
-    blurb: 'Look at the Monterrey (MON) and Miami (MIA) panels in the figure — when do the orange bars (WBGT &gt; 28 °C) peak?',
+    title: 'In Monterrey and Miami, when is WBGT most likely to exceed 28°C?',
+    blurb: 'Look at the Monterrey (MON) and Miami (MIA) panels in the figure - when do the orange bars (WBGT &gt; 28°C) peak?',
     figure: 'media/pacha-2025-figure-3.png',
-    figureCaption: 'Percentage of days during the match window in which average WBGT exceeded 26 °C (yellow), 28 °C (orange) or 32 °C (red), by hour of day, at each host venue. From Mullan et al., 2025.',
+    figureCaption: 'Percentage of days during the match window in which average WBGT exceeded 26°C (yellow), 28°C (orange) or 32°C (red), by hour of day, at each host venue. From Mullan et al., 2025.',
     options: [
       { id: '9am',  label: '9 am' },
       { id: '12pm', label: '12 pm' },
@@ -68,7 +68,7 @@ const STAGES = [
     id: 'fixtures',
     type: 'mcq',
     title: 'Look at the games scheduled in Monterrey and Miami. Based on local kickoff time, which three fixtures do you think will be played in the hottest conditions?',
-    blurb: 'Pick up to three. All kickoffs are in the evening — but look at Figure 3 from the last question: Miami\'s WBGT exceedance bars are still elevated at 18:00.',
+    blurb: 'Pick up to three. All kickoffs are in the evening - but look at Figure 3 from the last question: Miami\'s WBGT exceedance bars are still elevated at 18:00.',
     maxSelect: 3,
     options: [
       { id: 'sa-uru-mia-1800',  label: '🇸🇦 Saudi Arabia v Uruguay 🇺🇾',     sublabel: 'Miami · 18:00' },
@@ -84,10 +84,10 @@ const STAGES = [
   {
     id: 'heat-illness-infographic',
     type: 'content',
-    title: 'Scotland v Brazil, Miami — when a player overheats',
+    title: 'Scotland v Brazil, Miami - when a player overheats',
     blurb: 'Two escalating syndromes. Exertional heat illness (amber) is the warning stage. Exertional heat stroke (red) is a medical emergency.',
     figure: 'media/heat-illness-infographic.jpeg',
-    citation: 'Signs from Esh, Carter, Bougault et al., 2026 — Sports Medicine, Table 1',
+    citation: 'Signs from Esh, Carter, Bougault et al., 2026 - Sports Medicine, Table 1',
     link: 'https://doi.org/10.1007/s40279-026-02398-4'
   },
 
@@ -128,19 +128,19 @@ const STAGES = [
     id: 'fifa-break',
     type: 'mcq',
     title: 'Are these measures enough?',
-    blurb: 'You’ve seen what FIFA does — cooling breaks, WBGT monitoring, climate-controlled benches. Based on everything today, is it enough to keep players safe?',
+    blurb: 'You’ve seen what FIFA does - cooling breaks, WBGT monitoring, climate-controlled benches. Based on everything today, is it enough to keep players safe?',
     options: [
-      { id: 'yes-enough',     label: 'Yes — these measures are enough' },
-      { id: 'too-short',      label: 'No — the cooling breaks are too short' },
-      { id: 'too-few',        label: 'No — players need more breaks per half' },
-      { id: 'reschedule',     label: 'No — afternoon games can’t be made safe by breaks alone' }
+      { id: 'yes-enough',     label: 'Yes - these measures are enough' },
+      { id: 'too-short',      label: 'No - the cooling breaks are too short' },
+      { id: 'too-few',        label: 'No - players need more breaks per half' },
+      { id: 'reschedule',     label: 'No - afternoon games can’t be made safe by breaks alone' }
     ]
   },
 
   {
     id: 'recommendations',
     type: 'mcq',
-    title: 'You’re advising FIFA — what would you bring in? (pick 3)',
+    title: 'You’re advising FIFA - what would you bring in? (pick 3)',
     blurb: 'Pick the three changes you think would best protect players in extreme heat.',
     maxSelect: 3,
     options: [
