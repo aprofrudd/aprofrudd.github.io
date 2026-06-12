@@ -111,6 +111,42 @@
   function writeEdits(e) { localStorage.setItem(EDITS_KEY, JSON.stringify(e)); }
   let edits = readEdits();
 
+  // ---- per-section image overrides (student-supplied figures) -------------
+  // Downscaled data URLs kept on-device only (consistent with "store data,
+  // not images"): they show in the live preview and the downloaded PNG, but
+  // are not uploaded with a competition entry.
+  const IMAGES_KEY = LESSON_ID + '_poster_images';
+  const MAX_IMG_DIM = 1400;   // px; ample for a poster figure at 2x export
+  function readImages() { try { return JSON.parse(localStorage.getItem(IMAGES_KEY)) || {}; } catch (_) { return {}; } }
+  function writeImages(m) {
+    try { localStorage.setItem(IMAGES_KEY, JSON.stringify(m)); return true; }
+    catch (_) { return false; }   // localStorage quota exceeded
+  }
+  let images = readImages();
+
+  // Read a chosen file, downscale it to MAX_IMG_DIM, return a JPEG data URL.
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(reader.error || new Error('read failed'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('not an image'));
+        img.onload = () => {
+          const scale = Math.min(1, MAX_IMG_DIM / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   function generatedText(sec) {
     return typeof sec.body === 'function' ? sec.body(answers) : (sec.body || '');
   }
@@ -152,9 +188,15 @@
       html += `<section class="p-section${sec.wide ? ' p-section--wide' : ''}">
         <h2 class="p-h2">${esc(sec.heading)}</h2>`;
       if (sec.figure) {
+        const customImg = images[String(i)];
+        const src = customImg || sec.figure;
+        // The template caption describes the original figure (often with a
+        // citation), so drop it once the student swaps in their own image.
+        const cap = (sec.figureCaption && !customImg)
+          ? `<figcaption>${esc(sec.figureCaption)}</figcaption>` : '';
         html += `<figure class="p-figure">
-          <img src="${esc(sec.figure)}" alt="" crossorigin="anonymous">
-          ${sec.figureCaption ? `<figcaption>${esc(sec.figureCaption)}</figcaption>` : ''}
+          <img src="${esc(src)}" alt="" crossorigin="anonymous">
+          ${cap}
         </figure>`;
       }
       html += `<p class="p-text">${esc(sectionText(i, sec))}</p></section>`;
@@ -204,17 +246,28 @@
   function buildEditPanel() {
     if (!editPanel) return;
     editPanel.innerHTML = '<h2 class="edit-heading">Add your own detail</h2>' +
-      '<p class="edit-intro">Each section is filled in from your answers. Edit any of them to add more - your changes show on the poster straight away.</p>';
+      '<p class="edit-intro">Each section is filled in from your answers. Edit the text to add more, or replace a figure with your own image - your changes show on the poster straight away.</p>';
     (T.sections || []).forEach((sec, i) => {
       const block = document.createElement('div');
       block.className = 'edit-block';
       const id = 'edit-' + i;
+      // Figure sections get a "Replace image" control; text-only sections don't.
+      const imgControl = sec.figure ? `
+        <div class="edit-image">
+          <label class="edit-image-btn">
+            <input type="file" accept="image/*" hidden>
+            🖼 Replace image
+          </label>
+          <button type="button" class="edit-image-reset" hidden>Use original</button>
+          <span class="edit-image-status"></span>
+        </div>` : '';
       block.innerHTML = `
         <div class="edit-row">
           <label for="${id}">${esc(sec.heading)}</label>
           <button type="button" class="edit-reset" data-i="${i}">Reset</button>
         </div>
-        <textarea id="${id}" rows="3" data-i="${i}"></textarea>`;
+        <textarea id="${id}" rows="3" data-i="${i}"></textarea>
+        ${imgControl}`;
       editPanel.appendChild(block);
       const ta = block.querySelector('textarea');
       ta.value = sectionText(i, sec);
@@ -231,6 +284,47 @@
         ta.value = generatedText(sec);
         refresh();
       });
+
+      // Image replace / reset wiring (figure sections only).
+      if (sec.figure) {
+        const fileInput = block.querySelector('.edit-image input[type=file]');
+        const resetImg  = block.querySelector('.edit-image-reset');
+        const statusImg = block.querySelector('.edit-image-status');
+        const syncImgUI = () => {
+          const has = !!images[String(i)];
+          resetImg.hidden = !has;
+          statusImg.textContent = has ? 'Showing your image' : '';
+        };
+        syncImgUI();
+        fileInput.addEventListener('change', async () => {
+          const file = fileInput.files && fileInput.files[0];
+          if (!file) return;
+          statusImg.textContent = 'Loading…';
+          try {
+            const dataUrl = await fileToDataURL(file);
+            const prev = images[String(i)];
+            images[String(i)] = dataUrl;
+            if (!writeImages(images)) {
+              if (prev != null) images[String(i)] = prev; else delete images[String(i)];
+              statusImg.textContent = 'That image is too large to save - try a smaller one';
+              return;
+            }
+            syncImgUI();
+            refresh();
+          } catch (e) {
+            console.warn('[poster] image load failed:', e);
+            statusImg.textContent = 'Could not load that file';
+          } finally {
+            fileInput.value = '';
+          }
+        });
+        resetImg.addEventListener('click', () => {
+          delete images[String(i)];
+          writeImages(images);
+          syncImgUI();
+          refresh();
+        });
+      }
     });
   }
 

@@ -151,6 +151,41 @@ html, body {
 }
 .edit-panel textarea:focus { outline: none; border-color: var(--accent); }
 
+/* "Replace image" control (figure sections only) */
+.edit-image {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.edit-image-btn {
+  display: inline-block;
+  background: var(--paper-dark);
+  border: 1.5px solid rgba(124,74,62,0.28);
+  border-radius: 8px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+.edit-image-btn:hover { border-color: var(--accent); }
+.edit-image-reset {
+  background: transparent;
+  border: 0;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+}
+.edit-image-reset:hover { text-decoration: underline; }
+.edit-image-status {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
 /* Institutional logos in the banner */
 .header-logos {
   display: flex;
