@@ -110,6 +110,31 @@ const STAGES = [
   },
 
   {
+    id: 'performance-heat',
+    type: 'content',
+    title: 'Even when no one collapses, the heat changes the game',
+    blurb: 'Researchers matched performance to pitch-side heat across all 64 matches of the 2014 World Cup in Brazil. Watch the high-intensity running line - the black triangles.',
+    figure: 'media/nassis-2015-distance-wbgt.png',
+    figureCaption: 'Distance covered per minute against pitch-side WBGT, averaged over both teams across all 64 matches. As heat stress rises, high-intensity running falls (black triangles, r=-0.28, p<0.05) while low-intensity running rises (open circles, r=0.36, p<0.05). Moderate-intensity running is unchanged (grey squares, r=-0.01, not significant).',
+    quote: 'Players don’t cover less ground in the heat - they cover it differently. High-intensity running and sprints drop, low-intensity running rises, and they hold possession with more successful passes. The heat quietly drains the explosive, decisive part of the game.',
+    citation: 'Nassis, Brito, Dvorak, Chalabi, Racinais, 2015 - Br J Sports Med 49(9), 609-613',
+    link: 'https://doi.org/10.1136/bjsports-2014-094449'
+  },
+
+  {
+    id: 'performance-effect',
+    type: 'mcq',
+    title: 'In the heat, what happens to how players run?',
+    blurb: 'Based on the 2014 World Cup data you just saw - what changes most as the pitch gets hotter?',
+    options: [
+      { id: 'less-total',   label: 'They cover much less total distance' },
+      { id: 'less-highint', label: 'High-intensity running and sprints drop' },
+      { id: 'no-change',    label: 'Nothing measurable changes' },
+      { id: 'more-sprint',  label: 'They sprint more to finish games quickly' }
+    ]
+  },
+
+  {
     id: 'fifa-measures',
     type: 'content',
     title: 'So what is FIFA doing about it?',

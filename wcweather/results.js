@@ -190,8 +190,13 @@
           if (r.ok) {
             const img = el('img');
             img.src = stage.figure;
-            img.alt = '';
+            img.alt = stage.figureCaption || '';
             fig.appendChild(img);
+            if (stage.figureCaption) {
+              const cap = el('div', 'figure-caption');
+              cap.textContent = stage.figureCaption;
+              fig.appendChild(cap);
+            }
           } else throw new Error('missing');
         })
         .catch(() => {

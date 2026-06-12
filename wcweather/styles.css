@@ -1,4 +1,4 @@
-/* World Cup 2026 heat lesson — warm/vintage palette to match the
+/* World Cup 2026 heat lesson - warm/vintage palette to match the
    parchment-and-flag map aesthetic. */
 
 :root {
@@ -792,6 +792,14 @@ body.projector .results-pane h3 {
   font-style: italic;
 }
 
+.content-stage .figure-caption {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  font-family: var(--serif);
+}
+
 .content-stage blockquote {
   margin: 1.5rem 0 0;
   padding: 0 1.5rem;
@@ -1057,7 +1065,7 @@ body.projector .results-pane h3 {
   .brand-logo { height: 34px; }
   .header { gap: 0.7rem; }
 
-  /* On mobile, the map is too tight for 16 labels — show the dots for
+  /* On mobile, the map is too tight for 16 labels - show the dots for
      geographic context, but route voting through the city list below. */
   .map-wrap { overflow: visible; }
   .pin .label { display: none; }
