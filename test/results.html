@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test - Projector</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../engine/styles.css?v=mqe436pq">
+  <link rel="stylesheet" href="theme.css?v=mqe436pq">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body class="projector">
+  <div id="dev-banner" class="dev-banner" hidden></div>
+
+  <aside class="qr-corner" aria-label="Join the lesson on your phone">
+    <div id="qr-code"></div>
+    <div class="qr-corner-label">
+      <strong>Vote on your phone</strong>
+      <span>alanruddock.com/test</span>
+    </div>
+  </aside>
+
+  <header class="header">
+    
+    <div class="header-text">
+      <div class="kicker"></div>
+      <h1>Test</h1>
+    </div>
+  </header>
+
+  <main class="main">
+    <div id="stage-pane" class="stage-pane"></div>
+    <aside id="results-pane" class="results-pane"></aside>
+  </main>
+
+  <div class="controls">
+    <span id="auth-who" class="auth-who"></span>
+    <button id="auth-btn" class="auth-btn" type="button">Sign in to control</button>
+    <button id="reset-btn" class="reset" title="Wipe all votes">Reset</button>
+    <button id="prev-btn">‹ Back</button>
+    <span id="stage-indicator" class="stage-indicator">- / -</span>
+    <button id="next-btn">Next ›</button>
+  </div>
+
+  <script src="lesson.config.js?v=mqe436pq"></script>
+  <script src="stages.js?v=mqe436pq"></script>
+  <script src="firebase-config.js?v=mqe436pq"></script>
+  <script type="module" src="../engine/store.js?v=mqe436pq"></script>
+  <script>
+    (function waitForStore() {
+      if (window.createStore) {
+        var s = document.createElement('script');
+        s.src = '../engine/results.js?v=mqe436pq';
+        document.body.appendChild(s);
+      } else { setTimeout(waitForStore, 30); }
+    })();
+  </script>
+</body>
+</html>
