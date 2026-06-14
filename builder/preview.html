@@ -39,6 +39,12 @@
     // fallback (no network, no live writes). A throwaway LESSON_ID keeps preview
     // votes from colliding with any real lesson.
     window.LESSON_ID = '__preview__' + (data.lessonId || 'demo');
+    // Start the engine on the slide the editor has selected (store.js reads the
+    // current stage from this localStorage key on init), so edits show at once.
+    if (typeof data.startStage === 'number') {
+      try { localStorage.setItem(window.LESSON_ID + '_state_stage',
+        JSON.stringify({ stage: data.startStage, epoch: 0, ts: 0 })); } catch (e) {}
+    }
     window.STAGES = data.stages;            // already engine-normalized by the editor
     if (data.cities) { window.CITIES = data.cities; window.MAP_BOUNDS = data.mapBounds || null; }
     window.FIREBASE_CONFIG = { apiKey: 'REPLACE_ME' };

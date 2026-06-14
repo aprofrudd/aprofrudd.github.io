@@ -343,11 +343,16 @@ function refreshPreview() {
     lessonUrl: state.spec.lessonUrl, logo: substMedia(state.spec.logo),
     cities: state.spec.cities, mapBounds: state.spec.mapBounds,
     themeCss: previewThemeCss(),
-    stages: previewStages()
+    stages: previewStages(),
+    // Show the slide currently selected/edited, so edits appear immediately
+    // instead of only when you navigate the preview.
+    startStage: Math.max(0, state.selected)
   };
   try { sessionStorage.setItem('builder_preview', JSON.stringify(data)); } catch (e) {}
   const frame = document.getElementById('b-frame');
-  if (frame) frame.src = 'preview.html#' + state.mode + '?t=' + Date.now();
+  // Cache-buster must be in the QUERY (before the #), or a fragment-only change
+  // wouldn't reload the iframe - which is why edits previously needed a click away.
+  if (frame) frame.src = 'preview.html?t=' + Date.now() + '#' + state.mode;
 }
 const refreshPreviewDebounced = debounce(refreshPreview, 250);
 
