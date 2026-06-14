@@ -1,0 +1,134 @@
+/* Take-home lesson recap. Reuses the palette + header from styles.css and adds
+   a clean, readable single-column study layout. Print-friendly. */
+
+.recap-main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 4rem;
+}
+
+.recap-intro {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0.5rem 0 1.25rem;
+}
+
+.recap-actions { text-align: center; margin: 1.5rem 0; }
+.recap-poster-btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.8rem 1.6rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow);
+}
+.recap-poster-btn:hover { background: var(--ink); }
+
+.recap-section {
+  margin: 1.75rem 0;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(124, 74, 62, 0.15);
+}
+.recap-section:last-child { border-bottom: 0; }
+
+.recap-h2 {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin: 0 0 0.6rem;
+}
+.recap-blurb {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0 0 0.9rem;
+}
+
+.recap-figure {
+  margin: 0.9rem 0;
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: var(--shadow);
+}
+.recap-figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+}
+.recap-figure figcaption {
+  margin-top: 0.5rem;
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.recap-table-wrap { overflow-x: auto; margin: 0.9rem 0; }
+.recap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: var(--paper);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.recap-table th, .recap-table td {
+  padding: 0.5rem 0.7rem;
+  text-align: right;
+  border-bottom: 1px solid rgba(124, 74, 62, 0.12);
+}
+.recap-table th { background: var(--paper-dark); color: var(--ink); font-weight: 700; }
+.recap-table .rowlabel { text-align: left; font-weight: 600; }
+.recap-table tr.highlight td { background: var(--accent-soft); }
+
+.recap-quote {
+  margin: 0.9rem 0;
+  padding: 0 1.1rem;
+  border-left: 4px solid var(--accent);
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.recap-quote cite {
+  display: block;
+  margin-top: 0.6rem;
+  font-style: normal;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.recap-quote cite a, .recap-link a { color: var(--accent); }
+
+.recap-q-note {
+  margin: 0.9rem 0 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.recap-options {
+  margin: 0;
+  padding-left: 1.2rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.recap-options li { margin-bottom: 0.2rem; }
+
+.recap-refs ol {
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.recap-refs li { margin-bottom: 0.4rem; }
+
+@media print {
+  .recap-actions, .header-logos { display: none; }
+  .recap-section { break-inside: avoid; }
+}

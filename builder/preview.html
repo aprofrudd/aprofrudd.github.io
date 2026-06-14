@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preview</title>
+  <!-- The real engine stylesheet + the live theme (injected below). This is the
+       same CSS the published page uses, so the preview is pixel-identical. -->
+  <link rel="stylesheet" href="../engine/styles.css">
+  <style id="preview-theme"></style>
+  <style>
+    html, body { min-height: 100%; }
+    /* The editor sizes the iframe (narrow = phone, wide = projector). */
+  </style>
+</head>
+<body>
+  <div id="preview-error" hidden style="padding:1rem;font:14px system-ui;color:#8c2318;"></div>
+
+  <script>
+  (function () {
+    // mode comes from the hash: #phone or #projector
+    var mode = (location.hash || '#projector').replace('#', '').split('?')[0] || 'projector';
+
+    var data = {};
+    try { data = JSON.parse(sessionStorage.getItem('builder_preview') || '{}'); }
+    catch (e) {}
+
+    if (!data || !Array.isArray(data.stages)) {
+      var err = document.getElementById('preview-error');
+      err.hidden = false;
+      err.textContent = 'No presentation to preview yet - add a slide.';
+      return;
+    }
+
+    // Inject the per-presentation theme exactly as theme.css would.
+    document.getElementById('preview-theme').textContent = data.themeCss || '';
+
+    // Engine globals. Local-dev Firebase stub so store.js uses the localStorage
+    // fallback (no network, no live writes). A throwaway LESSON_ID keeps preview
+    // votes from colliding with any real lesson.
+    window.LESSON_ID = '__preview__' + (data.lessonId || 'demo');
+    window.STAGES = data.stages;            // already engine-normalized by the editor
+    if (data.cities) { window.CITIES = data.cities; window.MAP_BOUNDS = data.mapBounds || null; }
+    window.FIREBASE_CONFIG = { apiKey: 'REPLACE_ME' };
+    window.IS_LIVE = false;
+
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function logo() {
+      return data.logo
+        ? '<div class="header-logos"><img class="brand-logo" src="' + esc(data.logo) +
+          '" alt="" onerror="this.style.display=\'none\'"></div>'
+        : '';
+    }
+    function header(heading) {
+      return '<header class="header">' + logo() +
+        '<div class="header-text"><div class="kicker">' + esc(data.kicker || '') +
+        '</div><h1>' + esc(heading) + '</h1></div></header>';
+    }
+
+    // Build the same DOM scaffold the published shell uses, per mode.
+    if (mode === 'phone') {
+      document.body.innerHTML =
+        '<div id="dev-banner" class="dev-banner" hidden></div>' +
+        header(data.heading || data.title || '') +
+        '<main class="main"><div id="stage-root"></div></main>';
+    } else {
+      document.body.className = 'projector';
+      document.body.innerHTML =
+        '<div id="dev-banner" class="dev-banner" hidden></div>' +
+        '<aside class="qr-corner" aria-label="Join on your phone">' +
+          '<div id="qr-code"></div>' +
+          '<div class="qr-corner-label"><strong>Vote on your phone</strong>' +
+          '<span>' + esc(data.lessonUrl || '') + '</span></div></aside>' +
+        header(data.projectorHeading || data.heading || data.title || '') +
+        '<main class="main"><div id="stage-pane" class="stage-pane"></div>' +
+        '<aside id="results-pane" class="results-pane"></aside></main>' +
+        '<div class="controls">' +
+          '<span id="auth-who" class="auth-who"></span>' +
+          '<button id="auth-btn" class="auth-btn" type="button">Sign in to control</button>' +
+          '<button id="reset-btn" class="reset" title="Wipe all votes">Reset</button>' +
+          '<button id="prev-btn">‹ Back</button>' +
+          '<span id="stage-indicator" class="stage-indicator">- / -</span>' +
+          '<button id="next-btn">Next ›</button></div>';
+    }
+
+    // Load the engine the same way the shells do: store.js (module) first, then
+    // the renderer once window.createStore exists.
+    var store = document.createElement('script');
+    store.type = 'module';
+    store.src = '../engine/store.js';
+    document.body.appendChild(store);
+    (function waitForStore() {
+      if (window.createStore) {
+        var s = document.createElement('script');
+        s.src = mode === 'phone' ? '../engine/vote.js' : '../engine/results.js';
+        document.body.appendChild(s);
+      } else { setTimeout(waitForStore, 30); }
+    })();
+  })();
+  </script>
+</body>
+</html>

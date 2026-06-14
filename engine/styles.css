@@ -1,0 +1,1105 @@
+/* World Cup 2026 heat lesson - warm/vintage palette to match the
+   parchment-and-flag map aesthetic. */
+
+:root {
+  --paper: #faf4e6;
+  --paper-dark: #f0e8d0;
+  --ink: #3a261e;
+  --ink-soft: #6b4a3e;
+  --accent: #c0524a;
+  --accent-soft: #e9b9b3;
+  --pin: #7c2820;
+  --pin-glow: rgba(124, 40, 32, 0.18);
+  --shadow: 0 2px 8px rgba(58, 38, 30, 0.12);
+  --bar: #c0524a;
+  --bar-track: rgba(124, 74, 62, 0.12);
+  --serif: 'Georgia', 'Hoefler Text', 'Times New Roman', serif;
+  --sans: 'Helvetica Neue', 'Arial', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3 {
+  font-family: var(--serif);
+  color: var(--ink);
+  margin: 0;
+}
+
+.header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(124, 74, 62, 0.15);
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Institutional logos in the banner, next to the title */
+.header-logos {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-shrink: 0;
+}
+.brand-logo {
+  height: 46px;
+  width: auto;
+  display: block;
+}
+.header-text { min-width: 0; }
+
+.header .kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.header h1 {
+  font-size: 1.4rem;
+  margin-top: 0.25rem;
+  line-height: 1.2;
+}
+
+.header .blurb {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.main {
+  flex: 1;
+  padding: 1rem 1.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Map --- */
+
+.map-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  aspect-ratio: 700 / 460;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.map-wrap .basemap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.pins {
+  position: absolute;
+  inset: 0;
+}
+
+.pin {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
+/* Expand touch hit area on phones without affecting visual size */
+.pin::before {
+  content: '';
+  position: absolute;
+  inset: -16px;
+  z-index: 1;
+}
+
+.pin .dot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--pin);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 2px var(--pin-glow), 0 2px 4px rgba(0,0,0,0.15);
+  transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+
+.pin .label {
+  position: absolute;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--paper);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(124, 74, 62, 0.2);
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+
+  /* Default: 's' (label below dot) */
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Mirror the hover state across dot + label so either feels clickable */
+.pin:hover .label,
+.pin:focus-visible .label {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.pin.voted .label {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+/* Projector-side pins are just display, no pointer */
+.pin.disabled .label { cursor: default; }
+.pin.disabled:hover .label { background: var(--paper); border-color: rgba(124, 74, 62, 0.2); }
+
+.pin[data-dir="n"]  .label { top: auto; bottom: calc(100% + 4px); left: 50%;             transform: translateX(-50%); }
+.pin[data-dir="e"]  .label { top: 50%;  left: calc(100% + 6px);   right: auto;           transform: translateY(-50%); }
+.pin[data-dir="w"]  .label { top: 50%;  right: calc(100% + 6px);  left: auto;            transform: translateY(-50%); }
+.pin[data-dir="ne"] .label { bottom: calc(100% + 2px); left: calc(100% + 4px); top: auto; transform: none; }
+.pin[data-dir="nw"] .label { bottom: calc(100% + 2px); right: calc(100% + 4px); left: auto; top: auto; transform: none; }
+.pin[data-dir="se"] .label { top: calc(100% + 2px); left: calc(100% + 4px); transform: none; }
+.pin[data-dir="sw"] .label { top: calc(100% + 2px); right: calc(100% + 4px); left: auto; transform: none; }
+
+.pin:hover .dot,
+.pin:focus-visible .dot {
+  transform: scale(1.25);
+  background: var(--accent);
+}
+
+.pin.voted .dot {
+  background: var(--accent);
+  transform: scale(1.4);
+  box-shadow: 0 0 0 4px var(--accent-soft), 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.pin.disabled {
+  cursor: default;
+}
+
+.pin .count {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 2px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 8px;
+  display: none;
+}
+
+.pin.has-votes .count {
+  display: block;
+}
+
+.pin.leader .dot {
+  background: var(--accent);
+  width: 18px;
+  height: 18px;
+  box-shadow: 0 0 0 6px var(--accent-soft), 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* --- MCQ stages with a figure (e.g. "look at this chart, then vote") --- */
+
+.mcq-figure-wrap {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 1rem;
+}
+
+.mcq-figure-wrap img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+}
+
+.mcq-figure-caption {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* --- City list (tap-friendly fallback below the map) --- */
+
+.tap-hint {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}
+
+.city-list {
+  display: none;       /* shown on small screens via media query */
+  margin-top: 1.5rem;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.city-list-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.city-list-heading {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding-left: 0.25rem;
+}
+
+.city-list-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.city-list-btn {
+  background: var(--paper);
+  border: 1.5px solid rgba(124, 74, 62, 0.25);
+  border-radius: 8px;
+  padding: 0.85rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--sans);
+  transition: border-color 120ms ease, background 120ms ease;
+  box-shadow: var(--shadow);
+  min-height: 48px;     /* generous tap target */
+}
+
+.city-list-btn:hover,
+.city-list-btn:focus-visible {
+  border-color: var(--accent);
+  background: var(--paper-dark);
+}
+
+.city-list-btn:active {
+  background: var(--accent-soft);
+}
+
+/* --- MCQ --- */
+
+.mcq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 640px;
+  margin: 1rem auto;
+  width: 100%;
+}
+
+.mcq-option {
+  background: var(--paper);
+  border: 1.5px solid rgba(124, 74, 62, 0.25);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--sans);
+  transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+  box-shadow: var(--shadow);
+}
+
+/* Two-line MCQ option (label + sublabel). Used for fixture cards
+   where each option shows a matchup on top and venue · time below. */
+.mcq-option-label {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.mcq-option-sublabel {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.mcq-option:hover,
+.mcq-option:focus-visible {
+  border-color: var(--accent);
+  background: var(--paper-dark);
+}
+
+.mcq-option.voted,
+.mcq-option.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.mcq-option.disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+/* Brief shake/flash when the student tries to pick more than maxSelect */
+@keyframes mcq-limit-flash {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-3px); }
+  75%      { transform: translateX(3px); }
+}
+.mcq-option.limit-flash {
+  animation: mcq-limit-flash 0.4s ease;
+  border-color: var(--accent);
+}
+
+/* Multi-select footer: pick counter + submit button */
+.mcq-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.75rem auto 0;
+  max-width: 640px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.mcq-counter {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.mcq-submit {
+  background: var(--accent);
+  color: var(--paper);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: background 120ms ease, opacity 120ms ease;
+  min-height: 44px;
+}
+
+.mcq-submit:hover:not([disabled]),
+.mcq-submit:focus-visible:not([disabled]) {
+  background: var(--ink);
+}
+
+.mcq-submit[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- Phone post-vote state --- */
+
+.thanks {
+  margin: 2rem auto;
+  text-align: center;
+  max-width: 360px;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.thanks h2 {
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.thanks .arrow {
+  font-size: 2.5rem;
+  display: block;
+  margin: 1rem 0;
+}
+
+.thanks .poster-cta {
+  display: inline-block;
+  margin-top: 1.25rem;
+  background: var(--accent);
+  color: var(--paper);
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.85rem 1.8rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow);
+}
+.thanks .poster-cta:hover { background: var(--ink); }
+
+/* Projector instructions on the final poster stage */
+.poster-instructions {
+  text-align: center;
+  max-width: 640px;
+  margin: 1rem auto;
+}
+.poster-instructions .poster-emoji { font-size: 3rem; }
+.poster-instructions .poster-lead {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  color: var(--ink);
+  line-height: 1.35;
+  margin: 0.5rem 0 0.75rem;
+}
+.poster-instructions .poster-sub {
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+.poster-instructions code {
+  background: var(--paper-dark);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+.poster-instructions .poster-url {
+  margin-top: 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1rem;
+  color: var(--accent);
+  word-break: break-all;
+}
+.poster-instructions .poster-home {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(124, 74, 62, 0.18);
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+.poster-instructions .poster-url--home { font-size: 0.95rem; }
+
+.thanks .change-vote {
+  margin-top: 1.5rem;
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.thanks .change-vote:hover,
+.thanks .change-vote:focus-visible {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+/* --- Projector layout --- */
+
+body.projector .main {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  padding: 1.25rem 2rem 2rem;
+  padding-right: calc(2rem + 240px); /* leave room for the QR corner */
+}
+
+body.projector .header {
+  padding-right: calc(1.25rem + 240px);
+}
+
+body.projector .stage-pane,
+body.projector .results-pane {
+  background: var(--paper);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1.25rem 1.5rem;
+}
+
+body.projector .stage-pane h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+
+body.projector .stage-pane .blurb {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+body.projector .results-pane h3 {
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.results-row {
+  display: grid;
+  grid-template-columns: 12rem 1fr 3rem;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.results-row .name {
+  color: var(--ink);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.results-row .bar {
+  height: 14px;
+  background: var(--bar-track);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.results-row .bar-fill {
+  height: 100%;
+  background: var(--bar);
+  border-radius: 7px;
+  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.results-row .count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.results-row.leader .bar-fill {
+  background: linear-gradient(90deg, var(--accent) 0%, #d96b62 100%);
+}
+
+.results-row.leader .name {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.results-empty {
+  color: var(--ink-soft);
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+/* Optional reference image in the results pane on content stages.
+   Used to put a paper figure or supporting visual next to the main
+   table/quote in the stage pane. */
+.side-figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  background: var(--paper-dark);
+}
+
+.side-figure-caption {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* --- Projector controls --- */
+
+.controls {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background: var(--paper);
+  padding: 0.65rem 0.8rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  z-index: 50;
+  border: 1px solid rgba(124, 74, 62, 0.15);
+}
+
+.controls .stage-indicator {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  padding: 0 0.5rem;
+}
+
+.controls button {
+  background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: var(--sans);
+}
+
+.controls button:hover {
+  background: var(--accent);
+}
+
+.controls button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.controls .reset {
+  background: transparent;
+  color: var(--ink-soft);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.controls .auth-btn {
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.82rem;
+  padding: 0.45rem 0.9rem;
+}
+.controls .auth-btn:hover { background: var(--accent); }
+
+.controls .auth-who {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  padding: 0 0.4rem;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.controls .auth-who:empty { display: none; }
+
+.controls .reset:hover {
+  color: var(--accent);
+  background: transparent;
+}
+
+/* --- Media + content stages --- */
+
+.media-stage {
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.media-stage video,
+.media-stage .video-placeholder {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  background: #1c1410;
+  aspect-ratio: 16 / 9;
+}
+
+.media-stage .video-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(245, 237, 224, 0.75);
+  text-align: center;
+  padding: 2rem;
+  font-family: var(--serif);
+}
+
+.media-stage .video-placeholder code {
+  background: rgba(245, 237, 224, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.content-stage {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.content-stage .figure-wrap {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.content-stage .figure-wrap img,
+.content-stage .figure-placeholder {
+  width: 100%;
+  border-radius: 4px;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: var(--paper-dark);
+  display: block;
+}
+
+.content-stage .figure-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-family: var(--serif);
+  font-style: italic;
+}
+
+.content-stage .figure-caption {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  font-family: var(--serif);
+}
+
+.content-stage blockquote {
+  margin: 1.5rem 0 0;
+  padding: 0 1.5rem;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  line-height: 1.4;
+  color: var(--ink);
+  border-left: 4px solid var(--accent);
+}
+
+.content-stage cite {
+  display: block;
+  margin-top: 0.75rem;
+  font-style: normal;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.content-stage cite a,
+.content-stage .paper-link a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.content-stage cite a:hover,
+.content-stage .paper-link a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.content-stage .paper-link {
+  margin-top: 1.25rem;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}
+
+/* --- Clean HTML table for content stages (e.g. paper data) --- */
+
+.content-table-wrap {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.content-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+}
+
+.content-table thead th {
+  text-align: left;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 700;
+  padding: 0.55rem 0.6rem 0.35rem;
+  border-bottom: 2px solid rgba(124, 74, 62, 0.18);
+  white-space: nowrap;
+}
+
+/* Right-align non-first column headers so they sit above the numeric
+   data they describe. First column header stays left-aligned over the
+   row labels. */
+.content-table thead th:not(:first-child) {
+  text-align: right;
+}
+
+.content-table tbody td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid rgba(124, 74, 62, 0.08);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.content-table tbody td.rowlabel {
+  font-weight: 600;
+}
+
+.content-table tbody td:not(.rowlabel) {
+  text-align: right;
+}
+
+.content-table tbody tr.highlight {
+  background: var(--accent-soft);
+}
+
+.content-table tbody tr.highlight td.rowlabel {
+  color: var(--pin);
+}
+
+.content-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* --- Persistent QR in the top-right corner of the projector --- */
+
+.qr-corner {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: var(--paper);
+  padding: 0.85rem 0.85rem 0.75rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(58, 38, 30, 0.18);
+  border: 1px solid rgba(124, 74, 62, 0.18);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  width: 220px;
+}
+
+.qr-corner img {
+  width: 196px;
+  height: 196px;
+  display: block;
+  background: white;
+  border-radius: 4px;
+}
+
+.qr-corner .qr-corner-label {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.qr-corner .qr-corner-label strong {
+  display: block;
+  color: var(--accent);
+  font-size: 0.95rem;
+  margin-bottom: 0.15rem;
+}
+
+.qr-corner .qr-corner-label span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+/* Phone-sized results window (e.g. previewing): tuck the QR away */
+@media (max-width: 900px) {
+  .qr-corner { display: none; }
+}
+
+/* --- Legacy in-stage join box (kept for the phone view) --- */
+
+.join-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  box-shadow: var(--shadow);
+  margin-top: 1rem;
+}
+
+.join-box .qr {
+  width: 90px;
+  height: 90px;
+  background: white;
+  border-radius: 4px;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.join-box .qr canvas,
+.join-box .qr img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.join-box .qr.qr-fallback {
+  background: var(--paper-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.join-box .qr-fallback-inner small {
+  font-size: 0.7rem;
+}
+
+.join-box .join-text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.join-box .join-text strong {
+  display: block;
+  font-size: 1.05rem;
+  color: var(--accent);
+  margin-bottom: 0.2rem;
+}
+
+.join-box .join-text code {
+  background: var(--paper-dark);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9rem;
+}
+
+/* --- CASES Outreach "about" footer (phone home) --- */
+
+.lesson-about {
+  margin-top: auto;
+  padding: 1.5rem 1.25rem 2rem;
+  border-top: 1px solid rgba(124, 74, 62, 0.15);
+  text-align: center;
+  background: var(--paper);
+}
+
+.lesson-about p {
+  max-width: 32rem;
+  margin: 0 auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.lesson-about .cases-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.lesson-about .cases-link:hover { text-decoration: underline; }
+
+.lesson-about .lesson-home-links {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 1.25rem;
+}
+.lesson-about .lesson-home-links a { color: var(--accent); }
+
+/* --- Phone QR/instructions banner --- */
+
+.dev-banner {
+  background: #fff5d4;
+  color: #6b4a3e;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid #e7d39e;
+}
+
+/* --- Responsive tweaks --- */
+
+@media (max-width: 700px) {
+  .brand-logo { height: 34px; }
+  .header { gap: 0.7rem; }
+
+  /* On mobile, the map is too tight for 16 labels - show the dots for
+     geographic context, but route voting through the city list below. */
+  .map-wrap { overflow: visible; }
+  .pin .label { display: none; }
+  .pin .dot { width: 14px; height: 14px; }
+  .pin::before { inset: -10px; }
+
+  .city-list { display: flex; }
+  .tap-hint { font-size: 0.9rem; }
+
+  /* The projector layout collapses to one column at this width too, so
+     don't blow up the results pane unnecessarily. */
+  .header h1 { font-size: 1.2rem; }
+  .results-row { grid-template-columns: 9rem 1fr 2.5rem; font-size: 0.85rem; }
+}
+
+@media (max-width: 1000px) {
+  body.projector .main {
+    grid-template-columns: 1fr;
+  }
+}
