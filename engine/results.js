@@ -376,11 +376,31 @@
     renderControls();
   }
 
+  // Surface a failed stage write (rules / auth / network) instead of failing
+  // silently. The projector only advances on the onStage echo, so on failure it
+  // correctly does NOT move - and now it says why.
+  function flashError(msg) {
+    if (!dev) return;
+    const wasHidden = dev.hidden;
+    const prev = dev.textContent;
+    dev.hidden = false;
+    dev.textContent = msg;
+    setTimeout(() => {
+      if (dev.textContent === msg) { dev.textContent = prev; dev.hidden = wasHidden; }
+    }, 5000);
+  }
+  async function go(n) {
+    try { await store.setStage(n); }
+    catch (e) {
+      console.warn('[' + LESSON_ID + '] setStage failed:', e);
+      flashError('Could not change slide - check your sign-in and connection. (' + (e.code || e.message) + ')');
+    }
+  }
   prevBtn.addEventListener('click', () => {
-    if (currentStage > 0) store.setStage(currentStage - 1);
+    if (currentStage > 0) go(currentStage - 1);
   });
   nextBtn.addEventListener('click', () => {
-    if (currentStage < stagesTotal() - 1) store.setStage(currentStage + 1);
+    if (currentStage < stagesTotal() - 1) go(currentStage + 1);
   });
   resetBtn.addEventListener('click', () => {
     if (resetBtn.disabled) return;
@@ -477,4 +497,27 @@
   document.addEventListener('visibilitychange', () => { if (!document.hidden) resync(); });
   window.addEventListener('focus', resync);
   window.addEventListener('online', resync);
+
+  // Foreground safety-net poll (visibility-gated) + tap resync, so a projector
+  // whose realtime channel silently stalls cannot sit behind the live state.
+  const STALL_POLL_MS = 15000;
+  let pollTimer = null;
+  function pollTick() {
+    if (store.msSinceSnapshot && store.msSinceSnapshot() < STALL_POLL_MS) return;
+    resync();
+  }
+  function updatePoll() {
+    if (document.hidden) { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+    else if (!pollTimer) { pollTimer = setInterval(pollTick, STALL_POLL_MS); }
+  }
+  document.addEventListener('visibilitychange', updatePoll);
+  updatePoll();
+
+  let lastTap = 0;
+  window.addEventListener('pointerdown', () => {
+    const now = Date.now();
+    if (now - lastTap < 4000) return;
+    lastTap = now;
+    resync();
+  }, { passive: true });
 })();

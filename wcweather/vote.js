@@ -411,4 +411,34 @@
   window.addEventListener('focus', resync);
   window.addEventListener('online', resync);
   window.addEventListener('pageshow', resync);
+
+  // The wake events above only fire when the phone comes back. But a phone the
+  // student is actively WATCHING can have its realtime channel silently stall
+  // with no event at all - so it would sit on an old slide forever. Two safety
+  // nets for that case:
+  //  1) a visibility-gated poll (only while the page is visible, so a
+  //     backgrounded phone costs zero reads); it skips the read whenever a live
+  //     snapshot arrived within the interval, so a healthy phone is nearly free.
+  //  2) a throttled tap handler, so a student glancing at a stuck phone and
+  //     touching it snaps forward at once.
+  const STALL_POLL_MS = 15000;
+  let pollTimer = null;
+  function pollTick() {
+    if (store.msSinceSnapshot && store.msSinceSnapshot() < STALL_POLL_MS) return;
+    resync();
+  }
+  function updatePoll() {
+    if (document.hidden) { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+    else if (!pollTimer) { pollTimer = setInterval(pollTick, STALL_POLL_MS); }
+  }
+  document.addEventListener('visibilitychange', updatePoll);
+  updatePoll();
+
+  let lastTap = 0;
+  window.addEventListener('pointerdown', () => {
+    const now = Date.now();
+    if (now - lastTap < 4000) return;
+    lastTap = now;
+    resync();
+  }, { passive: true });
 })();
