@@ -401,4 +401,14 @@
       render(stage);
     }
   });
+
+  // A phone that locks, backgrounds, or drops WiFi suspends its realtime
+  // listener and can freeze on an old stage. When it comes back, pull the
+  // current stage so it snaps straight into sync instead of waiting for the
+  // teacher to nudge it (which is what threw the pacing off).
+  function resync() { if (store.refreshStage) store.refreshStage(); }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) resync(); });
+  window.addEventListener('focus', resync);
+  window.addEventListener('online', resync);
+  window.addEventListener('pageshow', resync);
 })();

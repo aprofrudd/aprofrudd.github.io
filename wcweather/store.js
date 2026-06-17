@@ -56,6 +56,7 @@ function createLocalStore() {
       writeState({stage: n, epoch: cur.epoch});
       emitState();
     },
+    refreshStage() { emitState(); },
     onVotes(cb) { voteSubs.push(cb); cb(readVotes()); },
     addVote(stage, choice) {
       const id = 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
@@ -102,13 +103,35 @@ async function createFirebaseStore() {
   const stateRef = doc(db, LESSON_ID, 'state');
   const votesCol = collection(db, LESSON_ID + '_votes');
 
+  // Stage subscription with auto-resubscribe + a manual refresh hook. Phones
+  // that lock, background, or drop WiFi suspend the realtime listener and would
+  // otherwise freeze on an old stage; refreshStage() (called on wake/reconnect
+  // by vote.js/results.js) pulls the current stage so they snap back into sync.
+  const stageSubs = [];
+  let stageUnsub = null;
+  function emitStage(data) {
+    const d = data || { stage: 0, epoch: 0 };
+    const payload = { stage: d.stage ?? 0, epoch: d.epoch ?? 0 };
+    stageSubs.forEach(cb => cb(payload));
+  }
+  function subscribeStage() {
+    if (stageUnsub) { try { stageUnsub(); } catch (_) {} }
+    stageUnsub = onSnapshot(stateRef,
+      (snap) => emitStage(snap.exists() ? snap.data() : null),
+      (err) => {
+        console.warn('[' + LESSON_ID + '] state listener error, resubscribing:', err && (err.code || err.message));
+        setTimeout(subscribeStage, 2000);
+      });
+  }
+
   return {
     isLive: true,
-    onStage(cb) {
-      onSnapshot(stateRef, (snap) => {
-        const data = snap.exists() ? snap.data() : {stage: 0, epoch: 0};
-        cb({stage: data.stage ?? 0, epoch: data.epoch ?? 0});
-      });
+    onStage(cb) { stageSubs.push(cb); if (!stageUnsub) subscribeStage(); },
+    async refreshStage() {
+      try {
+        const snap = await getDoc(stateRef);
+        emitStage(snap.exists() ? snap.data() : null);
+      } catch (e) { /* offline - the listener resumes and delivers when back */ }
     },
     async setStage(n) {
       await setDoc(stateRef, { stage: n, ts: serverTimestamp() }, { merge: true });

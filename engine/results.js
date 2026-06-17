@@ -470,4 +470,11 @@
 
   store.onStage(({stage}) => { currentStage = stage; rerender(); });
   store.onVotes((votes)   => { allVotes = votes; rerender(); });
+
+  // If the projector sleeps or drops its connection, pull the current stage
+  // back when it wakes so it cannot get stuck behind the live state.
+  function resync() { if (store.refreshStage) store.refreshStage(); }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) resync(); });
+  window.addEventListener('focus', resync);
+  window.addEventListener('online', resync);
 })();
