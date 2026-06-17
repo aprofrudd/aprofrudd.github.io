@@ -28,6 +28,7 @@
   // from the backing store and resolves; null until a source is wired up.
   let removeEntry = null;
   let localEntries = [];
+  let delBtn = null;   // the batch "delete selected" button (rebuilt per render)
 
   function status(msg) { statusEl.textContent = msg; }
   function esc(s) {
@@ -90,10 +91,77 @@
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'student';
   }
 
+  // ---- batch selection toolbar --------------------------------------------
+  function buildToolbar() {
+    let bar = document.getElementById('g-toolbar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'g-toolbar';
+      bar.className = 'g-toolbar';
+      gridEl.parentNode.insertBefore(bar, gridEl);
+    }
+    bar.hidden = false;
+    bar.innerHTML =
+      '<label class="g-selall"><input type="checkbox" id="g-selall"> Select all</label>' +
+      '<button type="button" id="g-delsel" class="g-delsel" disabled>🗑 Delete selected</button>';
+    bar.querySelector('#g-selall').addEventListener('change', (e) => {
+      gridEl.querySelectorAll('.g-check').forEach(c => { c.checked = e.target.checked; });
+      updateToolbar();
+    });
+    delBtn = bar.querySelector('#g-delsel');
+    delBtn.addEventListener('click', deleteSelected);
+  }
+  function hideToolbar() {
+    const bar = document.getElementById('g-toolbar');
+    if (bar) bar.hidden = true;
+    delBtn = null;
+  }
+  function updateToolbar() {
+    const all = gridEl.querySelectorAll('.g-check');
+    const checked = gridEl.querySelectorAll('.g-check:checked');
+    if (delBtn) {
+      delBtn.disabled = checked.length === 0;
+      delBtn.textContent = checked.length ? `🗑 Delete selected (${checked.length})` : '🗑 Delete selected';
+    }
+    const selAll = document.getElementById('g-selall');
+    if (selAll) {
+      selAll.checked = all.length > 0 && checked.length === all.length;
+      selAll.indeterminate = checked.length > 0 && checked.length < all.length;
+    }
+  }
+  async function deleteSelected() {
+    if (!removeEntry || !delBtn) return;
+    const checks = Array.from(gridEl.querySelectorAll('.g-check:checked'));
+    if (!checks.length) return;
+    const n = checks.length;
+    if (!window.confirm(`Permanently delete ${n} ${n === 1 ? 'entry' : 'entries'}? This cannot be undone.`)) return;
+    delBtn.disabled = true;
+    delBtn.textContent = 'Deleting…';
+    let fail = 0;
+    await Promise.all(checks.map(async (chk) => {
+      const card = chk.closest('.g-card');
+      const entry = card && card._entry;
+      if (!entry) { fail++; return; }
+      try {
+        await Promise.race([
+          removeEntry(entry),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timed out')), 15000))
+        ]);
+        card.remove();
+      } catch (e) { console.warn('[gallery] batch delete failed:', e); fail++; }
+    }));
+    const remaining = gridEl.querySelectorAll('.g-card').length;
+    if (!remaining) { hideToolbar(); status('No entries yet.'); return; }
+    updateToolbar();
+    status(remaining + ' ' + (remaining === 1 ? 'entry' : 'entries')
+      + (fail ? ' · ' + fail + ' could not be deleted (check rules/connection)' : ''));
+  }
+
   // ---- render the grid ----------------------------------------------------
   function renderGallery(entries) {
     gridEl.innerHTML = '';
     if (!entries.length) {
+      hideToolbar();
       status('No entries yet.');
       return;
     }
@@ -109,6 +177,7 @@
       card.className = 'g-card';
       card.innerHTML = `
         <div class="g-card-head">
+          <label class="g-cardsel"><input type="checkbox" class="g-check" aria-label="Select entry"></label>
           <div class="g-card-meta">
             <strong>${esc(entry.name || '-')}</strong>
             <span>${esc([entry.school, entry.year].filter(Boolean).join(' · '))}</span>
@@ -125,11 +194,15 @@
           </div>
         </div>`;
       gridEl.appendChild(card);
+      card._entry = entry;
       card.querySelector('.poster').innerHTML = posterHTML(entry);
       card.querySelector('.g-dl').addEventListener('click', () => downloadCard(i, entry));
       card.querySelector('.g-del').addEventListener('click', e => handleDelete(entry, card, e.currentTarget));
+      card.querySelector('.g-check').addEventListener('change', updateToolbar);
     });
 
+    buildToolbar();
+    updateToolbar();
     fitCards();
     setTimeout(fitCards, 300);
     setTimeout(fitCards, 1000);

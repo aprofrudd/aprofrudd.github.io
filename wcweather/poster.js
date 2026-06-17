@@ -345,6 +345,20 @@
   const ENTERED_KEY = LESSON_ID + '_entered';
   let entered = localStorage.getItem(ENTERED_KEY) !== null;
 
+  // One stable id per device, so re-submitting UPDATES the same entry instead of
+  // creating a new one - stops "Enter" from spamming hundreds of posters.
+  const POSTER_ID_KEY = LESSON_ID + '_poster_id';
+  function getPosterId() {
+    let id = localStorage.getItem(POSTER_ID_KEY);
+    if (!id) {
+      id = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'p-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(POSTER_ID_KEY, id);
+    }
+    return id;
+  }
+
   if (enterBtn) enterBtn.textContent = comp.entryLabel || '🏆 Enter the competition';
   if (enterConsent) enterConsent.textContent = comp.consent ||
     'Entering sends your name, school and poster to your teacher.';
@@ -358,7 +372,7 @@
 
   function setEnteredUI() {
     if (!enterBtn) return;
-    enterBtn.textContent = comp.enteredLabel || 'Entered ✓ - good luck!';
+    enterBtn.textContent = comp.updateLabel || '✓ Entered - update my entry';
     enterBtn.classList.add('entered');
   }
   if (entered) setEnteredUI();
@@ -383,8 +397,9 @@
 
   if (enterBtn) enterBtn.addEventListener('click', async () => {
     if (enterBtn.disabled) return;
+    const isUpdate = entered;
     enterBtn.disabled = true;
-    enterStatus.textContent = 'Entering…';
+    enterStatus.textContent = isUpdate ? 'Updating your entry…' : 'Entering…';
     const payload = {
       name:   nameInput.value.trim(),
       school: schoolInput.value.trim(),
@@ -395,14 +410,17 @@
     };
     try {
       const store = await getStore();
-      await store.submitPoster(payload);
+      await store.submitPoster(payload, getPosterId());
       localStorage.setItem(ENTERED_KEY, String(Date.now()));
       entered = true;
       setEnteredUI();
-      enterStatus.textContent = 'You’re entered! Good luck.';
+      enterStatus.textContent = isUpdate
+        ? 'Updated - your entry is saved.'
+        : 'You’re entered! You have one entry - edit anything above and tap to update it.';
     } catch (e) {
       console.warn('[poster] entry failed:', e);
-      enterStatus.textContent = 'Could not enter - check your connection and try again.';
+      enterStatus.textContent = (isUpdate ? 'Could not update' : 'Could not enter')
+        + ' - check your connection and try again.';
     } finally {
       updateEnterEnabled();
     }

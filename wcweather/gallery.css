@@ -129,6 +129,43 @@ body.gallery {
 }
 .g-card-err:empty { display: none; }
 
+/* Batch selection toolbar + per-card checkbox */
+.g-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 0.85rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--paper);
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(58, 38, 30, 0.1);
+}
+.g-toolbar[hidden] { display: none; }
+.g-selall {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.g-delsel {
+  background: transparent;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.g-delsel:hover:not([disabled]) { background: var(--accent); color: #fff; }
+.g-delsel[disabled] { opacity: 0.45; cursor: not-allowed; }
+.g-cardsel { display: flex; align-items: center; flex-shrink: 0; }
+.g-check { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+
 .g-frame { width: 100%; overflow: hidden; }
 .g-scaler {
   transform-origin: top left;

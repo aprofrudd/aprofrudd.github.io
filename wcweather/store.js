@@ -85,13 +85,20 @@ function createLocalStore() {
     },
     // Competition entries. In local-dev these stay on the device (no teacher
     // collection) — the button still works for testing.
-    submitPoster(payload) {
+    submitPoster(payload, id) {
       const KEY = LESSON_ID + '_posters';
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem(KEY)) || []; } catch (_) {}
-      arr.push({ ...payload, ts: Date.now() });
+      if (id) {
+        // One entry per device: overwrite this device's existing entry.
+        const rec = { ...payload, __id: id, ts: Date.now() };
+        const i = arr.findIndex(p => p.__id === id);
+        if (i >= 0) arr[i] = rec; else arr.push(rec);
+      } else {
+        arr.push({ ...payload, ts: Date.now() });
+      }
       localStorage.setItem(KEY, JSON.stringify(arr));
-      return 'local_' + Date.now();
+      return id || ('local_' + Date.now());
     }
   };
 }
@@ -196,12 +203,17 @@ async function createFirebaseStore() {
       const snap = await getDocs(votesCol);
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
     },
-    // Competition entries — written to a per-lesson, write-only collection.
-    // Security rules deny read/update/delete; the teacher retrieves entries
-    // from the Firebase console.
-    async submitPoster(payload) {
-      const postersCol = collection(db, LESSON_ID + '_posters');
-      const ref = await addDoc(postersCol, { ...payload, ts: serverTimestamp() });
+    // Competition entries per lesson. Students can create/update their own entry;
+    // only the teacher (by email, in the rules) can read or delete them.
+    async submitPoster(payload, id) {
+      // A stable per-device id makes "Enter" an upsert: one entry per student,
+      // editable, instead of a fresh doc on every tap. Needs `allow update` in
+      // the Firestore rules. Without an id, fall back to a new doc.
+      if (id) {
+        await setDoc(doc(db, LESSON_ID + '_posters', id), { ...payload, ts: serverTimestamp() });
+        return id;
+      }
+      const ref = await addDoc(collection(db, LESSON_ID + '_posters'), { ...payload, ts: serverTimestamp() });
       return ref.id;
     }
   };
