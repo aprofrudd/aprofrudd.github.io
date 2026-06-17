@@ -491,20 +491,25 @@
   store.onStage(({stage}) => { currentStage = stage; rerender(); });
   store.onVotes((votes)   => { allVotes = votes; rerender(); });
 
-  // If the projector sleeps or drops its connection, pull the current stage
-  // back when it wakes so it cannot get stuck behind the live state.
-  function resync() { if (store.refreshStage) store.refreshStage(); }
+  // If the projector sleeps or drops its connection, pull the current stage AND
+  // the live tally back when it wakes so neither can get stuck behind reality.
+  function resync() {
+    if (store.refreshStage) store.refreshStage();
+    if (store.refreshVotes) store.refreshVotes();
+  }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) resync(); });
   window.addEventListener('focus', resync);
   window.addEventListener('online', resync);
 
   // Foreground safety-net poll (visibility-gated) + tap resync, so a projector
-  // whose realtime channel silently stalls cannot sit behind the live state.
+  // whose realtime channel silently stalls cannot sit behind the live state or
+  // freeze the results bars. Each stream is refreshed only when its own listener
+  // has been quiet for the interval, so a healthy stream costs no extra reads.
   const STALL_POLL_MS = 15000;
   let pollTimer = null;
   function pollTick() {
-    if (store.msSinceSnapshot && store.msSinceSnapshot() < STALL_POLL_MS) return;
-    resync();
+    if (store.refreshStage && (!store.msSinceSnapshot || store.msSinceSnapshot() >= STALL_POLL_MS)) store.refreshStage();
+    if (store.refreshVotes && (!store.msSinceVotes || store.msSinceVotes() >= STALL_POLL_MS)) store.refreshVotes();
   }
   function updatePoll() {
     if (document.hidden) { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }

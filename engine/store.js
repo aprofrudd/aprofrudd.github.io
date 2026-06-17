@@ -41,8 +41,9 @@ function createLocalStore() {
     localStorage.setItem(VOTES_KEY, JSON.stringify(v));
   }
   let lastSnapshotAt = 0;
+  let lastVotesAt = 0;
   function emitState() { lastSnapshotAt = Date.now(); const s = readState(); stageSubs.forEach(cb => cb(s)); }
-  function emitVotes() { const v = readVotes(); voteSubs.forEach(cb => cb(v)); }
+  function emitVotes() { lastVotesAt = Date.now(); const v = readVotes(); voteSubs.forEach(cb => cb(v)); }
 
   window.addEventListener('storage', (e) => {
     if (e.key === STATE_KEY) emitState();
@@ -59,7 +60,9 @@ function createLocalStore() {
     },
     refreshStage() { emitState(); },
     msSinceSnapshot() { return Date.now() - lastSnapshotAt; },
-    onVotes(cb) { voteSubs.push(cb); cb(readVotes()); },
+    onVotes(cb) { voteSubs.push(cb); lastVotesAt = Date.now(); cb(readVotes()); },
+    refreshVotes() { emitVotes(); },
+    msSinceVotes() { return Date.now() - lastVotesAt; },
     addVote(stage, choice) {
       const id = 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
       const v = readVotes();
@@ -135,6 +138,28 @@ async function createFirebaseStore() {
       });
   }
 
+  // The live-results (votes) stream gets the same treatment as the stage stream:
+  // auto-resubscribe on error + a refreshVotes() hook, so the projector's
+  // results bars can't silently freeze if the listener stalls.
+  const voteSubs = [];
+  let votesUnsub = null;
+  let lastVotesAt = 0;
+  function pushVotes(snap) {
+    lastVotesAt = Date.now();
+    const votes = [];
+    snap.forEach((d) => votes.push(d.data()));
+    voteSubs.forEach(cb => cb(votes));
+  }
+  function subscribeVotes() {
+    if (votesUnsub) { try { votesUnsub(); } catch (_) {} }
+    votesUnsub = onSnapshot(votesCol,
+      (snap) => pushVotes(snap),
+      (err) => {
+        console.warn('[' + LESSON_ID + '] votes listener error, resubscribing:', err && (err.code || err.message));
+        setTimeout(subscribeVotes, 2000);
+      });
+  }
+
   return {
     isLive: true,
     onStage(cb) { stageSubs.push(cb); if (!stageUnsub) subscribeStage(); },
@@ -148,13 +173,12 @@ async function createFirebaseStore() {
     async setStage(n) {
       await setDoc(stateRef, { stage: n, ts: serverTimestamp() }, { merge: true });
     },
-    onVotes(cb) {
-      onSnapshot(votesCol, (snap) => {
-        const votes = [];
-        snap.forEach((d) => votes.push(d.data()));
-        cb(votes);
-      });
+    onVotes(cb) { voteSubs.push(cb); if (!votesUnsub) subscribeVotes(); },
+    async refreshVotes() {
+      try { const snap = await getDocs(votesCol); pushVotes(snap); }
+      catch (e) { /* offline - the listener resumes and delivers when back */ }
     },
+    msSinceVotes() { return Date.now() - lastVotesAt; },
     async addVote(stage, choice) {
       const ref = await addDoc(votesCol, { stage, choice, ts: serverTimestamp() });
       return ref.id;
