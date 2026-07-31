@@ -533,7 +533,8 @@ a:hover {
     color: var(--secondary-color);
 }
 
-.phd-year {
+.phd-year,
+.phd-institution {
     font-size: 0.85rem;
     color: var(--primary-color);
     font-weight: 600;
