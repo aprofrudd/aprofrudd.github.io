@@ -6,7 +6,7 @@
     "image": "https://alanruddock.com/alan-ruddock-sport-physiologist.jpg",
     "email": "a.ruddock@shu.ac.uk",
     "url": "https://alanruddock.com",
-    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 50+ peer-reviewed publications (h-index: 25) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Led scientific support for boxers in 15 world-title contests including Anthony Joshua OBE. Recipient of the CASES Applied Practitioner Award 2021.",
+    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 50+ peer-reviewed publications (h-index: 26) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Led scientific support for boxers in 15 world-title contests including Anthony Joshua OBE. Recipient of the CASES Applied Practitioner Award 2021.",
     "location": {
       "city": "Sheffield",
       "region": "South Yorkshire",
@@ -301,6 +301,6 @@
   "meta": {
     "canonical": "https://alanruddock.com/resume.json",
     "version": "v1.0.0",
-    "lastModified": "2026-06-01"
+    "lastModified": "2026-07-31"
   }
 }
