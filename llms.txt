@@ -9,7 +9,7 @@ Dr Alan Ruddock is an Associate Professor of Sport Physiology and Performance in
 ## Current Roles
 
 - Associate Professor of Sport Physiology and Performance, Sheffield Hallam University (2023 - present)
-- Co-Founder, Boxing Science (2013 - present)
+- Co-Founder, Boxing Science (2014 - present)
 - Director & Chair of Physiology and Nutrition Division, CASES (2024 - present)
 - Ethics Lead, School of Sport and Physical Activity, Sheffield Hallam University (2019 - present)
 - Course Leader, BSc Sport Technology and BSc Sport and Exercise Science (2021 - 2025)
@@ -21,7 +21,7 @@ Dr Alan Ruddock is an Associate Professor of Sport Physiology and Performance in
 - h-index: 26
 - i10-index: 31
 - >£130,000 in research funding
-- 4 completed PhDs, 5 current PhD candidates
+- 4 completed PhDs, 7 current PhD candidates
 - 225,000+ reads on ResearchGate
 - CASES Applied Practitioner Award recipient (2021)
 
@@ -31,23 +31,26 @@ Applied Physiology, Sport Performance, High-Intensity Interval Training (HIIT), 
 
 ## Applied Impact
 
-Led scientific support for boxers in 15 world-title contests, including Olympic Gold medallist and two-time heavyweight champion Anthony Joshua OBE. Provided scientific support for Russ Cook's ("Hardest Geezer") record-breaking run across Africa (2024). Delivered workshops to over 500 coaches across the UK, Europe, North America and Asia through Boxing Science, reaching 30,000 unique users per month.
+Led scientific support for boxers in 15 world championship contests, including Olympic Gold medallist and two-time heavyweight champion Anthony Joshua OBE. Delivered workshops to over 500 coaches across the UK, Europe, North America and Asia through Boxing Science, reaching 30,000 unique users per month. Provided laboratory testing for Russ Cook ("Hardest Geezer") ahead of his 2024 run across Africa.
 
 ## Applied Projects
 
-- Running the length of Africa (Russ Cook, 2024) — thermal load, hydration and fuelling strategy, and workload tolerance across 16,000 km and 352 consecutive days; the first full-length crossing of Africa on foot.
-- Heat strain in specialist police officers (Metropolitan Police of London) — core and skin temperature responses and work-rest tolerance in the field, producing a funded evidence base for operational thermal stress management.
-- Hydration and sodium losses in elite squash (England Squash) — fluid balance, sweat sodium concentration and training-day hydration practice across a national squad, published as individualised hydration guidance and a systematic review of the sport's demands.
-- Conditioning for world-title boxing (Boxing Science) — high-intensity interval responses, punch impact force and its strength determinants, and weight-making physiology; scientific support across 15 world-title contests including Anthony Joshua OBE.
-- Recovery in elite professional football (Aston Villa FC) — recovery interventions evaluated against performance and wellness outcomes in a Premier League environment, via a £40,000 funded doctoral programme embedded in the club.
+- Conditioning for world championship boxing (Boxing Science): high-intensity interval responses, punch impact force and its strength determinants, and weight-making physiology. Scientific support across 15 world championship contests including Anthony Joshua OBE.
+- Recovery in elite professional football (Aston Villa FC): recovery interventions evaluated against performance and wellness outcomes in a Premier League environment, via a £40,000 funded doctoral programme embedded in the club.
+- Hydration and fluid balance in elite squash (England Squash): fluid balance, sodium losses and training-day hydration practice across a national squad, published as individualised hydration guidance and a systematic review of the sport's demands.
+- Heat strain in specialist police officers (Metropolitan Police of London): core and skin temperature responses and work-rest tolerance in the field, producing a funded evidence base for operational thermal stress management.
 
 ## Laboratory & Measurement Capability
 
 - Physiological assessment: VO2max and submaximal metabolic testing, gas exchange and RER, lactate profiling, critical power and critical speed, running and cycling economy
-- Thermal: core and skin temperature, sweat rate and sweat sodium concentration, environmental chamber protocols, heat acclimation
+- Thermal: core and skin temperature, sweat rate, environmental chamber protocols, heat acclimation
 - Neuromuscular: force plates, velocity-based training, isometric and isokinetic strength assessment
-- Field: GPS and accelerometry, heart rate variability, wearable validation, remote monitoring in uncontrolled environments
-- Governance: Laboratory Director 2019-2024; School Ethics Lead; lead author, CASES Expert Statement on Guidance for Reporting of Physiological Assessments (2026)
+- Field: speed and power analysis, blood lactate testing, heart rate variability, wearable validation, remote monitoring in uncontrolled environments
+- Governance: Laboratory Director 2019-2024; School Ethics Lead; Director of CASES and Chair of its Physiology and Nutrition Division
+
+## Doctoral Supervision
+
+7 current doctoral projects across sleep, recovery, speed training, blood flow restriction, polyphenols, disability classification and physical training language in tennis. Projects embedded with industry partners: Aston Villa FC (recovery methods in elite professional soccer) and Sheffield United FC (speed training in elite professional soccer). Completed doctoral work includes nutrition and hydration for England Squash.
 
 ## Available For
 
@@ -61,7 +64,7 @@ Industry R&D and product science (physiological testing and study design for spo
 
 ## Media & Public Engagement
 
-Over 100 media outputs providing expert commentary across broadcast, print and digital platforms including The Times, Wall Street Journal, BBC, Sky Sports, Live Science, Runners World, and The Conversation.
+Expert commentary across broadcast, print and digital platforms including The Times, Wall Street Journal, BBC, Sky Sports, Live Science, Runner's World, and The Conversation.
 
 ## Links
 

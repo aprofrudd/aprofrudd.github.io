@@ -6,7 +6,7 @@
     "image": "https://alanruddock.com/alan-ruddock-sport-physiologist.jpg",
     "email": "a.ruddock@shu.ac.uk",
     "url": "https://alanruddock.com",
-    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 50+ peer-reviewed publications (h-index: 26) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Led scientific support for boxers in 15 world-title contests including Anthony Joshua OBE. Recipient of the CASES Applied Practitioner Award 2021.",
+    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 50+ peer-reviewed publications (h-index: 26) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Led scientific support for boxers in 15 world championship contests including Anthony Joshua OBE. Recipient of the CASES Applied Practitioner Award 2021.",
     "location": {
       "city": "Sheffield",
       "region": "South Yorkshire",
@@ -53,17 +53,17 @@
       "highlights": [
         "Course Leader for BSc Sport Technology and BSc Sport and Exercise Science (2021-2025), managing up to 350 students and 30 staff",
         "SHU Academic Board member (2021 - 2024)",
-        "Currently supervising 5 PhD candidates"
+        "Currently supervising 7 PhD candidates"
       ]
     },
     {
       "name": "Boxing Science",
       "position": "Co-Founder",
       "url": "https://boxingscience.co.uk",
-      "startDate": "2013-01-01",
+      "startDate": "2014-01-01",
       "highlights": [
         "Provides scientific support to boxers and combat athletes worldwide",
-        "Led scientific support for boxers in 15 world-title contests",
+        "Led scientific support for boxers in 15 world championship contests",
         "Delivered workshops to over 500 coaches across UK, Europe, North America and Asia",
         "Platform reaches 30,000 unique users per month"
       ]
@@ -290,16 +290,17 @@
         "Critical Power and Critical Speed",
         "Running and Cycling Economy",
         "Core and Skin Temperature",
-        "Sweat Rate and Sweat Sodium Concentration",
         "Environmental Chamber Protocols",
         "Heat Acclimation",
+        "Sweat Rate",
         "Force Plates",
         "Isometric and Isokinetic Strength Assessment",
-        "GPS and Accelerometry",
         "Heart Rate Variability",
         "Wearable Validation",
         "Remote Monitoring in Uncontrolled Environments",
-        "Research Governance and Ethics"
+        "Research Governance and Ethics",
+        "Speed and Power Analysis",
+        "Blood Lactate Testing"
       ]
     }
   ],
@@ -314,49 +315,15 @@
       "name": "Boxing Science",
       "description": "Applied sport science consultancy supporting elite combat sport athletes worldwide",
       "url": "https://boxingscience.co.uk",
-      "startDate": "2013-01-01",
+      "startDate": "2014-01-01",
       "highlights": [
-        "Scientific support for 15 world-title boxing contests",
+        "Scientific support for 15 world championship contests",
         "Workshops delivered to 500+ coaches across UK, Europe, North America and Asia",
         "30,000 unique users per month"
       ],
       "roles": [
         "Co-Founder"
       ]
-    },
-    {
-      "name": "Running the Length of Africa",
-      "description": "Physiological support for Russ Cook's run across the full length of Africa: 16,000 km over 352 consecutive days in extreme heat, with no laboratory.",
-      "startDate": "2024-01-01",
-      "endDate": "2024-12-31",
-      "highlights": [
-        "Problem: 16,000 km, 352 consecutive days, extreme heat, no laboratory.",
-        "Measured: thermal load, hydration and fuelling strategy, workload tolerance under conditions no protocol covers.",
-        "Outcome: the first full-length crossing of Africa on foot."
-      ],
-      "roles": [
-        "Sport Physiologist"
-      ]
-    },
-    {
-      "name": "Heat Strain in Specialist Police Officers",
-      "description": "Funded research into thermal strain for officers operating in protective equipment.",
-      "highlights": [
-        "Problem: officers operating in protective equipment under uncontrolled thermal load.",
-        "Measured: core and skin temperature responses, work-rest tolerance in the field.",
-        "Outcome: funded evidence base for operational thermal stress management."
-      ],
-      "entity": "Metropolitan Police of London"
-    },
-    {
-      "name": "Hydration and Sodium Losses in Elite Squash",
-      "description": "Sweat and electrolyte profiling across a national squash squad.",
-      "highlights": [
-        "Problem: individual sweat and electrolyte profiles unknown across a national squad.",
-        "Measured: fluid balance, sweat sodium concentration, training-day hydration practice.",
-        "Outcome: published individualised hydration guidance, and a systematic review of the physiological and nutritional demands of the sport."
-      ],
-      "entity": "England Squash"
     },
     {
       "name": "Recovery in Elite Professional Football",
@@ -367,6 +334,26 @@
         "Outcome: a GBP 40,000 funded doctoral programme embedded in the club."
       ],
       "entity": "Aston Villa FC"
+    },
+    {
+      "name": "Hydration and Fluid Balance in Elite Squash",
+      "description": "Hydration status and fluid losses across a national squash squad.",
+      "highlights": [
+        "Problem: hydration status and fluid losses unknown across a national squad.",
+        "Measured: fluid balance, sodium losses and training-day hydration practice.",
+        "Outcome: published individualised hydration guidance, and a systematic review of the physiological and nutritional demands of the sport."
+      ],
+      "entity": "England Squash"
+    },
+    {
+      "name": "Heat Strain in Specialist Police Officers",
+      "description": "Funded research into thermal strain for officers operating in protective equipment.",
+      "highlights": [
+        "Problem: officers operating in protective equipment under uncontrolled thermal load.",
+        "Measured: core and skin temperature responses, work-rest tolerance in the field.",
+        "Outcome: funded evidence base for operational thermal stress management."
+      ],
+      "entity": "Metropolitan Police of London"
     }
   ],
   "meta": {
