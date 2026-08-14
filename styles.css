@@ -989,6 +989,175 @@ a.publication-link:hover .publication-title {
     line-height: 1.7;
 }
 
+/* Collaboration Network Section
+   Two categorical hues, validated for colour-vision deficiency against both
+   page surfaces: --primary-color for research, --collab-applied for applied
+   partners. Shape (circle vs diamond) and direct labels carry identity too,
+   so the figure never relies on colour alone. */
+:root {
+    --collab-applied: #c2410c;
+}
+
+.collab-intro {
+    max-width: 780px;
+    margin: 0 auto 1.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.collab-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.collab-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.collab-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.collab-swatch-home { background: var(--secondary-color); }
+.collab-swatch-research { background: var(--primary-color); }
+
+.collab-swatch-applied {
+    background: var(--collab-applied);
+    border-radius: 2px;
+    transform: rotate(45deg);
+}
+
+.collab-figure {
+    margin: 0;
+}
+
+.collab-graph {
+    min-height: 320px;
+}
+
+.collab-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.collab-edge {
+    fill: none;
+    stroke: var(--border-color);
+}
+
+.collab-edge.is-research { stroke: rgb(0 113 227 / 0.35); }
+.collab-edge.is-applied { stroke: rgb(194 65 12 / 0.35); }
+
+.collab-dot {
+    stroke: var(--background);
+    stroke-width: 2;
+}
+
+.collab-dot.is-home { fill: var(--secondary-color); }
+.collab-dot.is-research { fill: var(--primary-color); }
+.collab-dot.is-applied { fill: var(--collab-applied); }
+
+.collab-label {
+    font-size: 13px;
+    fill: var(--text-primary);
+}
+
+.collab-node:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.collab-node:hover .collab-label {
+    font-weight: 600;
+}
+
+.collab-centre {
+    fill: var(--secondary-color);
+}
+
+.collab-centre-label {
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--background);
+}
+
+.collab-caption {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.collab-table {
+    max-width: 800px;
+    margin: 1.5rem auto 0;
+}
+
+.collab-table summary {
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.collab-table-scroll {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.collab-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.collab-table th,
+.collab-table td {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.collab-table th {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.collab-table td {
+    color: var(--text-secondary);
+}
+
+/* Under 720px the SVG labels scale below legibility, so the table carries it */
+@media (max-width: 720px) {
+    .collab-graph {
+        display: none;
+    }
+
+    .collab-table summary {
+        display: none;
+    }
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
 /* Applied Projects Section */
 .projects-list {
     max-width: 800px;
