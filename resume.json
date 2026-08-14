@@ -159,6 +159,11 @@
     {
       "name": "Chartered Scientist (CSci)",
       "issuer": "The Science Council"
+    },
+    {
+      "name": "Athletics Coach",
+      "issuer": "England Athletics",
+      "url": "https://www.englandathletics.org"
     }
   ],
   "publications": [
