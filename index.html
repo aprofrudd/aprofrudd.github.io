@@ -1016,7 +1016,7 @@
                     <div class="grant-item">
                         <div class="grant-details">
                             <p class="grant-title">SHU Speed Symposia</p>
-                            <p class="grant-funder">TASS</p>
+                            <p class="grant-funder">Talented Athlete Scholarship Scheme (TASS)</p>
                         </div>
                         <span class="grant-amount">&pound;6,000</span>
                     </div>
@@ -1030,7 +1030,7 @@
                     <div class="grant-item">
                         <div class="grant-details">
                             <p class="grant-title">Velocity Based Training Research</p>
-                            <p class="grant-funder">UKSCA</p>
+                            <p class="grant-funder">UK Strength and Conditioning Association (UKSCA)</p>
                         </div>
                         <span class="grant-amount">&pound;2,000</span>
                     </div>
@@ -1553,9 +1553,8 @@
                 { name: 'England Squash', note: 'Nutrition and hydration, £24,000' },
                 { name: 'Metropolitan Police of London', note: 'Thermal stress, £5,000' },
                 { name: 'Boxing Science', note: 'Consultancy, over £50,000' },
-                { name: 'Research England', note: 'Innovation project, £7,500' },
-                { name: 'TASS', note: 'Speed symposia, £6,000' },
-                { name: 'UKSCA', note: 'Velocity based training, £2,000' }
+                { name: 'Talented Athlete Scholarship Scheme', note: 'Speed symposia, £6,000' },
+                { name: 'UK Strength and Conditioning Association', note: 'Velocity based training, £2,000' }
             ];
 
             var MAX_RESEARCH = 12;
@@ -1586,7 +1585,7 @@
                     return items.map(function (d, i) {
                         return {
                             d: d,
-                            x: side < 0 ? 320 : W - 260,
+                            x: side < 0 ? 320 : W - 320,
                             y: n === 1 ? cy : top + i * (span / n),
                             side: side
                         };
@@ -1612,7 +1611,7 @@
                     var isResearch = p.side < 0;
                     var isHome = isResearch && p.d.name === HOME;
                     var g = el('g', { class: 'collab-node', tabindex: '0' });
-                    var name = p.d.name.length > 34 ? p.d.name.slice(0, 33).trim() + '…' : p.d.name;
+                    var name = p.d.name.length > 44 ? p.d.name.slice(0, 43).trim() + '…' : p.d.name;
                     var label = isResearch
                         ? name + ' · ' + p.d.count + (p.d.count === 1 ? ' paper' : ' papers')
                         : name;
