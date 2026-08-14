@@ -1092,6 +1092,61 @@ a.publication-link:hover .publication-title {
     fill: var(--background);
 }
 
+.collab-map-figure {
+    margin-top: 2.5rem;
+}
+
+.collab-map-title {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+.collab-map {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--background-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.collab-map-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.collab-land {
+    fill: var(--border-color);
+}
+
+.collab-pin {
+    fill: var(--primary-color);
+    fill-opacity: 0.55;
+    stroke: var(--primary-color);
+    stroke-width: 1;
+}
+
+/* Sheffield Hallam dwarfs every other marker and sits on the densest part of
+   the map, so it is drawn as a ring rather than a disc: the UK institutions
+   underneath it stay visible. */
+.collab-pin.is-home {
+    fill: none;
+    stroke: var(--secondary-color);
+    stroke-width: 2.5;
+}
+
+.collab-point:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.collab-point:hover .collab-pin {
+    fill-opacity: 0.85;
+}
+
 .collab-caption {
     margin-top: 0.5rem;
     text-align: center;
