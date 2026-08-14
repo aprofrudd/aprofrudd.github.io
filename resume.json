@@ -6,7 +6,7 @@
     "image": "https://alanruddock.com/alan-ruddock-sport-physiologist.jpg",
     "email": "a.ruddock@shu.ac.uk",
     "url": "https://alanruddock.com",
-    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 50+ peer-reviewed publications (h-index: 25) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Led scientific support for boxers in 15 world-title contests including Anthony Joshua OBE. Recipient of the CASES Applied Practitioner Award 2021.",
+    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 50+ peer-reviewed publications (h-index: 26) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Led scientific support for boxers in 15 world-title contests including Anthony Joshua OBE. Recipient of the CASES Applied Practitioner Award 2021.",
     "location": {
       "city": "Sheffield",
       "region": "South Yorkshire",
@@ -245,7 +245,11 @@
         "High-Intensity Interval Training",
         "Strength & Conditioning",
         "Combat Sports Science",
-        "Microvascular Function"
+        "Microvascular Function",
+        "Hydration",
+        "Recovery",
+        "Endurance Running",
+        "Performance Testing"
       ]
     },
     {
@@ -276,6 +280,27 @@
         "Frontiers",
         "Applied Sciences"
       ]
+    },
+    {
+      "name": "Laboratory & Measurement Capability",
+      "keywords": [
+        "VO2max and Submaximal Metabolic Testing",
+        "Gas Exchange and RER",
+        "Lactate Profiling",
+        "Critical Power and Critical Speed",
+        "Running and Cycling Economy",
+        "Core and Skin Temperature",
+        "Sweat Rate and Sweat Sodium Concentration",
+        "Environmental Chamber Protocols",
+        "Heat Acclimation",
+        "Force Plates",
+        "Isometric and Isokinetic Strength Assessment",
+        "GPS and Accelerometry",
+        "Heart Rate Variability",
+        "Wearable Validation",
+        "Remote Monitoring in Uncontrolled Environments",
+        "Research Governance and Ethics"
+      ]
     }
   ],
   "languages": [
@@ -295,12 +320,58 @@
         "Workshops delivered to 500+ coaches across UK, Europe, North America and Asia",
         "30,000 unique users per month"
       ],
-      "roles": ["Co-Founder"]
+      "roles": [
+        "Co-Founder"
+      ]
+    },
+    {
+      "name": "Running the Length of Africa",
+      "description": "Physiological support for Russ Cook's run across the full length of Africa: 16,000 km over 352 consecutive days in extreme heat, with no laboratory.",
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31",
+      "highlights": [
+        "Problem: 16,000 km, 352 consecutive days, extreme heat, no laboratory.",
+        "Measured: thermal load, hydration and fuelling strategy, workload tolerance under conditions no protocol covers.",
+        "Outcome: the first full-length crossing of Africa on foot."
+      ],
+      "roles": [
+        "Sport Physiologist"
+      ]
+    },
+    {
+      "name": "Heat Strain in Specialist Police Officers",
+      "description": "Funded research into thermal strain for officers operating in protective equipment.",
+      "highlights": [
+        "Problem: officers operating in protective equipment under uncontrolled thermal load.",
+        "Measured: core and skin temperature responses, work-rest tolerance in the field.",
+        "Outcome: funded evidence base for operational thermal stress management."
+      ],
+      "entity": "Metropolitan Police of London"
+    },
+    {
+      "name": "Hydration and Sodium Losses in Elite Squash",
+      "description": "Sweat and electrolyte profiling across a national squash squad.",
+      "highlights": [
+        "Problem: individual sweat and electrolyte profiles unknown across a national squad.",
+        "Measured: fluid balance, sweat sodium concentration, training-day hydration practice.",
+        "Outcome: published individualised hydration guidance, and a systematic review of the physiological and nutritional demands of the sport."
+      ],
+      "entity": "England Squash"
+    },
+    {
+      "name": "Recovery in Elite Professional Football",
+      "description": "Doctoral programme embedded in a Premier League club, evaluating recovery interventions.",
+      "highlights": [
+        "Problem: recovery methods widely used, thinly evidenced, and expensive.",
+        "Measured: recovery interventions against performance and wellness outcomes in a Premier League environment.",
+        "Outcome: a GBP 40,000 funded doctoral programme embedded in the club."
+      ],
+      "entity": "Aston Villa FC"
     }
   ],
   "meta": {
     "canonical": "https://alanruddock.com/resume.json",
     "version": "v1.0.0",
-    "lastModified": "2026-06-01"
+    "lastModified": "2026-08-14"
   }
 }

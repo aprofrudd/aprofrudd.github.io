@@ -17,8 +17,8 @@ Dr Alan Ruddock is an Associate Professor of Sport Physiology and Performance in
 ## Research Impact
 
 - 50+ peer-reviewed publications
-- 1,624 citations
-- h-index: 25
+- 1,774 citations
+- h-index: 26
 - i10-index: 31
 - >£130,000 in research funding
 - 4 completed PhDs, 5 current PhD candidates
@@ -27,11 +27,31 @@ Dr Alan Ruddock is an Associate Professor of Sport Physiology and Performance in
 
 ## Areas of Expertise
 
-Applied Physiology, Sport Performance, High-Intensity Interval Training (HIIT), Thermoregulation, Strength and Conditioning, Combat Sports Science, Microvascular Function, Velocity-Based Training
+Applied Physiology, Sport Performance, High-Intensity Interval Training (HIIT), Thermoregulation, Hydration, Recovery, Endurance Running, Performance Testing, Strength and Conditioning, Combat Sports Science, Microvascular Function, Velocity-Based Training
 
 ## Applied Impact
 
 Led scientific support for boxers in 15 world-title contests, including Olympic Gold medallist and two-time heavyweight champion Anthony Joshua OBE. Provided scientific support for Russ Cook's ("Hardest Geezer") record-breaking run across Africa (2024). Delivered workshops to over 500 coaches across the UK, Europe, North America and Asia through Boxing Science, reaching 30,000 unique users per month.
+
+## Applied Projects
+
+- Running the length of Africa (Russ Cook, 2024) — thermal load, hydration and fuelling strategy, and workload tolerance across 16,000 km and 352 consecutive days; the first full-length crossing of Africa on foot.
+- Heat strain in specialist police officers (Metropolitan Police of London) — core and skin temperature responses and work-rest tolerance in the field, producing a funded evidence base for operational thermal stress management.
+- Hydration and sodium losses in elite squash (England Squash) — fluid balance, sweat sodium concentration and training-day hydration practice across a national squad, published as individualised hydration guidance and a systematic review of the sport's demands.
+- Conditioning for world-title boxing (Boxing Science) — high-intensity interval responses, punch impact force and its strength determinants, and weight-making physiology; scientific support across 15 world-title contests including Anthony Joshua OBE.
+- Recovery in elite professional football (Aston Villa FC) — recovery interventions evaluated against performance and wellness outcomes in a Premier League environment, via a £40,000 funded doctoral programme embedded in the club.
+
+## Laboratory & Measurement Capability
+
+- Physiological assessment: VO2max and submaximal metabolic testing, gas exchange and RER, lactate profiling, critical power and critical speed, running and cycling economy
+- Thermal: core and skin temperature, sweat rate and sweat sodium concentration, environmental chamber protocols, heat acclimation
+- Neuromuscular: force plates, velocity-based training, isometric and isokinetic strength assessment
+- Field: GPS and accelerometry, heart rate variability, wearable validation, remote monitoring in uncontrolled environments
+- Governance: Laboratory Director 2019-2024; School Ethics Lead; lead author, CASES Expert Statement on Guidance for Reporting of Physiological Assessments (2026)
+
+## Available For
+
+Industry R&D and product science (physiological testing and study design for sports brands, wearable and technology companies, and product development; independent evaluation of performance claims), keynote speaking, consultancy, external examining, PhD supervision, advisory boards, and media commentary.
 
 ## Education
 
