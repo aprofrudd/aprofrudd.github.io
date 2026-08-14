@@ -25,6 +25,15 @@
 
 html {
     scroll-behavior: smooth;
+    /* Clear the fixed navbar so anchor jumps land on the section title,
+       not 71px past it. Covers nav clicks, deep links and find-in-page. */
+    scroll-padding-top: 5.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
 }
 
 body {
@@ -94,13 +103,13 @@ a:hover {
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: 1.25rem;
+    gap: 1rem;
 }
 
 .nav-menu a {
     color: var(--text-secondary);
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .nav-menu a:hover {
@@ -307,6 +316,9 @@ a:hover {
     border-radius: 12px;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-color);
+    /* Grid items default to min-width: auto, so a long unbreakable word
+       would widen its track and push the page into horizontal scroll. */
+    min-width: 0;
 }
 
 .glance-number {
@@ -321,6 +333,8 @@ a:hover {
 .glance-number--text {
     font-size: 1.05rem;
     line-height: 1.3;
+    letter-spacing: 0;
+    overflow-wrap: break-word;
 }
 
 .glance-label {
@@ -1123,10 +1137,11 @@ a.publication-link:hover .publication-title {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-    h1 { font-size: 2.25rem; }
-    h2 { font-size: 1.75rem; }
 
+/* The nav collapses earlier than the page layout: 14 items no longer fit
+   the 1100px container below ~1025px, so the overlay menu takes over there
+   while everything else stays on the 768px breakpoint. */
+@media (max-width: 1024px) {
     .nav-toggle {
         display: block;
     }
@@ -1138,12 +1153,17 @@ a.publication-link:hover .publication-title {
         left: 0;
         width: 100vw;
         height: 100vh;
+        height: 100dvh;
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        gap: 2rem;
+        justify-content: safe center;
+        gap: 1.25rem;
+        padding: 5rem 1.5rem 3rem;
+        overflow-y: auto;
+        overscroll-behavior: contain;
         z-index: 999;
     }
 
@@ -1154,6 +1174,11 @@ a.publication-link:hover .publication-title {
     .nav-menu a {
         font-size: 1.25rem;
     }
+}
+
+@media (max-width: 768px) {
+    h1 { font-size: 2.25rem; }
+    h2 { font-size: 1.75rem; }
 
     .hero {
         padding-top: 5rem;
