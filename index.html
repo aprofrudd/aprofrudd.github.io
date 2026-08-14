@@ -1690,7 +1690,9 @@
                 var layer = document.getElementById('collab-points');
                 var cap = document.getElementById('collab-map-caption');
                 if (!layer) return;
-                var placed = institutions.filter(function (d) { return d.lat != null; });
+                var placed = institutions.filter(function (d) {
+                    return d.lat != null && d.name !== HOME;
+                });
                 if (!placed.length) return;
                 var max = placed.reduce(function (m, d) { return Math.max(m, d.count); }, 1);
 
@@ -1704,16 +1706,18 @@
                     g.appendChild(el('circle', {
                         cx: xy[0].toFixed(1), cy: xy[1].toFixed(1),
                         r: (4 + 8 * Math.sqrt(d.count / max)).toFixed(1),
-                        class: d.name === HOME ? 'collab-pin is-home' : 'collab-pin'
+                        class: 'collab-pin'
                     }));
                     layer.appendChild(g);
                 });
-                cap.textContent = placed.length + ' research institutions across ' + countries +
+                cap.textContent = placed.length + ' collaborating institutions across ' + countries +
                     ' countries. Marker size is the number of co-authored publications. ' +
-                    'Applied partners are not plotted; all are UK based.';
+                    'Sheffield Hallam is not plotted, and nor are the applied partners, ' +
+                    'who are all UK based.';
                 document.getElementById('collab-map').setAttribute('aria-label',
                     'World map showing ' + placed.length + ' collaborating institutions in ' +
-                    countries + ' countries. The same organisations are listed in the table below.');
+                    countries + ' countries, excluding Sheffield Hallam. ' +
+                    'The same organisations are listed in the table below.');
             }
 
             function loadMap(groups, countries) {

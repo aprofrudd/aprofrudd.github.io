@@ -1129,15 +1129,6 @@ a.publication-link:hover .publication-title {
     stroke-width: 1;
 }
 
-/* Sheffield Hallam dwarfs every other marker and sits on the densest part of
-   the map, so it is drawn as a ring rather than a disc: the UK institutions
-   underneath it stay visible. */
-.collab-pin.is-home {
-    fill: none;
-    stroke: var(--secondary-color);
-    stroke-width: 2.5;
-}
-
 .collab-point:focus-visible {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
