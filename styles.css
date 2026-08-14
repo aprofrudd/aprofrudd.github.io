@@ -195,6 +195,14 @@ a:hover {
     letter-spacing: 0.5px;
 }
 
+.hero-positioning {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    max-width: 620px;
+    margin: 0 auto 1.25rem;
+}
+
 .hero-title {
     font-size: 1.25rem;
     color: var(--primary-color);
@@ -1083,6 +1091,10 @@ a.publication-link:hover .publication-title {
 
     .hero {
         padding-top: 5rem;
+    }
+
+    .hero-positioning {
+        font-size: 1.05rem;
     }
 
     .profile-placeholder {
