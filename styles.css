@@ -951,6 +951,16 @@ a.publication-link:hover .publication-title {
     line-height: 1.6;
 }
 
+/* Laboratory & Measurement Capability — reuses .skills-grid / .skill-tag */
+.skill-category-full {
+    grid-column: 1 / -1;
+}
+
+.capability-governance {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
 /* Applied Projects Section */
 .projects-list {
     max-width: 800px;
