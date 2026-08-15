@@ -1129,7 +1129,7 @@ a.publication-link:hover .publication-title {
     margin-top: 0.5rem;
     text-align: center;
     font-size: 0.85rem;
-    color: var(--text-light);
+    color: var(--text-secondary);
 }
 
 .collab-table {
@@ -1212,7 +1212,7 @@ a.publication-link:hover .publication-title {
 }
 
 .project-partner {
-    color: var(--text-light);
+    color: var(--text-secondary);
     font-size: 0.9rem;
     margin-bottom: 1rem;
 }
