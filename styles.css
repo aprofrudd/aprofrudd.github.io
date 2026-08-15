@@ -564,7 +564,8 @@ a:hover {
     color: var(--secondary-color);
 }
 
-.phd-year {
+.phd-year,
+.phd-institution {
     font-size: 0.85rem;
     color: var(--primary-color);
     font-weight: 600;
@@ -574,20 +575,6 @@ a:hover {
     font-size: 0.9rem;
     color: var(--text-secondary);
     margin-top: 0.25rem;
-}
-
-/* Industry partner a doctoral project is embedded with */
-.phd-partner {
-    display: inline-block;
-    margin-top: 0.4rem;
-    padding: 0.15rem 0.6rem;
-    border-radius: 20px;
-    background: var(--background-alt);
-    border: 1px solid var(--border-color);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    color: var(--primary-color);
 }
 
 /* Grants & Funding Section */
