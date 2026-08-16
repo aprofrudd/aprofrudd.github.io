@@ -65,7 +65,7 @@
         "Provides scientific support to boxers and combat athletes worldwide",
         "Led scientific support for boxers in 15 world championship contests",
         "Delivered workshops to over 500 coaches across UK, Europe, North America and Asia",
-        "Platform reaches 30,000 unique users per month"
+        "Platform reaches over 300,000 unique visitors per year and over 11 million YouTube views"
       ]
     },
     {
@@ -161,9 +161,15 @@
       "issuer": "The Science Council"
     },
     {
-      "name": "Athletics Coach",
+      "name": "Athletics Coach (Level 2)",
       "issuer": "England Athletics",
-      "url": "https://www.englandathletics.org"
+      "url": "https://www.englandathletics.org",
+      "date": "2023"
+    },
+    {
+      "name": "ISAK Level 1 Anthropometrist",
+      "issuer": "International Society for the Advancement of Kinanthropometry",
+      "date": "2026"
     }
   ],
   "publications": [
@@ -324,7 +330,7 @@
       "highlights": [
         "Scientific support for 15 world championship contests",
         "Workshops delivered to 500+ coaches across UK, Europe, North America and Asia",
-        "30,000 unique users per month"
+        "over 300,000 unique visitors per year and over 11 million YouTube views"
       ],
       "roles": [
         "Co-Founder"
