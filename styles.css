@@ -107,9 +107,41 @@ a:hover {
 }
 
 .nav-menu a {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 5px;
     color: var(--text-secondary);
     font-weight: 500;
     font-size: 0.85rem;
+}
+
+/* Underline marking the section currently in view. Scale rather than height
+   so it animates without shifting the row. */
+.nav-menu a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--primary-color);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+}
+
+.nav-menu a.is-current {
+    color: var(--primary-color);
+}
+
+.nav-menu a.is-current::after {
+    transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-menu a::after {
+        transition: none;
+    }
 }
 
 .nav-menu a:hover {

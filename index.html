@@ -714,7 +714,7 @@
                     <ul class="now-list">
                         <li>Recently published: <strong>Effects of Sleep Restriction on Cognition, Wellbeing &amp; Athletic Performance in Elite Team-Sport: A Scoping Review</strong> (2026)</li>
                         <li>Recently published: <strong>CASES Expert Statement on Guidance for Reporting of Physiological Assessments: Sport Performance Testing</strong> (2026)</li>
-                        <li>Contributing to the <a href="https://www.qaa.ac.uk/the-quality-code/subject-benchmark-statements" target="_blank" rel="noopener"><strong>QAA Subject Benchmark Statement</strong></a> for Sport and Exercise Sciences</li>
+                        <li>Contributing to the <a href="https://www.qaa.ac.uk" target="_blank" rel="noopener"><strong>QAA Subject Benchmark Statement</strong></a> for Sport and Exercise Sciences</li>
                         <li>Supervising <strong>7 PhD candidates</strong> across sleep, recovery, speed training, blood flow restriction, polyphenols and disability sport classification</li>
                         <li>Chairing the <strong>CASES Physiology and Nutrition Division</strong>, overseeing professional standards and accreditation</li>
                         <li>Delivering <strong>applied sport science support</strong> to elite boxing athletes through Boxing Science</li>
@@ -764,7 +764,7 @@
                         <div class="timeline-content">
                             <div class="timeline-header">
                                 <h3>Co-Founder</h3>
-                                <span class="timeline-date"><time datetime="2014">2014 - Present</time></span>
+                                <span class="timeline-date">Co-founded <time datetime="2014">2014</time></span>
                             </div>
                             <h4 class="company">Boxing Science</h4>
                             <ul class="experience-list">
@@ -1586,6 +1586,90 @@
                 .catch(function () {
                     // Keep fallback static content
                 });
+        })();
+    </script>
+
+    <script>
+        // Scroll spy: underline the nav item for the section currently in view.
+        // Reads the section under a probe line just below the fixed navbar, which
+        // is deterministic and copes with sections shorter than the viewport,
+        // unlike an intersection ratio. Sections with no nav entry (#now,
+        // #available) leave the previous item marked rather than flickering off.
+        (function () {
+            var links = Array.prototype.slice.call(
+                document.querySelectorAll('.nav-menu a[href^="#"]'));
+            if (!links.length) return;
+
+            var targets = links
+                .map(function (a) {
+                    var el = document.getElementById(a.getAttribute('href').slice(1));
+                    return el ? { link: a, el: el } : null;
+                })
+                .filter(Boolean);
+            if (!targets.length) return;
+
+            var navbar = document.querySelector('.navbar');
+            var current = null;
+            var ticking = false;
+
+            function update() {
+                ticking = false;
+                var probe = (navbar ? navbar.getBoundingClientRect().height : 0) + 4;
+                var found = null;
+
+                for (var i = 0; i < targets.length; i++) {
+                    var box = targets[i].el.getBoundingClientRect();
+                    if (box.top <= probe && box.bottom > probe) { found = targets[i]; }
+                }
+
+                // At the bottom of the page the last section can never reach the
+                // probe line, so nothing below it is reachable by scrolling. Mark it
+                // once the page is scrolled to the end.
+                var doc = document.documentElement;
+                var atEnd = window.innerHeight + window.scrollY >= doc.scrollHeight - 2;
+                if (atEnd) { found = targets[targets.length - 1]; }
+
+                // Past the last section (the footer) keep the last item marked.
+                if (!found) {
+                    var last = targets[targets.length - 1].el.getBoundingClientRect();
+                    if (last.bottom <= probe) { found = targets[targets.length - 1]; }
+                }
+
+                // Above the first section there is nothing to mark.
+                if (!found && targets[0].el.getBoundingClientRect().top > probe) {
+                    if (current) { current.link.classList.remove('is-current'); current = null; }
+                    return;
+                }
+
+                if (!found || found === current) return;
+                if (current) current.link.classList.remove('is-current');
+                found.link.classList.add('is-current');
+                current = found;
+            }
+
+            function onScroll() {
+                if (ticking) return;
+                ticking = true;
+                // requestAnimationFrame does not fire while the tab is hidden, which
+                // would strand `ticking` at true and kill every later scroll. Fall
+                // back to a timer whenever a frame is not going to come.
+                if (document.hidden || typeof window.requestAnimationFrame !== 'function') {
+                    setTimeout(update, 100);
+                } else {
+                    window.requestAnimationFrame(update);
+                }
+            }
+
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll);
+            window.addEventListener('load', update);
+            // requestAnimationFrame does not fire in a background tab, so a page
+            // restored at a scroll position would show a stale mark until the next
+            // scroll. Recompute directly when the tab becomes visible.
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden) update();
+            });
+            update();
         })();
     </script>
 
