@@ -36,18 +36,19 @@ Led scientific support for boxers in 15 world championship contests, including O
 
 ## Applied Projects
 
-- Conditioning for world championship boxing (Boxing Science): high-intensity interval responses, punch impact force and its strength determinants, and weight-making physiology. Scientific support across 15 world championship contests including Anthony Joshua OBE.
+- Conditioning for world championship boxing (Boxing Science): high-intensity interval responses, load-velocity profiling and weight-making physiology. Scientific support across 15 world championship contests including Anthony Joshua OBE.
 - Recovery in elite professional football (Aston Villa FC): recovery interventions evaluated against performance and wellness outcomes in a Premier League environment, via a £40,000 funded doctoral programme embedded in the club.
-- Hydration and fluid balance in elite squash (England Squash): fluid balance, sodium losses and training-day hydration practice across a national squad, published as individualised hydration guidance and a systematic review of the sport's demands.
-- Heat strain in specialist police officers (Metropolitan Police of London): core and skin temperature responses and work-rest tolerance in the field, producing a funded evidence base for operational thermal stress management.
+- Hydration and fluid balance in elite squash (England Squash): fluid and sodium losses were undocumented in squash as a sport. Fluid balance, sodium losses and training-day hydration practice measured, published as individualised hydration guidance and a systematic review of the sport's demands.
+- Heat acclimation before the 2014 FIFA World Cup (professional soccer match official): 13 sessions over 18 days combining isothermic running and hot water immersion, raising plasma volume 7.1% and high-intensity running performance 29%. Published as a case report in SpringerPlus.
+- Operational body armour in specialist police officers (Metropolitan Police Physical Protection Group): authored the foundational 2020 exploratory report applying doctoral thermoregulation research, then oversaw a commissioned study of 147 officers using a novel story stem method.
 
 ## Laboratory & Measurement Capability
 
 - Physiological assessment: VO2max and submaximal metabolic testing, gas exchange and RER, lactate profiling, critical power and critical speed, running and cycling economy
 - Thermal: core and skin temperature, sweat rate, environmental chamber protocols, heat acclimation
 - Neuromuscular: force plates, velocity-based training, isometric and isokinetic strength assessment
-- Field: speed and power analysis, blood lactate testing, heart rate variability, wearable validation, remote monitoring in uncontrolled environments
-- Governance: Laboratory Director 2019-2024; School Ethics Lead; Director of CASES and Chair of its Physiology and Nutrition Division
+- Field: speed and power analysis, blood lactate testing, load-velocity profiling, heart rate variability, wearable validation, remote monitoring in uncontrolled environments
+- Governance: Director of CASES (elected Board director); Chair, CASES Physiology and Nutrition Division (2024-2027); School Research Ethics Lead, Sheffield Hallam University, and member of the University Research Ethics Committee; Laboratory Director 2019-2024, securing CASES Laboratory Accreditation in 2024
 
 ## Doctoral Supervision
 

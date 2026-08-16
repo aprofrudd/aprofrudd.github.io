@@ -344,21 +344,31 @@
       "name": "Hydration and Fluid Balance in Elite Squash",
       "description": "Hydration status and fluid losses across a national squash squad.",
       "highlights": [
-        "Problem: hydration status and fluid losses unknown across a national squad.",
+        "Problem: fluid and sodium losses were undocumented in squash as a sport, not just in one squad.",
         "Measured: fluid balance, sodium losses and training-day hydration practice.",
         "Outcome: published individualised hydration guidance, and a systematic review of the physiological and nutritional demands of the sport."
       ],
       "entity": "England Squash"
     },
     {
-      "name": "Heat Strain in Specialist Police Officers",
-      "description": "Funded research into thermal strain for officers operating in protective equipment.",
+      "name": "Operational Body Armour in Specialist Police Officers",
+      "description": "Physiological demands and lived experience of operational body armour use.",
       "highlights": [
-        "Problem: officers operating in protective equipment under uncontrolled thermal load.",
-        "Measured: core and skin temperature responses, work-rest tolerance in the field.",
-        "Outcome: funded evidence base for operational thermal stress management."
+        "Problem: the physiological demands and lived experience of wearing body armour on operations were not documented.",
+        "Approach: authored the foundational 2020 exploratory report applying doctoral thermoregulation research, then convened and oversaw a multidisciplinary team for a commissioned study of 147 officers using a novel story stem method.",
+        "Outcome: built the force's understanding of what operational body armour asks of the people wearing it."
       ],
-      "entity": "Metropolitan Police of London"
+      "entity": "Metropolitan Police Physical Protection Group"
+    },
+    {
+      "name": "Heat Acclimation Before the 2014 FIFA World Cup",
+      "description": "Mixed-methods heat acclimation for a professional soccer match official before the Brazil tournament.",
+      "startDate": "2014-01-01",
+      "highlights": [
+        "Problem: a northern European match official heading for the heat and humidity of Brazil, with no environmental chamber.",
+        "Measured: tympanic and mean body temperature, plasma volume, sweat rate, high-intensity running performance and thermal comfort.",
+        "Outcome: 13 sessions over 18 days combining isothermic running and hot water immersion. Plasma volume +7.1%, sweat rate +0.9 L/h, exercising temperature -0.6C, high-intensity running +29%. Published as a case report in SpringerPlus."
+      ]
     }
   ],
   "meta": {

@@ -971,9 +971,30 @@ a.publication-link:hover .publication-title {
     grid-column: 1 / -1;
 }
 
-.capability-governance {
+.capability-roles {
+    list-style: none;
+    display: grid;
+    gap: 1rem;
+}
+
+.capability-roles li {
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--border-color);
+}
+
+.role-title {
+    display: block;
+    color: var(--secondary-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.role-detail {
+    display: block;
     color: var(--text-secondary);
-    line-height: 1.7;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-top: 0.15rem;
 }
 
 /* Collaboration Network Section
