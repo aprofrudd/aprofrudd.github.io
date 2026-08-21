@@ -165,7 +165,7 @@ export function resultsHtml(spec, version) {
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="../engine/styles.css${q}">
   <link rel="stylesheet" href="theme.css${q}">
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="../engine/vendor/qrcode.js${q}"></script>
 </head>
 <body class="projector">
   <div id="dev-banner" class="dev-banner" hidden></div>

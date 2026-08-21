@@ -494,28 +494,39 @@
   // Generate the "join on your phone" QR at runtime from this page's folder URL
   // (which serves index.html), so each presentation needs no committed qr.png.
   // The qrcode lib is loaded by results.html; retry briefly in case it is slow.
+  // The QR lib is the vendored qrcode-generator (engine/vendor/qrcode.js),
+  // which defines a global `qrcode` function. It used to come from a CDN path
+  // that turned out not to exist - the corner failed silently on every
+  // published presentation - hence vendored, like every other third-party lib.
   function renderJoinQR(tries) {
     tries = tries || 0;
     const corner = document.querySelector('.qr-corner');
     if (!corner) return;
-    if (!window.QRCode || !window.QRCode.toDataURL) {
-      if (tries < 50) setTimeout(() => renderJoinQR(tries + 1), 50);
+    if (typeof window.qrcode !== 'function') {
+      if (tries < 50) { setTimeout(() => renderJoinQR(tries + 1), 50); return; }
+      // Library never arrived: make the URL the join mechanism instead of
+      // leaving a silently empty corner.
+      const label = corner.querySelector('.qr-corner-label span');
+      if (label) label.style.cssText = 'font-size:1.05rem;font-weight:700;';
       return;
     }
-    const joinUrl = window.location.origin +
-      window.location.pathname.replace(/[^/]*$/, '');
-    window.QRCode.toDataURL(joinUrl, {
-      margin: 1, width: 240, color: { dark: '#1b1b1b', light: '#ffffff' }
-    }, (err, url) => {
-      if (err || !url) return;
+    try {
+      const joinUrl = window.location.origin +
+        window.location.pathname.replace(/[^/]*$/, '');
+      const qr = window.qrcode(0, 'M');   // 0 = auto-size to the data
+      qr.addData(joinUrl);
+      qr.make();
       let img = corner.querySelector('img');
       if (!img) {
         img = document.createElement('img');
         img.alt = 'QR code to join';
+        img.style.cssText = 'width:100%;height:auto;image-rendering:pixelated;border-radius:4px;';
         (corner.querySelector('#qr-code') || corner).appendChild(img);
       }
-      img.src = url;
-    });
+      img.src = qr.createDataURL(8, 8);
+    } catch (e) {
+      console.warn('[' + LESSON_ID + '] QR render failed:', e);
+    }
   }
   renderJoinQR();
 
