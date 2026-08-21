@@ -10,6 +10,8 @@ import { DEFAULT_THEME, themeCss } from './theme.js';
 import { engineStages, buildPresentationFiles } from './generate.js';
 import { stagePanel, themePanel, settingsPanel } from './panels.js';
 import { publishPresentation, getToken, setToken, clearToken, fetchManifest } from './publish.js';
+import { loadMedia, saveMedia, mediaBytes } from './media-store.js';
+import { importDeck, IMPORT_ACCEPT } from './import.js';
 
 const root = document.getElementById('app');
 const DRAFT_PREFIX = 'builder_draft_';
@@ -21,15 +23,37 @@ let state = null;   // { spec, mediaBlobs, selected, mode, tab, published }
 function saveDraft() {
   if (!state || !state.spec.slug) return;
   try {
+    // Spec only. Media lives in IndexedDB (media-store.js) because an imported
+    // deck is tens of megabytes of data URLs and would blow localStorage.
     localStorage.setItem(DRAFT_PREFIX + state.spec.slug,
-      JSON.stringify({ spec: state.spec, mediaBlobs: state.mediaBlobs, published: state.published }));
+      JSON.stringify({ spec: state.spec, published: state.published }));
   } catch (e) { console.warn('draft save failed (quota?)', e); }
+  if (state.mediaDirty) {
+    state.mediaDirty = false;
+    saveMedia(state.spec.slug, Object.assign({}, state.mediaBlobs));
+  }
 }
+// Media changed (import, image pick) - mark it for the next draft save.
+function touchMedia() { if (state) state.mediaDirty = true; }
 const saveDraftDebounced = debounce(saveDraft, 400);
 
 function loadDraft(slug) {
   try { return JSON.parse(localStorage.getItem(DRAFT_PREFIX + slug) || 'null'); }
   catch (e) { return null; }
+}
+// Draft + its media. Older drafts kept mediaBlobs inline in localStorage; if we
+// find one, move it into IndexedDB and rewrite the draft without it.
+async function loadDraftFull(slug) {
+  const d = loadDraft(slug);
+  if (!d) return null;
+  if (d.mediaBlobs && Object.keys(d.mediaBlobs).length) {
+    await saveMedia(slug, d.mediaBlobs);
+    const media = d.mediaBlobs;
+    delete d.mediaBlobs;
+    try { localStorage.setItem(DRAFT_PREFIX + slug, JSON.stringify(d)); } catch (e) {}
+    return { spec: d.spec, published: d.published, mediaBlobs: media };
+  }
+  return { spec: d.spec, published: d.published, mediaBlobs: await loadMedia(slug) };
 }
 function listDrafts() {
   const out = [];
@@ -41,6 +65,20 @@ function listDrafts() {
     }
   }
   return out;
+}
+
+// mediaBlobs is written to by several places (import, the image picker, the
+// theme background). Rather than remembering to flag each one, proxy the map so
+// any write marks the media dirty and the next save persists it.
+const watchedMedia = new WeakSet();
+function watchMedia(obj) {
+  if (!obj || watchedMedia.has(obj)) return obj;   // don't re-wrap on every open
+  const proxy = new Proxy(obj, {
+    set(t, k, v) { t[k] = v; if (state) state.mediaDirty = true; return true; },
+    deleteProperty(t, k) { delete t[k]; if (state) state.mediaDirty = true; return true; }
+  });
+  watchedMedia.add(proxy);
+  return proxy;
 }
 
 function newSpec(name) {
@@ -60,10 +98,16 @@ function substMedia(path) {
   if (!path) return path;
   return (state.mediaBlobs && state.mediaBlobs[path]) ? state.mediaBlobs[path] : path;
 }
+const MEDIA_KEYS = ['figure', 'sideFigure', 'poster', 'video', 'image', 'slideImage'];
+
 function previewStages() {
-  return engineStages(state.spec.stages).map(s => {
+  // Inlining every stage's data URL would overflow sessionStorage on an
+  // imported deck (tens of MB), so only the stage actually on screen gets its
+  // media substituted - the rest keep their media/ paths and are never drawn.
+  const sel = Math.max(0, state.selected);
+  return engineStages(state.spec.stages).map((s, i) => {
     const c = Object.assign({}, s);
-    ['figure', 'sideFigure', 'poster', 'video'].forEach(k => { if (c[k]) c[k] = substMedia(c[k]); });
+    if (i === sel) MEDIA_KEYS.forEach(k => { if (c[k]) c[k] = substMedia(c[k]); });
     return c;
   });
 }
@@ -98,6 +142,8 @@ async function renderDashboard() {
 
   const actions = el('div', 'b-dash-actions');
   actions.appendChild(button('+ New presentation', createNew, 'b-btn--primary'));
+  actions.appendChild(button('\u2191 Import a deck', importNew, 'b-btn--ghost'));
+  actions.appendChild(el('span', 'b-dash-hint', { text: 'PowerPoint (.pptx) or a PDF export of your slides' }));
   page.appendChild(actions);
 
   const grid = el('div', 'b-card-grid');
@@ -148,40 +194,148 @@ function createNew() {
   if (!name || !name.trim()) return;
   const spec = newSpec(name.trim());
   if (loadDraft(spec.slug)) { alert('A presentation with that slug already exists. Pick another name.'); return; }
-  state = { spec, mediaBlobs: {}, selected: -1, mode: 'projector', tab: 'slide', published: false };
+  state = { spec, mediaBlobs: {}, mediaDirty: true, selected: -1, mode: 'projector', tab: 'slide', published: false };
   saveDraft();
   location.hash = '#/edit/' + spec.slug;
 }
-function duplicate(slug) {
-  const d = loadDraft(slug);
-  const src = d ? d : null;
+async function duplicate(slug) {
+  const src = await loadDraftFull(slug);
   if (!src) { alert('Open and edit the published version first to duplicate it.'); return; }
   const name = prompt('Name for the copy:', (src.spec.title || slug) + ' copy');
   if (!name) return;
   const spec = JSON.parse(JSON.stringify(src.spec));
   spec.slug = kebab(name); spec.lessonId = spec.slug; spec.title = name;
   spec.lessonUrl = 'alanruddock.com/' + spec.slug;
-  state = { spec, mediaBlobs: Object.assign({}, src.mediaBlobs), selected: -1, mode: 'projector', tab: 'slide', published: false };
+  state = { spec, mediaBlobs: Object.assign({}, src.mediaBlobs), mediaDirty: true,
+            selected: -1, mode: 'projector', tab: 'slide', published: false };
   saveDraft();
   location.hash = '#/edit/' + spec.slug;
+}
+
+// ---- deck import -----------------------------------------------------------
+
+// Ask for a file, then hand it to importDeck(). Shared by the dashboard (create
+// a whole presentation from a deck) and the editor (append a deck's slides).
+function pickDeckFile() {
+  return new Promise(resolve => {
+    const input = el('input', null, { type: 'file', accept: IMPORT_ACCEPT, hidden: true });
+    input.addEventListener('change', () => {
+      const f = input.files && input.files[0];
+      input.remove();
+      resolve(f || null);
+    });
+    document.body.appendChild(input);
+    input.click();
+  });
+}
+
+function importOverlay() {
+  const wrap = el('div', 'b-overlay');
+  const box = el('div', 'b-overlay-box');
+  const msg = el('div', 'b-overlay-msg', { text: 'Reading deck\u2026' });
+  const barWrap = el('div', 'b-overlay-bar');
+  const fill = el('div', 'b-overlay-fill');
+  barWrap.appendChild(fill);
+  box.appendChild(el('h3', null, { text: 'Importing your slides' }));
+  box.appendChild(msg);
+  box.appendChild(barWrap);
+  wrap.appendChild(box);
+  document.body.appendChild(wrap);
+  return {
+    progress(n, total, text) {
+      msg.textContent = text || '';
+      fill.style.width = total ? Math.round((n / total) * 100) + '%' : '0%';
+    },
+    done() { wrap.remove(); }
+  };
+}
+
+// Import into the presentation currently open in the editor.
+async function importIntoCurrent() {
+  const file = await pickDeckFile();
+  if (!file) return;
+  const ui = importOverlay();
+  try {
+    const res = await importDeck(file, ui.progress);
+    Object.assign(state.mediaBlobs, res.media);
+    state.spec.stages = state.spec.stages.concat(res.stages);
+    touchMedia();
+    state.selected = state.spec.stages.length - res.stages.length;
+    ui.done();
+    saveDraft();
+    reportImport(res, state.mediaBlobs);
+    renderEditor();
+    refreshPreview();
+  } catch (e) {
+    ui.done();
+    console.error(e);
+    alert('Import failed: ' + e.message);
+  }
+}
+
+// Import as a brand-new presentation from the dashboard.
+async function importNew() {
+  const file = await pickDeckFile();
+  if (!file) return;
+  const suggested = (file.name || 'Imported deck').replace(/\.(pdf|pptx)$/i, '').replace(/[_-]+/g, ' ').trim();
+  const name = prompt('Name this presentation:', suggested || 'Imported deck');
+  if (!name || !name.trim()) return;
+  const spec = newSpec(name.trim());
+  if (loadDraft(spec.slug)) { alert('A presentation with that slug already exists. Pick another name.'); return; }
+  const ui = importOverlay();
+  try {
+    const res = await importDeck(file, ui.progress);
+    spec.stages = res.stages;
+    state = { spec, mediaBlobs: res.media, mediaDirty: true, selected: 0,
+              mode: 'projector', tab: 'slide', published: false };
+    ui.done();
+    saveDraft();
+    reportImport(res, res.media);
+    location.hash = '#/edit/' + spec.slug;
+  } catch (e) {
+    ui.done();
+    console.error(e);
+    alert('Import failed: ' + e.message);
+  }
+}
+
+function reportImport(res, media) {
+  const polls = res.stages.filter(s => s.type === 'mcq').length;
+  const lines = [`Imported ${res.stages.length} slide(s).`];
+  lines.push(polls
+    ? `${polls} became live polls (from the [[poll]] marker).`
+    : 'No [[poll]] markers found - pick any slide and press "Turn into a poll" to add voting.');
+  // ~60KB per slide for a typical text deck, but photo-heavy slides run 5x that,
+  // so this is reachable on a long image-rich deck - and a commit that size is
+  // slow to push and permanent in the repo's history.
+  const mb = mediaBytes(media) / (1024 * 1024);
+  if (mb > 15) {
+    lines.push(`\nHeads up: the images total ${mb.toFixed(0)}MB. Publishing that many will be slow and bloats the repo - consider splitting the deck.`);
+  }
+  (res.warnings || []).forEach(w => lines.push('\n' + w));
+  alert(lines.join('\n'));
 }
 
 // ---- editor ----------------------------------------------------------------
 
 async function openEditor(slug) {
   if (!state || state.spec.slug !== slug) {
-    let d = loadDraft(slug);
+    let d = await loadDraftFull(slug);
     if (!d) {
       // Try to open a published presentation by fetching its presentation.json.
+      // Its media already lives in the repo, so the blob map starts empty and
+      // the preview loads the published files by path.
       try {
         const res = await fetch('../' + slug + '/presentation.json', { cache: 'no-store' });
-        if (res.ok) d = { spec: await res.json(), mediaBlobs: {}, published: true };
+        if (res.ok) d = { spec: await res.json(), mediaBlobs: await loadMedia(slug), published: true };
       } catch (e) {}
     }
     if (!d) { alert('Could not find that presentation.'); location.hash = '#/'; return; }
-    state = { spec: d.spec, mediaBlobs: d.mediaBlobs || {}, selected: d.spec.stages.length ? 0 : -1,
+    state = { spec: d.spec, mediaBlobs: d.mediaBlobs || {}, mediaDirty: false,
+              selected: d.spec.stages.length ? 0 : -1,
               mode: 'projector', tab: 'slide', published: !!d.published };
   }
+  state.mediaBlobs = watchMedia(state.mediaBlobs);
   renderEditor();
   refreshPreview();
 }
@@ -210,6 +364,7 @@ function renderEditor() {
 const STAGE_TYPES = [
   { type: 'content', label: 'Info / figure' },
   { type: 'mcq', label: 'Poll (multiple choice)' },
+  { type: 'slide', label: 'Slide image' },
   { type: 'map', label: 'Tap-the-map' },
   { type: 'media', label: 'Video' }
 ];
@@ -222,10 +377,11 @@ function newStage(type) {
   return base;
 }
 function defaultTitle(type) {
-  return { content: 'New info slide', mcq: 'New question', map: 'Where is it?', media: 'Watch this' }[type] || 'New slide';
+  return { content: 'New info slide', mcq: 'New question', map: 'Where is it?',
+           media: 'Watch this', slide: 'New slide image' }[type] || 'New slide';
 }
 function uniqueStageId(type) {
-  let base = type + '-slide', id = base, n = 2;
+  let base = type === 'slide' ? 'slide' : type + '-slide', id = base, n = 2;
   const ids = new Set((state.spec.stages || []).map(s => s.id));
   while (ids.has(id)) id = base + '-' + (n++);
   return id;
@@ -234,6 +390,7 @@ function uniqueStageId(type) {
 function slideListCol() {
   const col = el('aside', 'b-slides');
   const addRow = el('div', 'b-add');
+  addRow.appendChild(button('\u2191 Import deck', importIntoCurrent, 'b-btn--ghost b-btn--add b-btn--import'));
   STAGE_TYPES.forEach(t => addRow.appendChild(button('+ ' + t.label, () => {
     state.spec.stages.push(newStage(t.type));
     state.selected = state.spec.stages.length - 1;
@@ -384,6 +541,7 @@ function validate(spec) {
     if (s.type === 'mcq' && (!s.options || s.options.length < 2)) p.push('Slide ' + (i + 1) + ' (poll) needs 2+ options.');
     if (s.type === 'content' && !s.figure && !s.quote && !s.table) p.push('Slide ' + (i + 1) + ' (info) needs a figure, table or quote.');
     if (s.type === 'media' && !s.video) p.push('Slide ' + (i + 1) + ' (video) needs a video URL.');
+    if (s.type === 'slide' && !s.image) p.push('Slide ' + (i + 1) + ' (slide image) needs an image.');
     if (s.type === 'poster') p.push('Slide ' + (i + 1) + ': poster slides are not supported in the builder yet.');
   });
   return p;

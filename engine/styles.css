@@ -1103,3 +1103,38 @@ body.projector .results-pane h3 {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Imported deck slides (PowerPoint/Keynote import) --- */
+
+.deck-slide {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.deck-slide img {
+  width: 100%;
+  height: auto;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* On a deck slide there is nothing to show in the results column, so the slide
+   takes the whole projector width. The QR corner still needs its gutter. */
+body.projector.stage-slide .main {
+  grid-template-columns: 1fr;
+}
+
+body.projector.stage-slide .results-pane {
+  display: none;
+}
+
+body.projector.stage-slide .stage-pane {
+  padding: 0.75rem;
+}
+
+body.projector.stage-slide .deck-slide img {
+  max-height: 78vh;
+}

@@ -14,7 +14,7 @@ import { THEME_PRESETS, FONT_PRESETS } from './theme.js';
 
 export function stagePanel(stage, ctx) {
   const root = el('div', 'b-panel');
-  root.appendChild(el('div', 'b-panel-type', { text: stage.type.toUpperCase() + ' slide' }));
+  root.appendChild(el('div', 'b-panel-type', { text: TYPE_LABEL[stage.type] || (stage.type.toUpperCase() + ' slide') }));
 
   // Title (drives the slide-list label) + blurb, common to all types.
   root.appendChild(field('Title', textInput(stage.title, v => { stage.title = v; ctx.onRename(); })));
@@ -26,8 +26,38 @@ export function stagePanel(stage, ctx) {
   if (stage.type === 'content') contentFields(stage, root, ctx);
   if (stage.type === 'media')   mediaFields(stage, root, ctx);
   if (stage.type === 'map')     mapFields(stage, root, ctx);
+  if (stage.type === 'slide')   slideFields(stage, root, ctx);
 
   return root;
+}
+
+const TYPE_LABEL = {
+  slide: 'IMPORTED SLIDE',
+  mcq: 'POLL',
+  content: 'INFO slide',
+  media: 'VIDEO slide',
+  map: 'MAP slide'
+};
+
+// An imported deck slide: the rendered page image, plus the one-click route to
+// turning it into a live poll. Converting keeps the image (as the poll's
+// figure), so the students still see the original slide while they vote.
+function slideFields(stage, root, ctx) {
+  root.appendChild(field('Slide image', imageField(stage.image, ctx.mediaBlobs,
+    p => { stage.image = p; ctx.onChange(); }, ctx.resolvePreview),
+    'Replace this if you edit the slide in PowerPoint and re-export it.'));
+
+  root.appendChild(el('hr', 'b-sep'));
+  root.appendChild(el('p', 'b-field-hint', {
+    text: 'This slide is displayed only - nobody votes on it. Turn it into a poll to collect answers on the same slide.'
+  }));
+  root.appendChild(button('Turn into a poll', () => {
+    stage.type = 'mcq';
+    stage.slideImage = stage.image;
+    delete stage.image;
+    stage.options = [{ id: 'option-1', label: 'Option 1' }, { id: 'option-2', label: 'Option 2' }];
+    ctx.onStructure();
+  }, 'b-btn--primary'));
 }
 
 function imagePicker(label, stage, key, ctx, captionKey) {
@@ -42,6 +72,16 @@ function imagePicker(label, stage, key, ctx, captionKey) {
 }
 
 function mcqFields(stage, root, ctx) {
+  // An imported deck slide behind the poll: the projector shows this instead of
+  // re-rendering the question, so it gets its own field rather than the
+  // "figure above the options" one.
+  if (stage.slideImage) {
+    root.appendChild(field('Slide image (shown on the projector)',
+      imageField(stage.slideImage, ctx.mediaBlobs,
+        p => { stage.slideImage = p; ctx.onChange(); }, ctx.resolvePreview),
+      'The projector shows this slide; students see the options on their phones.'));
+    root.appendChild(el('hr', 'b-sep'));
+  }
   root.appendChild(field('Let students pick up to', numberInput(stage.maxSelect || 1,
     v => { stage.maxSelect = (v && v > 1) ? v : undefined; ctx.onChange(); }, 1, 6), '1 = single choice'));
 
@@ -76,8 +116,23 @@ function mcqFields(stage, root, ctx) {
   root.appendChild(addBtn);
   repaint();
 
-  root.appendChild(el('hr', 'b-sep'));
-  root.appendChild(imagePicker('Figure above the options (optional)', stage, 'figure', ctx, 'figureCaption'));
+  if (!stage.slideImage) {
+    root.appendChild(el('hr', 'b-sep'));
+    root.appendChild(imagePicker('Figure above the options (optional)', stage, 'figure', ctx, 'figureCaption'));
+  }
+
+  // Undo an accidental "turn into a poll" without losing the imported image.
+  if (stage.slideImage) {
+    root.appendChild(el('hr', 'b-sep'));
+    root.appendChild(button('Back to a display-only slide', () => {
+      if (!confirm('Remove the voting options and show this as a plain slide?')) return;
+      stage.type = 'slide';
+      stage.image = stage.slideImage;
+      delete stage.slideImage;
+      delete stage.options; delete stage.maxSelect;
+      ctx.onStructure();
+    }, 'b-btn--link'));
+  }
 }
 
 function contentFields(stage, root, ctx) {

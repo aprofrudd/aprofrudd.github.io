@@ -50,9 +50,14 @@
     kicker.textContent = `Stage ${currentStage + 1} of ${stagesTotal()}`;
     stagePane.appendChild(kicker);
 
-    const h = el('h2');
-    h.textContent = stage.title;
-    stagePane.appendChild(h);
+    // An imported deck slide carries its own title inside the image, so
+    // repeating it above just eats projector space. The title is still used in
+    // the builder's slide list and on the students' phones.
+    if (stage.type !== 'slide' && !stage.slideImage) {
+      const h = el('h2');
+      h.textContent = stage.title;
+      stagePane.appendChild(h);
+    }
 
     if (stage.blurb) {
       const p = el('p', 'blurb');
@@ -62,6 +67,12 @@
 
     if (stage.type === 'map') {
       renderProjectorMap(stagePane, stage);
+    } else if (stage.type === 'mcq' && stage.slideImage) {
+      // A poll imported from a deck: the teacher's slide already shows the
+      // question and the answer choices exactly as they designed them, so show
+      // that and nothing else. The live bars go in the results pane; the phones
+      // still render the tappable option list from stage.options.
+      renderDeckSlide(stagePane, { image: stage.slideImage, title: stage.title });
     } else if (stage.type === 'mcq') {
       // Optional figure shown above the option list - useful when the
       // question requires students to read a chart to answer.
@@ -100,8 +111,22 @@
       renderContent(stagePane, stage);
     } else if (stage.type === 'poster') {
       renderPosterInstructions(stagePane, stage);
+    } else if (stage.type === 'slide') {
+      renderDeckSlide(stagePane, stage);
     }
     // QR + URL live in the persistent top-right corner of the projector page.
+  }
+
+  // A slide imported from a PowerPoint/Keynote deck: one rasterised page shown
+  // as large as the projector allows. No vote attaches to it - it is the
+  // teacher's own slide, displayed inside the lesson flow.
+  function renderDeckSlide(parent, stage) {
+    const wrap = el('div', 'deck-slide');
+    const img = el('img');
+    img.src = stage.image;
+    img.alt = stage.title || '';
+    wrap.appendChild(img);
+    parent.appendChild(wrap);
   }
 
   function renderProjectorMap(parent, stage) {
@@ -320,7 +345,7 @@
       return;
     }
 
-    if (stage.type === 'media' || stage.type === 'content') {
+    if (stage.type === 'media' || stage.type === 'content' || stage.type === 'slide') {
       const note = el('div', 'results-empty');
       note.textContent = 'No vote on this stage - discussion / viewing.';
       resultsPane.appendChild(note);
@@ -371,6 +396,12 @@
   }
 
   function rerender() {
+    // Deck slides get the full projector width (the results column is empty on
+    // them anyway); CSS keys off this class.
+    const cur = window.STAGES[currentStage];
+    // Display-only deck slides get the whole width; a slide-backed poll keeps
+    // the results column, so it is not included here.
+    document.body.classList.toggle('stage-slide', !!cur && cur.type === 'slide');
     renderStagePane();
     renderResultsPane();
     renderControls();

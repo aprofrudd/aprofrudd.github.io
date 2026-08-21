@@ -133,3 +133,60 @@ button { font-family: inherit; }
   .b-cols { grid-template-columns: 1fr; grid-template-rows: auto 320px auto; }
   .b-slides, .b-panelcol { border: 0; border-bottom: 1px solid var(--line); }
 }
+
+/* --- Deck import --- */
+
+.b-dash-hint {
+  color: var(--b-muted, #6b7280);
+  font-size: 0.85rem;
+  align-self: center;
+}
+
+.b-btn--import {
+  border-style: dashed;
+}
+
+.b-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 20, 26, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.b-overlay-box {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  min-width: 340px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.b-overlay-box h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.b-overlay-msg {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.b-overlay-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.b-overlay-fill {
+  height: 100%;
+  width: 0;
+  background: #2563eb;
+  border-radius: 4px;
+  transition: width 200ms ease;
+}

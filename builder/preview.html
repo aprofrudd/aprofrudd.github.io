@@ -6,7 +6,7 @@
   <title>Preview</title>
   <!-- The real engine stylesheet + the live theme (injected below). This is the
        same CSS the published page uses, so the preview is pixel-identical. -->
-  <link rel="stylesheet" href="../engine/styles.css">
+  <link rel="stylesheet" href="../engine/styles.css" id="engine-css">
   <style id="preview-theme"></style>
   <style>
     html, body { min-height: 100%; }
@@ -20,6 +20,15 @@
   (function () {
     // mode comes from the hash: #phone or #projector
     var mode = (location.hash || '#projector').replace('#', '').split('?')[0] || 'projector';
+
+    // The editor reloads this frame with ?t=<now> on every edit. Pass that token
+    // down to the engine files too - without it the browser serves a cached
+    // engine and the preview silently shows the previous version's behaviour,
+    // which is indistinguishable from a bug in whatever you just changed.
+    var bust = (location.search || '').replace(/^\?/, '');
+    function engineUrl(path) { return path + (bust ? '?' + bust : ''); }
+    var css = document.getElementById('engine-css');
+    if (css && bust) css.href = engineUrl('../engine/styles.css');
 
     var data = {};
     try { data = JSON.parse(sessionStorage.getItem('builder_preview') || '{}'); }
@@ -96,12 +105,12 @@
     // the renderer once window.createStore exists.
     var store = document.createElement('script');
     store.type = 'module';
-    store.src = '../engine/store.js';
+    store.src = engineUrl('../engine/store.js');
     document.body.appendChild(store);
     (function waitForStore() {
       if (window.createStore) {
         var s = document.createElement('script');
-        s.src = mode === 'phone' ? '../engine/vote.js' : '../engine/results.js';
+        s.src = engineUrl(mode === 'phone' ? '../engine/vote.js' : '../engine/results.js');
         document.body.appendChild(s);
       } else { setTimeout(waitForStore, 30); }
     })();

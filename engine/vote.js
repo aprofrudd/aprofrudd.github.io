@@ -374,6 +374,7 @@
       }
       case 'media':   renderWait(stage.title); break;
       case 'content': renderWait(stage.title); break;
+      case 'slide':   renderWait(stage.title); break;
       case 'poster':  renderPosterCta(stage); break;
     }
   }
