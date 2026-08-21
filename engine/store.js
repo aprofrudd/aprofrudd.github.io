@@ -6,15 +6,24 @@
 // share a single Firebase project without their votes colliding.
 //
 // Public surface returned by createStore():
-//   onStage(cb)             - subscribe to {stage, epoch} changes
-//   setStage(n)             - set current stage index (projector only)
-//   onVotes(cb)             - subscribe to all votes; cb(votes[])
-//   addVote(stage, choice)  - record a vote; returns the new vote's id
-//   removeVote(voteId)      - delete a single vote (used by "Change my vote")
-//   clearVotes()            - wipe all votes and bump epoch (teacher reset)
+//   onStage(cb)                - subscribe to {stage, epoch, stageReset} changes
+//   setStage(n)                - set current stage index (projector only)
+//   onVotes(cb)                - subscribe to all votes; cb(votes[])
+//   addVote(stage, choice)     - record a vote; returns the new vote's id
+//   removeVote(voteId)         - delete a single vote (used by "Change my vote")
+//   clearVotes()               - wipe all votes and bump epoch (teacher reset)
+//   clearVotesForStage(stageId)- wipe one stage's votes and stamp stageReset,
+//                                so phones unlock just that question
+//   probeControl()             - harmless state-doc write; resolves true if this
+//                                account is allowed to drive the lesson
+//
+// In live mode a failed Firebase init no longer falls back to localStorage -
+// that silently forked students into device-only voting that never reached the
+// projector. createStore() instead resolves {failed: true} and the pages show
+// a plain reconnect screen.
 //
 // Vote shape: { id, stage: string, choice: string, ts }
-// State doc shape: { stage: int, epoch: int, ts }
+// State doc shape: { stage: int, epoch: int, stageReset: {stage, nonce}, ts }
 
 const LESSON_ID = window.LESSON_ID || 'lesson';
 const STATE_KEY = LESSON_ID + '_state_stage';
@@ -26,9 +35,9 @@ function createLocalStore() {
 
   function readState() {
     const raw = localStorage.getItem(STATE_KEY);
-    if (!raw) return {stage: 0, epoch: 0};
+    if (!raw) return {stage: 0, epoch: 0, stageReset: null};
     const s = JSON.parse(raw);
-    return {stage: s.stage ?? 0, epoch: s.epoch ?? 0};
+    return {stage: s.stage ?? 0, epoch: s.epoch ?? 0, stageReset: s.stageReset || null};
   }
   function writeState(state) {
     localStorage.setItem(STATE_KEY, JSON.stringify({...state, ts: Date.now()}));
@@ -55,9 +64,10 @@ function createLocalStore() {
     onStage(cb) { stageSubs.push(cb); lastSnapshotAt = Date.now(); cb(readState()); },
     setStage(n) {
       const cur = readState();
-      writeState({stage: n, epoch: cur.epoch});
+      writeState({stage: n, epoch: cur.epoch, stageReset: cur.stageReset});
       emitState();
     },
+    probeControl() { return Promise.resolve(true); },
     refreshStage() { emitState(); },
     msSinceSnapshot() { return Date.now() - lastSnapshotAt; },
     onVotes(cb) { voteSubs.push(cb); lastVotesAt = Date.now(); cb(readVotes()); },
@@ -79,9 +89,18 @@ function createLocalStore() {
     clearVotes() {
       writeVotes([]);
       const cur = readState();
-      writeState({stage: cur.stage, epoch: (cur.epoch || 0) + 1});
+      writeState({stage: cur.stage, epoch: (cur.epoch || 0) + 1, stageReset: cur.stageReset});
       emitState();
       emitVotes();
+    },
+    clearVotesForStage(stageId) {
+      writeVotes(readVotes().filter(v => v.stage !== stageId));
+      const cur = readState();
+      writeState({stage: cur.stage, epoch: cur.epoch,
+                  stageReset: {stage: stageId, nonce: Date.now()}});
+      emitState();
+      emitVotes();
+      return Promise.resolve();
     },
     // Competition entries. In local-dev these stay on the device (no teacher
     // collection) — the button still works for testing.
@@ -125,7 +144,7 @@ async function createFirebaseStore() {
   function emitStage(data) {
     lastSnapshotAt = Date.now();
     const d = data || { stage: 0, epoch: 0 };
-    const payload = { stage: d.stage ?? 0, epoch: d.epoch ?? 0 };
+    const payload = { stage: d.stage ?? 0, epoch: d.epoch ?? 0, stageReset: d.stageReset || null };
     stageSubs.forEach(cb => cb(payload));
   }
   function subscribeStage() {
@@ -203,6 +222,31 @@ async function createFirebaseStore() {
       const snap = await getDocs(votesCol);
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
     },
+    // Re-run ONE question without destroying the rest of the lesson's results.
+    // Stamping stageReset on the state doc is what unlocks the phones for just
+    // that stage (vote.js watches the nonce), so stamp first, delete second -
+    // mirroring clearVotes' epoch-first ordering.
+    async clearVotesForStage(stageId) {
+      await setDoc(stateRef, { stageReset: { stage: stageId, nonce: Date.now() },
+                               ts: serverTimestamp() }, { merge: true });
+      const snap = await getDocs(votesCol);
+      await Promise.all(snap.docs
+        .filter(d => d.data().stage === stageId)
+        .map(d => deleteDoc(d.ref)));
+    },
+    // A harmless merge write to the state doc. The Firestore rules only allow
+    // the teacher's account to write state, so success here means "this
+    // account can drive the lesson" - which lets the projector tell a wrong
+    // Google account apart from the right one WITHOUT shipping the teacher's
+    // email to every student's browser.
+    async probeControl() {
+      try {
+        await setDoc(stateRef, { probe: serverTimestamp() }, { merge: true });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
     // Competition entries per lesson. Students can create/update their own entry;
     // only the teacher (by email, in the rules) can read or delete them.
     async submitPoster(payload, id) {
@@ -223,8 +267,12 @@ async function createStore() {
   if (window.IS_LIVE) {
     try { return await createFirebaseStore(); }
     catch (e) {
-      console.warn('[' + LESSON_ID + '] Firebase init failed, falling back to localStorage:', e);
-      return createLocalStore();
+      // Do NOT fall back to localStorage here. A student whose SDK import
+      // failed (congested lecture WiFi) would get a fully working-looking
+      // vote page whose votes never reach the projector. Fail loudly instead;
+      // vote.js/results.js render a plain reconnect screen.
+      console.warn('[' + LESSON_ID + '] Firebase init failed:', e);
+      return { failed: true, error: e };
     }
   }
   return createLocalStore();

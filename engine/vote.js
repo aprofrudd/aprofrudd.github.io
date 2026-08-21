@@ -4,6 +4,13 @@
 // "Change my vote" button. When the teacher advances the stage on the
 // projector, every connected phone re-renders.
 //
+// Voting is ack-gated: the phone only says "your vote is in" AFTER Firestore
+// confirms the write. A slow write shows an honest "still sending" state (the
+// SDK keeps it queued, so it lands when the connection returns); a rejected
+// write re-opens the question with a plain-English retry message. The old
+// behaviour - mark voted locally, then fire-and-forget - could lock 200 phones
+// on a false success screen while the projector stayed at zero.
+//
 // Lesson-agnostic engine code - uses window.LESSON_ID (set by
 // lesson.config.js) so multiple lessons can coexist on the same origin
 // without clobbering each other's localStorage.
@@ -14,23 +21,59 @@
   const dev   = document.getElementById('dev-banner');
   const store = await window.createStore();
 
+  function el(tag, cls, html) {
+    const e = document.createElement(tag);
+    if (cls)  e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+
+  // Screen-reader live region: announces question changes, vote confirmations
+  // and errors, since the page rebuilds its DOM silently otherwise.
+  const live = el('div', 'sr-only');
+  live.setAttribute('aria-live', 'polite');
+  live.setAttribute('role', 'status');
+  document.body.appendChild(live);
+  function announce(text) {
+    live.textContent = '';
+    setTimeout(() => { live.textContent = text; }, 40);
+  }
+
+  // Live mode with a dead Firebase init: say so and offer reload, instead of
+  // silently collecting votes into localStorage that never reach the screen.
+  if (store.failed) {
+    root.innerHTML = '';
+    const wrap = el('div', 'thanks connect-error');
+    wrap.innerHTML = `
+      <h2>Couldn't connect.</h2>
+      <p>Check your WiFi or mobile signal, then reload this page.</p>
+      <button type="button" class="mcq-submit" style="margin-top:1rem;">Reload</button>`;
+    wrap.querySelector('button').addEventListener('click', () => location.reload());
+    root.appendChild(wrap);
+    announce("Couldn't connect. Check your WiFi and reload this page.");
+    return;
+  }
+
   if (!store.isLive) {
     dev.hidden = false;
-    dev.textContent = 'Local-dev mode (no Firebase) - votes stored on this device only.';
+    dev.textContent = 'Practice mode - votes stay on this device and only sync between tabs here.';
   }
 
   let currentStageIndex = -1;
   let currentEpoch = null;
   const EPOCH_KEY  = LESSON_ID + '_epoch';
+  const SRESET_KEY = LESSON_ID + '_sreset_nonce';
   const VOTED_PREFIX = LESSON_ID + '_voted_';
 
   function votedKey(stageId) { return VOTED_PREFIX + stageId; }
   function hasVoted(stageId) { return localStorage.getItem(votedKey(stageId)) !== null; }
+  function currentStage() { return (window.STAGES || [])[currentStageIndex] || null; }
 
   // Voted state on the device.
-  // Always normalised to {choices: [], voteIds: []} (arrays). Single-select
-  // stages have one entry; multi-select stages have up to maxSelect entries.
-  // Backwards-compatible with the older single-shape {choice, voteId}.
+  // Always normalised to {choices: [], voteIds: [], pending} (arrays). Single-
+  // select stages have one entry; multi-select up to maxSelect. `pending` means
+  // the server has not acked yet (weak connection) - the writes are queued in
+  // the SDK and the ids get patched in when they land.
   function readVoted(stageId) {
     const raw = localStorage.getItem(votedKey(stageId));
     if (!raw) return null;
@@ -43,10 +86,11 @@
     } catch (_) { /* fall through */ }
     return { choices: [raw], voteIds: [null] };
   }
-  function markVoted(stageId, choices, voteIds) {
+  function markVoted(stageId, choices, voteIds, pending) {
     localStorage.setItem(votedKey(stageId), JSON.stringify({
       choices: Array.isArray(choices) ? choices : [choices],
-      voteIds: Array.isArray(voteIds) ? voteIds : [voteIds || null]
+      voteIds: Array.isArray(voteIds) ? voteIds : [voteIds || null],
+      pending: !!pending
     }));
   }
   function clearVoted(stageId) { localStorage.removeItem(votedKey(stageId)); }
@@ -76,50 +120,139 @@
     }
   }
 
-  function el(tag, cls, html) {
-    const e = document.createElement(tag);
-    if (cls)  e.className = cls;
-    if (html != null) e.innerHTML = html;
-    return e;
+  // Teacher re-ran a single question (stageReset on the state doc): unlock just
+  // that stage on this phone, leaving every other answer intact.
+  function syncStageReset(stageReset) {
+    if (!stageReset || stageReset.nonce == null) return false;
+    const seen = localStorage.getItem(SRESET_KEY);
+    if (String(seen) === String(stageReset.nonce)) return false;
+    localStorage.setItem(SRESET_KEY, String(stageReset.nonce));
+    if (seen === null) return false;   // first sight of the field - nothing to undo
+    clearVoted(stageReset.stage);
+    const cur = currentStage();
+    return !!(cur && cur.id === stageReset.stage);
   }
+
+  // ---- casting votes (ack-gated) -------------------------------------------
+
+  const ACK_WAIT_MS = 4000;
+
+  function showSending() {
+    root.querySelectorAll('button').forEach(b => { b.disabled = true; });
+    const note = el('div', 'vote-sending');
+    note.textContent = 'Sending your vote…';
+    root.appendChild(note);
+    announce('Sending your vote.');
+  }
+
+  function showVoteError() {
+    const note = el('div', 'vote-error');
+    note.textContent = "Your vote didn't send - check your WiFi and tap your answer again.";
+    root.prepend(note);
+  }
+
+  async function castVotes(stage, choices) {
+    if (hasVoted(stage.id)) return;
+    showSending();
+    const writes = choices.map(c => store.addVote(stage.id, c));
+    const all = Promise.all(writes);
+    const outcome = await Promise.race([
+      all.then(ids => ({ ok: true, ids })).catch(e => ({ ok: false, e })),
+      new Promise(res => setTimeout(() => res({ slow: true }), ACK_WAIT_MS))
+    ]);
+
+    if (outcome.ok) {
+      markVoted(stage.id, choices, outcome.ids, false);
+      renderThanks(stage);
+      announce('Got it - your vote is in.');
+      return;
+    }
+
+    if (outcome.slow) {
+      // Not failed - queued. The SDK delivers it when the connection returns,
+      // so lock the stage but say honestly that it is still on its way.
+      markVoted(stage.id, choices, choices.map(() => null), true);
+      renderThanks(stage);
+      announce('Still sending your vote - keep this page open.');
+      all.then(ids => {
+        markVoted(stage.id, choices, ids, false);
+        const cur = currentStage();
+        if (cur && cur.id === stage.id && hasVoted(stage.id)) renderThanks(stage);
+        announce('Your vote is in.');
+      }).catch(e => {
+        console.warn('[' + LESSON_ID + '] queued vote rejected:', e);
+        clearVoted(stage.id);
+        const cur = currentStage();
+        if (cur && cur.id === stage.id) { render(currentStageIndex); showVoteError(); }
+        announce("Your vote didn't send - tap your answer to try again.");
+      });
+      return;
+    }
+
+    // Rejected outright (rules, quota, bad request): reopen the question.
+    console.warn('[' + LESSON_ID + '] vote rejected:', outcome.e);
+    render(currentStageIndex);
+    showVoteError();
+    announce("Your vote didn't send - tap your answer to try again.");
+  }
+
+  // ---- screens -------------------------------------------------------------
 
   function renderThanks(stage) {
     root.innerHTML = '';
     const wrap = el('div', 'thanks');
     const v = readVoted(stage.id);
     const choices = (v && v.choices) || [];
+    const pending = !!(v && v.pending);
     const labels = choices.map(c => labelForChoice(stage, c)).filter(Boolean);
 
     let picksHtml = '';
     if (labels.length === 1) {
-      picksHtml = `<p style="font-size:0.95rem;margin-top:0.5rem;color:#6b4a3e;">You picked <strong>${labels[0]}</strong>.</p>`;
+      picksHtml = `<p class="thanks-picks">You picked <strong>${labels[0]}</strong>.</p>`;
     } else if (labels.length > 1) {
       const items = labels.map(l => `<li>${l}</li>`).join('');
       picksHtml = `
-        <div style="margin-top:0.75rem;color:#6b4a3e;font-size:0.95rem;">
+        <div class="thanks-picks">
           <div>You picked:</div>
-          <ul style="text-align:left;margin:0.3rem auto 0;display:inline-block;padding-left:1.25rem;">${items}</ul>
+          <ul>${items}</ul>
         </div>`;
     }
 
-    wrap.innerHTML = `
+    wrap.innerHTML = pending ? `
+      <h2>Sending…</h2>
+      <span class="arrow">↑</span>
+      <p>Weak connection - your vote goes through as soon as it's back. Keep this page open.</p>
+      ${picksHtml}
+      <button type="button" class="change-vote" disabled>Change my vote</button>
+      <p class="thanks-note">You can change your vote once it has sent.</p>` : `
       <h2>Got it.</h2>
       <span class="arrow">↑</span>
       <p>Look at the screen - your vote is in.</p>
       ${picksHtml}
       <button type="button" class="change-vote">Change my vote</button>
-      <p style="font-size:0.85rem;margin-top:1.5rem;color:#9a7d6f;">
-        The next question will appear automatically.
-      </p>`;
-    wrap.querySelector('.change-vote').addEventListener('click', async () => {
+      <p class="thanks-note">The next question will appear automatically.</p>`;
+
+    const changeBtn = wrap.querySelector('.change-vote');
+    changeBtn.addEventListener('click', async () => {
       const cur = readVoted(stage.id);
       const ids = (cur && cur.voteIds) || [];
-      // Delete every vote this device cast for this stage in parallel
-      await Promise.all(ids.filter(Boolean).map(id =>
-        store.removeVote(id).catch(() => {})
-      ));
-      clearVoted(stage.id);
-      render(currentStageIndex);
+      changeBtn.disabled = true;
+      changeBtn.textContent = 'Removing…';
+      try {
+        // Delete every vote this device cast for this stage in parallel.
+        // Ids are always present here - the button is disabled while pending.
+        await Promise.all(ids.filter(Boolean).map(id => store.removeVote(id)));
+        clearVoted(stage.id);
+        render(currentStageIndex);
+        announce('Vote removed - pick again.');
+      } catch (e) {
+        console.warn('[' + LESSON_ID + '] removeVote failed:', e);
+        changeBtn.disabled = false;
+        changeBtn.textContent = 'Change my vote';
+        const note = el('p', 'vote-error');
+        note.textContent = "Couldn't remove your vote - check your connection and try again.";
+        wrap.appendChild(note);
+      }
     });
     root.appendChild(wrap);
   }
@@ -145,31 +278,30 @@
     root.appendChild(wrap);
   }
 
-  function renderMap(stage) {
-    root.innerHTML = '';
-
-    const head = el('div', 'header-inline');
-    head.style.padding = '0 0 1rem';
+  // Question header, shared by map + mcq. Focus lands on the heading so a
+  // screen reader announces the new question the moment the stage changes.
+  function questionHead(qNumber, stage) {
+    const head = el('div', 'q-head');
     head.innerHTML = `
-      <div class="kicker" style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:#6b4a3e;">
-        Question 1
-      </div>
-      <h2 style="font-family:Georgia,serif;font-size:1.25rem;margin:0.25rem 0 0.5rem;">${stage.title}</h2>
-      <p style="color:#6b4a3e;font-size:0.9rem;margin:0;">${stage.blurb || ''}</p>
-    `;
+      <div class="q-kicker">Question ${qNumber}</div>
+      <h2 class="q-title" tabindex="-1">${stage.title}</h2>
+      ${stage.blurb ? `<p class="q-blurb">${stage.blurb}</p>` : ''}`;
+    return head;
+  }
+  function focusQuestion(head, qNumber, stage, choiceCount) {
+    const h = head.querySelector('.q-title');
+    if (h) { try { h.focus({ preventScroll: true }); } catch (_) {} }
+    announce(`Question ${qNumber}: ${stage.title}. ${choiceCount} choices.`);
+  }
+
+  function renderMap(stage, qNumber) {
+    root.innerHTML = '';
+    const head = questionHead(qNumber, stage);
     root.appendChild(head);
 
-    async function castVote(choiceId) {
-      if (hasVoted(stage.id)) return;
-      markVoted(stage.id, choiceId, null);
-      renderThanks(stage);
-      try {
-        const voteId = await store.addVote(stage.id, choiceId);
-        markVoted(stage.id, choiceId, voteId);
-      } catch (e) { console.warn('[' + LESSON_ID + '] vote failed:', e); }
-    }
-
     const cities = window.CITIES || [];
+    let selectedId = null;
+
     const mapWrap = el('div', 'map-wrap');
     const img = el('img', 'basemap');
     img.src = (stage.map || 'map.svg');
@@ -179,23 +311,50 @@
     const pinsLayer = el('div', 'pins');
     mapWrap.appendChild(pinsLayer);
 
+    // Confirm bar: a 34px dot is too easy to fat-finger for the tap to be the
+    // vote itself, so the first tap selects and this button casts.
+    const confirmBar = el('div', 'map-confirm');
+    confirmBar.hidden = true;
+    const confirmBtn = el('button', 'mcq-submit');
+    confirmBtn.type = 'button';
+    confirmBar.appendChild(confirmBtn);
+    confirmBtn.addEventListener('click', () => {
+      if (selectedId) castVotes(stage, [selectedId]);
+    });
+
+    function select(cityId) {
+      selectedId = cityId;
+      const city = cities.find(c => c.id === cityId);
+      root.querySelectorAll('.pin, .city-list-btn').forEach(n => {
+        n.classList.toggle('selected', n.dataset.city === cityId);
+        if (n.classList.contains('city-list-btn')) {
+          n.setAttribute('aria-pressed', String(n.dataset.city === cityId));
+        }
+      });
+      confirmBar.hidden = false;
+      confirmBtn.textContent = 'Confirm: ' + (city ? city.name : cityId);
+      announce((city ? city.name : cityId) + ' selected. Tap confirm to cast your vote.');
+    }
+
     cities.forEach(city => {
       const btn = el('button', 'pin');
+      btn.type = 'button';
       btn.style.left = city.x + '%';
       btn.style.top  = city.y + '%';
       btn.setAttribute('aria-label', city.name);
       btn.dataset.city = city.id;
       btn.dataset.dir  = city.labelDir || 's';
       btn.innerHTML = `<span class="dot"></span><span class="label">${city.name}</span>`;
-      btn.addEventListener('click', () => castVote(city.id));
+      btn.addEventListener('click', () => select(city.id));
       pinsLayer.appendChild(btn);
     });
 
     root.appendChild(mapWrap);
 
     const note = el('div', 'tap-hint');
-    note.textContent = stage.tapHint || 'Tap the marker you want to pick.';
+    note.textContent = stage.tapHint || 'Tap a marker to pick it, then confirm.';
     root.appendChild(note);
+    root.appendChild(confirmBar);
 
     // Tap-friendly fallback list - labels overlap badly when 16+ pins are
     // squeezed into a phone-width map, so we hide labels on small screens
@@ -224,9 +383,11 @@
         const row = el('div', 'city-list-row');
         items.forEach(city => {
           const b = el('button', 'city-list-btn');
+          b.type = 'button';
           b.dataset.city = city.id;
           b.textContent = city.name;
-          b.addEventListener('click', () => castVote(city.id));
+          b.setAttribute('aria-pressed', 'false');
+          b.addEventListener('click', () => select(city.id));
           row.appendChild(b);
         });
         group.appendChild(row);
@@ -235,26 +396,36 @@
 
       root.appendChild(list);
     }
+
+    focusQuestion(head, qNumber, stage, cities.length);
   }
 
   function renderMcq(stage, qNumber) {
     root.innerHTML = '';
-
-    const head = el('div');
-    head.innerHTML = `
-      <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:#6b4a3e;">
-        Question ${qNumber}
-      </div>
-      <h2 style="font-family:Georgia,serif;font-size:1.3rem;margin:0.25rem 0 0.5rem;">${stage.title}</h2>
-      ${stage.blurb ? `<p style="color:#6b4a3e;font-size:0.95rem;margin:0 0 0.5rem;">${stage.blurb}</p>` : ''}
-    `;
+    const head = questionHead(qNumber, stage);
     root.appendChild(head);
+
+    // A question that hangs off a chart (or an imported slide) has to show it
+    // on the phone too - the projector may be hard to read from the back row.
+    const figSrc = stage.figure || stage.slideImage;
+    if (figSrc) {
+      const fig = el('div', 'phone-figure');
+      const img = el('img');
+      img.src = figSrc;
+      img.alt = stage.figureCaption || 'Figure for this question';
+      fig.appendChild(img);
+      if (stage.figureCaption) {
+        const cap = el('div', 'phone-figure-caption');
+        cap.textContent = stage.figureCaption;
+        fig.appendChild(cap);
+      }
+      root.appendChild(fig);
+    }
 
     const maxSelect = Math.max(1, Number(stage.maxSelect || 1));
     const isMulti   = maxSelect > 1;
 
     const list = el('div', 'mcq-list');
-    const buttons = new Map();   // opt.id → button element (used to toggle .selected)
     const selected = new Set();  // selected opt.ids while the student is choosing
 
     // Helper to render label + optional sublabel inside an option button.
@@ -274,6 +445,8 @@
     if (isMulti) {
       // Multi-select flow: tap to toggle, submit when ready.
       const counter = el('div', 'mcq-counter');
+      const limitNote = el('div', 'mcq-limit-note');
+      limitNote.hidden = true;
       const submit  = el('button', 'mcq-submit');
       submit.type = 'button';
       submit.disabled = true;
@@ -289,23 +462,30 @@
       stage.options.forEach(opt => {
         const b = el('button', 'mcq-option');
         b.type = 'button';
+        b.setAttribute('aria-pressed', 'false');
         fillOption(b, opt);
         b.addEventListener('click', () => {
           if (selected.has(opt.id)) {
             selected.delete(opt.id);
             b.classList.remove('selected');
+            b.setAttribute('aria-pressed', 'false');
           } else {
             if (selected.size >= maxSelect) {
+              // Visible + audible rejection, not just a shake.
               b.classList.add('limit-flash');
               setTimeout(() => b.classList.remove('limit-flash'), 400);
+              limitNote.hidden = false;
+              limitNote.textContent = `You can pick up to ${maxSelect} - unselect one first.`;
+              setTimeout(() => { limitNote.hidden = true; }, 2500);
+              announce(`You can pick up to ${maxSelect}. Unselect one first.`);
               return;
             }
             selected.add(opt.id);
             b.classList.add('selected');
+            b.setAttribute('aria-pressed', 'true');
           }
           refresh();
         });
-        buttons.set(opt.id, b);
         list.appendChild(b);
       });
 
@@ -313,41 +493,28 @@
       root.appendChild(list);
       const footer = el('div', 'mcq-footer');
       footer.appendChild(counter);
+      footer.appendChild(limitNote);
       footer.appendChild(submit);
       root.appendChild(footer);
 
-      submit.addEventListener('click', async () => {
+      submit.addEventListener('click', () => {
         if (hasVoted(stage.id) || selected.size < 1) return;
-        const choices = Array.from(selected);
-        // Lock optimistically with no IDs, then write votes and patch in IDs.
-        markVoted(stage.id, choices, choices.map(() => null));
-        renderThanks(stage);
-        try {
-          const voteIds = await Promise.all(
-            choices.map(c => store.addVote(stage.id, c))
-          );
-          markVoted(stage.id, choices, voteIds);
-        } catch (e) { console.warn('[' + LESSON_ID + '] vote failed:', e); }
+        castVotes(stage, Array.from(selected));
       });
+      focusQuestion(head, qNumber, stage, stage.options.length);
       return;
     }
 
-    // Single-select fast path (unchanged behaviour).
+    // Single-select fast path.
     stage.options.forEach(opt => {
       const b = el('button', 'mcq-option');
+      b.type = 'button';
       fillOption(b, opt);
-      b.addEventListener('click', async () => {
-        if (hasVoted(stage.id)) return;
-        markVoted(stage.id, [opt.id], [null]);
-        renderThanks(stage);
-        try {
-          const voteId = await store.addVote(stage.id, opt.id);
-          markVoted(stage.id, [opt.id], [voteId]);
-        } catch (e) { console.warn('[' + LESSON_ID + '] vote failed:', e); }
-      });
+      b.addEventListener('click', () => castVotes(stage, [opt.id]));
       list.appendChild(b);
     });
     root.appendChild(list);
+    focusQuestion(head, qNumber, stage, stage.options.length);
   }
 
   function render(stageIndex) {
@@ -363,15 +530,13 @@
       return;
     }
 
+    const qIdx = stages
+      .slice(0, stageIndex + 1)
+      .filter(s => s.type === 'mcq' || s.type === 'map').length;
+
     switch (stage.type) {
-      case 'map': renderMap(stage); break;
-      case 'mcq': {
-        const qIdx = stages
-          .slice(0, stageIndex + 1)
-          .filter(s => s.type === 'mcq' || s.type === 'map').length;
-        renderMcq(stage, qIdx);
-        break;
-      }
+      case 'map': renderMap(stage, qIdx); break;
+      case 'mcq': renderMcq(stage, qIdx); break;
       case 'media':   renderWait(stage.title); break;
       case 'content': renderWait(stage.title); break;
       case 'slide':   renderWait(stage.title); break;
@@ -387,17 +552,23 @@
       <span class="arrow" style="font-size:2.2rem;">🎓</span>
       <p>${stage.blurb || 'Turn your answers into a poster you can keep.'}</p>
       <a class="poster-cta" href="${stage.href || 'poster.html'}">Create my poster →</a>
-      <p style="font-size:0.85rem;margin-top:1.5rem;color:#9a7d6f;">
-        It opens on this phone using the answers you gave today.
-      </p>`;
+      <p class="thanks-note">It opens on this phone using the answers you gave today.</p>`;
     root.appendChild(wrap);
   }
 
-  store.onStage(({stage, epoch}) => {
+  // The builder preview drives this hook to update content without a full
+  // iframe reload (which flashed a half-booted page on every keystroke).
+  window.__previewRefresh = (stages) => {
+    if (stages) window.STAGES = stages;
+    render(currentStageIndex);
+  };
+
+  store.onStage(({stage, epoch, stageReset}) => {
     const epochChanged = currentEpoch !== null && currentEpoch !== epoch;
     syncEpoch(epoch);
     currentEpoch = epoch ?? currentEpoch;
-    if (stage !== currentStageIndex || epochChanged) {
+    const stageUnlocked = syncStageReset(stageReset);
+    if (stage !== currentStageIndex || epochChanged || stageUnlocked) {
       currentStageIndex = stage;
       render(stage);
     }

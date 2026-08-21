@@ -1138,3 +1138,143 @@ body.projector.stage-slide .stage-pane {
 body.projector.stage-slide .deck-slide img {
   max-height: 78vh;
 }
+
+/* --- Honest voting states, a11y, and lecture-hall legibility --- */
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Question header on phones (was inline-styled with fixed parchment hexes,
+   which broke on dark themes). */
+.q-kicker {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.q-title {
+  font-family: Georgia, serif;
+  font-size: 1.3rem;
+  margin: 0.25rem 0 0.5rem;
+  outline: none;
+}
+.q-blurb {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+}
+
+.thanks-picks { font-size: 0.95rem; margin-top: 0.75rem; color: var(--ink-soft); }
+.thanks-picks ul { text-align: left; margin: 0.3rem auto 0; display: inline-block; padding-left: 1.25rem; }
+.thanks-note { font-size: 0.85rem; margin-top: 1.5rem; color: var(--ink-soft); opacity: 0.85; }
+
+.vote-sending {
+  margin: 0.9rem 0 0;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  animation: vote-pulse 1.2s ease-in-out infinite;
+}
+@keyframes vote-pulse { 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) { .vote-sending { animation: none; } }
+
+.vote-error {
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(179, 38, 30, 0.1);
+  border: 1px solid rgba(179, 38, 30, 0.35);
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+/* Figure shown on the phone for questions that hang off a chart or slide. */
+.phone-figure { margin: 0 0 1rem; }
+.phone-figure img {
+  display: block;
+  width: 100%;
+  max-height: 30vh;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.phone-figure-caption {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-top: 0.3rem;
+  text-align: center;
+}
+
+/* Map voting is select-then-confirm: a 34px dot is too easy to fat-finger
+   for the tap itself to be the vote. */
+.map-confirm { margin: 0.75rem 0; display: flex; justify-content: center; }
+.pin.selected .dot { background: var(--accent); transform: scale(1.35); }
+.pin.selected .label {
+  opacity: 1;
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+.city-list-btn.selected {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+
+.mcq-limit-note {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0.35rem 0;
+}
+
+/* Projector-only chrome */
+.stage-kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.controls .reset.armed,
+.controls button.armed {
+  background: #8c2318;
+  color: #fff;
+  border-color: #8c2318;
+}
+
+/* Legible from the back row: the live bars are the whole point of the
+   projector, so they get lecture-hall sizes, not dashboard sizes. */
+body.projector .results-row {
+  grid-template-columns: 14rem 1fr 3.5rem;
+  font-size: 1.15rem;
+}
+body.projector .results-row .bar { height: 22px; border-radius: 11px; }
+body.projector .results-row .bar-fill { border-radius: 11px; }
+body.projector .results-row .count { font-size: 1.2rem; }
+body.projector .qr-corner { width: 260px; }
+body.projector .qr-corner img { width: 236px; height: 236px; }
+
+/* Static "connecting" placeholder in the shells, replaced by the first
+   render - so joining is never a silent white page. */
+.connecting {
+  color: var(--ink-soft);
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 1rem;
+  animation: vote-pulse 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .connecting { animation: none; } }
+
+/* The QR corner grew to 260px; keep the projector layout clear of it. */
+body.projector .main { padding-right: calc(2rem + 280px); }
+body.projector .header { padding-right: calc(1.25rem + 280px); }

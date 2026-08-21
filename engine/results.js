@@ -23,9 +23,23 @@
   let isTeacher = false;
 
   const store = await window.createStore();
+
+  // Live mode with a dead Firebase init: a plain reconnect screen beats a
+  // projector that looks fine but never receives a vote.
+  if (store.failed) {
+    stagePane.innerHTML = '<h2>Couldn\'t connect</h2><p class="blurb">Check the network connection, then reload this page.</p>';
+    resultsPane.innerHTML = '';
+    const reload = document.createElement('button');
+    reload.textContent = 'Reload';
+    reload.className = 'mcq-submit';
+    reload.addEventListener('click', () => location.reload());
+    stagePane.appendChild(reload);
+    return;
+  }
+
   if (!store.isLive) {
     dev.hidden = false;
-    dev.textContent = 'Local-dev mode (no Firebase) - votes only sync between tabs on this device.';
+    dev.textContent = 'Practice mode - votes only sync between tabs on this device.';
   }
 
   let currentStage = 0;
@@ -45,8 +59,7 @@
     const stage = window.STAGES[currentStage];
     if (!stage) return;
 
-    const kicker = el('div');
-    kicker.style.cssText = 'font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:#6b4a3e;';
+    const kicker = el('div', 'stage-kicker');
     kicker.textContent = `Stage ${currentStage + 1} of ${stagesTotal()}`;
     stagePane.appendChild(kicker);
 
@@ -392,6 +405,13 @@
     prevBtn.disabled = locked || currentStage <= 0;
     nextBtn.disabled = locked || currentStage >= stagesTotal() - 1;
     resetBtn.disabled = locked;
+    const rsBtn = document.getElementById('reset-stage-btn');
+    if (rsBtn) {
+      const cur = window.STAGES[currentStage];
+      const votable = !!cur && (cur.type === 'mcq' || cur.type === 'map');
+      rsBtn.disabled = locked || !votable;
+      rsBtn.hidden = !votable;
+    }
     stageIndic.textContent = `${currentStage + 1} / ${stagesTotal()}`;
   }
 
@@ -420,11 +440,22 @@
       if (dev.textContent === msg) { dev.textContent = prev; dev.hidden = wasHidden; }
     }, 5000);
   }
+  // Firestore error codes, translated for a projector in front of a class.
+  function explainError(e, doing) {
+    const code = e && (e.code || '');
+    if (String(code).includes('permission-denied')) {
+      return "This Google account can't control the lesson - sign out and use the account that owns it.";
+    }
+    if (String(code).includes('unavailable') || String(code).includes('network')) {
+      return "No connection - check the WiFi, then try again.";
+    }
+    return 'Could not ' + doing + ' - check your sign-in and connection.';
+  }
   async function go(n) {
     try { await store.setStage(n); }
     catch (e) {
       console.warn('[' + LESSON_ID + '] setStage failed:', e);
-      flashError('Could not change slide - check your sign-in and connection. (' + (e.code || e.message) + ')');
+      flashError(explainError(e, 'change slide'));
     }
   }
   prevBtn.addEventListener('click', () => {
@@ -433,23 +464,88 @@
   nextBtn.addEventListener('click', () => {
     if (currentStage < stagesTotal() - 1) go(currentStage + 1);
   });
-  resetBtn.addEventListener('click', () => {
-    if (resetBtn.disabled) return;
-    const ok = confirm('Reset all votes? This wipes every recorded vote across every stage and unlocks every phone.');
-    if (!ok) return;
-    store.clearVotes();
-    // Also clear voted flags on the projector's own browser so testing isn't
-    // blocked by stale localStorage.
+  // Destructive controls use an arm-then-confirm press on the button itself -
+  // a native confirm() dialog on the projector, in front of the class, is
+  // both jarring and (in some setups) blocks the screen share.
+  function armThenRun(btn, armedLabel, run) {
+    const original = btn.textContent;
+    let armed = false, timer = null;
+    btn.addEventListener('click', async () => {
+      if (btn.disabled) return;
+      if (!armed) {
+        armed = true;
+        btn.classList.add('armed');
+        btn.textContent = armedLabel;
+        timer = setTimeout(() => {
+          armed = false;
+          btn.classList.remove('armed');
+          btn.textContent = original;
+        }, 5000);
+        return;
+      }
+      clearTimeout(timer);
+      armed = false;
+      btn.classList.remove('armed');
+      btn.disabled = true;
+      btn.textContent = 'Working…';
+      try { await run(); }
+      finally {
+        btn.disabled = false;
+        btn.textContent = original;
+        renderControls();
+      }
+    });
+  }
+
+  function clearLocalVotedFlags() {
     Object.keys(localStorage)
       .filter(k => k.startsWith(VOTED_PREFIX))
       .forEach(k => localStorage.removeItem(k));
+  }
+
+  // Reset all: awaited, and the local voted flags only clear if the remote
+  // wipe actually succeeded - a silent failure used to leave the bars full
+  // and every phone locked while the projector pretended it had worked.
+  armThenRun(resetBtn, 'Wipe ALL votes?', async () => {
+    try {
+      await store.clearVotes();
+      clearLocalVotedFlags();
+      flashError('All votes cleared - phones are unlocked.');
+    } catch (e) {
+      console.warn('[' + LESSON_ID + '] reset failed:', e);
+      flashError(explainError(e, 'reset the votes'));
+    }
   });
 
-  // Keyboard: arrows advance the lesson.
+  // Reset just the current question, so re-running one poll doesn't destroy
+  // the results of every other stage. Created here (not in the shell) so
+  // already-published presentations get it without a re-publish.
+  const resetStageBtn = el('button', 'reset');
+  resetStageBtn.id = 'reset-stage-btn';
+  resetStageBtn.textContent = 'Re-run question';
+  resetStageBtn.title = 'Clear votes for this question only and let everyone vote again';
+  if (resetBtn.parentNode) resetBtn.parentNode.insertBefore(resetStageBtn, resetBtn);
+  armThenRun(resetStageBtn, 'Clear this question?', async () => {
+    const stage = window.STAGES[currentStage];
+    if (!stage) return;
+    try {
+      await store.clearVotesForStage(stage.id);
+      localStorage.removeItem(VOTED_PREFIX + stage.id);
+      flashError('Votes for this question cleared - phones can vote again.');
+    } catch (e) {
+      console.warn('[' + LESSON_ID + '] stage reset failed:', e);
+      flashError(explainError(e, 'reset this question'));
+    }
+  });
+
+  // Keyboard: arrows advance the lesson, and so do the keys presenter
+  // clickers actually send (PageDown/PageUp, plus space bar).
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
-    if (e.key === 'ArrowLeft'  && !prevBtn.disabled) prevBtn.click();
+    const next = e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ';
+    const prev = e.key === 'ArrowLeft'  || e.key === 'PageUp';
+    if (next && !nextBtn.disabled) { e.preventDefault(); nextBtn.click(); }
+    if (prev && !prevBtn.disabled) { e.preventDefault(); prevBtn.click(); }
   });
 
   // --- Teacher sign-in gate ------------------------------------------------
@@ -473,20 +569,40 @@
       if (authBtn) authBtn.addEventListener('click', () => {
         if (auth.currentUser) signOut(auth);
         else signInWithPopup(auth, new GoogleAuthProvider())
-               .catch(e => { if (authWho) authWho.textContent = 'Sign-in failed: ' + e.code; });
+               .catch(e => {
+                 if (!authWho) return;
+                 authWho.textContent = String(e && e.code).includes('popup')
+                   ? 'Sign-in window was closed - tap to try again.'
+                   : 'Sign-in failed - check the connection and try again.';
+               });
       });
-      onAuthStateChanged(auth, (user) => {
-        isTeacher = !!user;
+      onAuthStateChanged(auth, async (user) => {
         if (authBtn) authBtn.textContent = user ? 'Sign out' : 'Sign in to control';
+        if (!user) {
+          isTeacher = false;
+          if (authWho) authWho.textContent = 'View-only - sign in to control the lesson';
+          renderControls();
+          return;
+        }
+        // Being signed in is not the same as being allowed to drive the
+        // lesson. Probe with a harmless state write (the rules only accept
+        // the teacher's account) so a wrong Google account is told so here,
+        // instead of failing every Next press mid-lecture.
+        isTeacher = false;
+        if (authWho) authWho.textContent = 'Checking this account…';
+        renderControls();
+        const allowed = await store.probeControl();
+        isTeacher = allowed;
         // Don't show the email on the projector (it's in front of the class);
-        // just confirm the signed-in state.
-        if (authWho) authWho.textContent = user
-          ? 'Signed in'
-          : 'View-only - sign in to control the lesson';
+        // just confirm the state.
+        if (authWho) authWho.textContent = allowed
+          ? 'Signed in - you have control'
+          : "This account can't control the lesson - sign out and use the account that owns it.";
         renderControls();
       });
     } catch (e) {
       console.warn('[' + LESSON_ID + '] auth setup failed:', e);
+      flashError('Sign-in is unavailable - reload the page to try again.');
     }
   }
   setupAuth();
@@ -529,6 +645,13 @@
     }
   }
   renderJoinQR();
+
+  // The builder preview drives this hook to update content without a full
+  // iframe reload (which flashed a half-booted page on every keystroke).
+  window.__previewRefresh = (stages) => {
+    if (stages) window.STAGES = stages;
+    rerender();
+  };
 
   store.onStage(({stage}) => { currentStage = stage; rerender(); });
   store.onVotes((votes)   => { allVotes = votes; rerender(); });

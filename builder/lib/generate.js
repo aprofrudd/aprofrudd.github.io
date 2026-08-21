@@ -131,7 +131,7 @@ export function indexHtml(spec, version) {
   </header>
 
   <main class="main">
-    <div id="stage-root"></div>
+    <div id="stage-root"><div class="connecting">Connecting…</div></div>
   </main>
 
   <script src="lesson.config.js${q}"></script>
@@ -187,7 +187,7 @@ export function resultsHtml(spec, version) {
   </header>
 
   <main class="main">
-    <div id="stage-pane" class="stage-pane"></div>
+    <div id="stage-pane" class="stage-pane"><div class="connecting">Connecting…</div></div>
     <aside id="results-pane" class="results-pane"></aside>
   </main>
 
@@ -219,6 +219,8 @@ ${cities}  <script src="stages.js${q}"></script>
 }
 
 // presentation.json = the builder's round-trip source of truth (committed).
+// publishedAt is stamped by the publish flow (not part of the editable spec)
+// so the builder can poll the served file and know when the deploy landed.
 export function presentationJson(spec) {
   return JSON.stringify(spec, null, 2) + '\n';
 }
