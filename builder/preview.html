@@ -41,6 +41,23 @@
       return;
     }
 
+    // Content edits arrive from the editor as a call into the RUNNING page -
+    // no iframe reload, no flash, no engine re-fetch per keystroke.
+    window.__previewApply = function (next) {
+      if (next.themeCss != null) document.getElementById('preview-theme').textContent = next.themeCss;
+      var kick = document.querySelector('.header .kicker');
+      if (kick) kick.textContent = next.kicker || '';
+      var h1 = document.querySelector('.header h1');
+      if (h1) h1.textContent = (mode === 'phone'
+        ? (next.heading || next.title)
+        : (next.projectorHeading || next.heading || next.title)) || '';
+      var urlSpan = document.querySelector('.qr-corner-label span');
+      if (urlSpan && next.lessonUrl) urlSpan.textContent = next.lessonUrl;
+      if (next.cities) { window.CITIES = next.cities; window.MAP_BOUNDS = next.mapBounds || null; }
+      if (window.__previewRefresh) window.__previewRefresh(next.stages);
+      else window.STAGES = next.stages;
+    };
+
     // Inject the per-presentation theme exactly as theme.css would.
     document.getElementById('preview-theme').textContent = data.themeCss || '';
 
@@ -99,6 +116,15 @@
           '<button id="prev-btn">‹ Back</button>' +
           '<span id="stage-indicator" class="stage-indicator">- / -</span>' +
           '<button id="next-btn">Next ›</button></div>';
+    }
+
+    // Nothing to render yet: a friendly hint beats the engine's "Lesson
+    // complete." (its out-of-range fallback) or a silent white rectangle.
+    if (!data.stages.length) {
+      var target = document.getElementById('stage-root') || document.getElementById('stage-pane');
+      if (target) target.innerHTML =
+        '<div class="connecting" style="animation:none;">Nothing to preview yet - your first slide will appear here.</div>';
+      return;
     }
 
     // Load the engine the same way the shells do: store.js (module) first, then

@@ -39,17 +39,23 @@ function tx(mode, fn) {
   }));
 }
 
+// Failures used to be swallowed with a console.warn - which meant an imported
+// deck's images could silently vanish. The app registers a handler and tells
+// the user instead.
+let onError = null;
+export function setMediaErrorHandler(fn) { onError = fn; }
+
 export function loadMedia(slug) {
   if (!slug) return Promise.resolve({});
   return tx('readonly', s => s.get(slug))
     .then(v => v || {})
-    .catch(e => { console.warn('media load failed', e); return {}; });
+    .catch(e => { console.warn('media load failed', e); if (onError) onError('load', e); return {}; });
 }
 
 export function saveMedia(slug, blobs) {
   if (!slug) return Promise.resolve();
   return tx('readwrite', s => s.put(blobs || {}, slug))
-    .catch(e => { console.warn('media save failed', e); });
+    .catch(e => { console.warn('media save failed', e); if (onError) onError('save', e); });
 }
 
 export function deleteMedia(slug) {

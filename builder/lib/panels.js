@@ -19,7 +19,13 @@ export function stagePanel(stage, ctx) {
   // Title (drives the slide-list label) + blurb, common to all types.
   root.appendChild(field('Title', textInput(stage.title, v => { stage.title = v; ctx.onRename(); })));
   if (stage.type !== 'poster') {
-    root.appendChild(field('Blurb (subtitle)', textArea(stage.blurb, v => { stage.blurb = v || undefined; ctx.onChange(); }, 2)));
+    // The blurb is rendered with innerHTML, and deck import joins bullets with
+    // <br> - but nobody should have to EDIT raw <br> tags. The textarea shows
+    // newlines and converts on the way in and out.
+    const brToNl = v => String(v == null ? '' : v).replace(/<br\s*\/?>(\n)?/gi, '\n');
+    const nlToBr = v => v.replace(/\n/g, '<br>');
+    root.appendChild(field('Blurb (subtitle)', textArea(brToNl(stage.blurb),
+      v => { stage.blurb = v ? nlToBr(v) : undefined; ctx.onChange(); }, 2)));
   }
 
   if (stage.type === 'mcq')     mcqFields(stage, root, ctx);
@@ -97,21 +103,34 @@ function mcqFields(stage, root, ctx) {
     while (stage.options.some(o => o !== opt && o.id === id)) id = base + '-' + (n++);
     opt.id = id;
   }
-  function repaint() {
+  function repaint(focusLast) {
     optsWrap.innerHTML = '';
     stage.options.forEach((opt, i) => {
       const row = el('div', 'b-option-row');
-      row.appendChild(textInput(opt.label, v => { opt.label = v; ensureId(opt, v); ctx.onChange(); }, 'Option label'));
+      const labelInput = textInput(opt.label, v => { opt.label = v; ensureId(opt, v); ctx.onChange(); }, 'Option text');
+      row.appendChild(labelInput);
       row.appendChild(textInput(opt.sublabel, v => { opt.sublabel = v || undefined; ctx.onChange(); }, 'Sub-label (optional)'));
-      row.appendChild(button('✕', () => { stage.options.splice(i, 1); repaint(); ctx.onChange(); }, 'b-btn--icon'));
+      const rm = button('✕', () => {
+        if (ctx.snapshot) ctx.snapshot('Option removed');
+        stage.options.splice(i, 1);
+        repaint();
+        ctx.onChange();
+        if (ctx.toast) ctx.toast('Option removed', true);
+      }, 'b-btn--icon');
+      rm.setAttribute('aria-label', 'Remove option: ' + (opt.label || 'untitled'));
+      row.appendChild(rm);
       optsWrap.appendChild(row);
+      if (focusLast && i === stage.options.length - 1) labelInput.focus();
     });
     addBtn.disabled = stage.options.length >= 6;
   }
   const addBtn = button('+ Add option', () => {
     if (stage.options.length >= 6) return;
-    const opt = { label: 'New option' }; ensureId(opt, opt.label);
-    stage.options.push(opt); repaint(); ctx.onChange();
+    // Empty on purpose: pre-filled placeholder text ("New option") had to be
+    // selected and retyped every single time.
+    stage.options.push({ label: '' });
+    repaint(true);
+    ctx.onChange();
   }, 'b-btn--ghost');
   root.appendChild(addBtn);
   repaint();
@@ -125,12 +144,13 @@ function mcqFields(stage, root, ctx) {
   if (stage.slideImage) {
     root.appendChild(el('hr', 'b-sep'));
     root.appendChild(button('Back to a display-only slide', () => {
-      if (!confirm('Remove the voting options and show this as a plain slide?')) return;
+      if (ctx.snapshot) ctx.snapshot('poll turned back into a slide');
       stage.type = 'slide';
       stage.image = stage.slideImage;
       delete stage.slideImage;
       delete stage.options; delete stage.maxSelect;
       ctx.onStructure();
+      if (ctx.toast) ctx.toast('Voting removed from this slide', true);
     }, 'b-btn--link'));
   }
 }
@@ -241,11 +261,22 @@ export function settingsPanel(spec, ctx) {
   const root = el('div', 'b-panel');
   root.appendChild(el('div', 'b-panel-type', { text: 'Settings' }));
 
-  root.appendChild(field('Presentation name (title)', textInput(spec.title, v => { spec.title = v; ctx.onRename(); })));
-  root.appendChild(field('URL slug', textInput(spec.slug, v => {
-    spec.slug = kebab(v); ctx.onChange();
-  }, 'heat-2026'), ctx.published ? 'Locked - this presentation is already published.' : 'Lowercase, hyphens. Becomes alanruddock.com/<slug>/'));
-  if (ctx.published) root.querySelector('.b-field:last-child .b-input').disabled = true;
+  root.appendChild(field('Presentation name', textInput(spec.title, v => { spec.title = v; ctx.onRename(); })));
+
+  // Renaming the web address is a real move (the draft and its images follow
+  // it), so it applies when you leave the field - not on every keystroke,
+  // which used to strand a ghost draft per pause while typing.
+  const slugInput = textInput(spec.slug, () => {}, 'heat-2026');
+  slugInput.addEventListener('change', () => {
+    const next = kebab(slugInput.value);
+    slugInput.value = next;
+    if (next && next !== spec.slug && ctx.onSlugChange) ctx.onSlugChange(next);
+  });
+  const slugHint = ctx.published
+    ? 'Locked - this presentation is already published at this address.'
+    : 'Students join at alanruddock.com/' + (spec.slug || '…') + '/ - short names make easier joins.';
+  root.appendChild(field('Web address', slugInput, slugHint));
+  if (ctx.published) slugInput.disabled = true;
 
   root.appendChild(field('Kicker (small tagline)', textInput(spec.kicker, v => { spec.kicker = v || undefined; ctx.onChange(); })));
   root.appendChild(field('Phone heading', textInput(spec.heading, v => { spec.heading = v || undefined; ctx.onChange(); })));
@@ -253,10 +284,15 @@ export function settingsPanel(spec, ctx) {
   root.appendChild(field('Logo (optional)', imageField(spec.logo, ctx.mediaBlobs,
     p => { spec.logo = p; ctx.onChange(); }, ctx.resolvePreview)));
 
-  const lidField = field('Lesson ID (vote storage key)', textInput(spec.lessonId, v => { spec.lessonId = kebab(v); ctx.onChange(); }),
-    ctx.published ? 'Locked once published - votes are keyed on it.' : 'Defaults to the slug. Keep unique.');
-  root.appendChild(lidField);
+  // Advanced: nobody needs "Lesson ID (vote storage key)" in their face.
+  const adv = el('details', 'b-advanced');
+  adv.appendChild(el('summary', null, { text: 'Advanced' }));
+  const lidField = field('Vote storage key', textInput(spec.lessonId, v => { spec.lessonId = kebab(v); ctx.onChange(); }),
+    ctx.published ? 'Locked once published - votes are keyed on it.'
+                  : "Defaults to the web address. Only change it if two presentations must share (or must not share) their votes.");
+  adv.appendChild(lidField);
   if (ctx.published) lidField.querySelector('.b-input').disabled = true;
+  root.appendChild(adv);
 
   // Map places (only if a map stage exists)
   if ((spec.stages || []).some(s => s.type === 'map')) {

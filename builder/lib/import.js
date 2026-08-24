@@ -24,6 +24,7 @@ import { kebab } from './ui.js';
 const SLIDE_WIDTH   = 1600;   // px; raster width for PDF pages
 const JPEG_QUALITY  = 0.82;
 const MAX_SLIDES    = 200;
+const MAX_OPTIONS   = 6;      // matches the builder's own poll-option cap
 const POLL_MARKER   = /\[\[\s*poll\s*\]\]/i;
 
 // ---- small helpers ---------------------------------------------------------
@@ -72,13 +73,24 @@ function pollFrom(title, bodyLines, notesLines) {
   // A wrapped title arrives as one joined string, so drop any line that is part
   // of it, not just an exact match.
   const notTitle = l => l !== title && !(title && title.includes(l));
+  // A slide carries more text than its answer choices: page numbers, footers,
+  // stray fragments. Filter the obvious junk rather than turning it into
+  // options a student can vote for.
+  const looksLikeOption = l => !/^\d+$/.test(l) && l.length > 2 && !/^https?:\/\//i.test(l);
+
+  function pick(lines) {
+    const candidates = strip(lines).filter(notTitle);
+    const options = candidates.filter(looksLikeOption).slice(0, MAX_OPTIONS);
+    const dropped = candidates.filter(l => !options.includes(l));
+    return { question: title, options, dropped };
+  }
 
   if (notesLines && notesLines.some(l => POLL_MARKER.test(l))) {
     const i = notesLines.findIndex(l => POLL_MARKER.test(l));
-    const fromNotes = strip(notesLines.slice(i)).filter(notTitle);
-    if (fromNotes.length >= 2) return { question: title, options: fromNotes.slice(0, 8) };
+    const fromNotes = pick(notesLines.slice(i));
+    if (fromNotes.options.length >= 2) return fromNotes;
   }
-  return { question: title, options: strip(bodyLines).filter(notTitle).slice(0, 8) };
+  return pick(bodyLines);
 }
 
 // `imageKey` decides how the projector treats the picture. For a PDF import the
@@ -208,7 +220,10 @@ async function importPdf(file, onProgress) {
     title = title || 'Slide ' + n;
 
     if (lines.some(l => POLL_MARKER.test(l))) {
-      const { question, options } = pollFrom(title, lines, null);
+      const { question, options, dropped } = pollFrom(title, lines, null);
+      if (dropped.length) {
+        warnings.push(`Slide ${n}: left ${dropped.length} line(s) out of the poll options (${dropped.slice(0, 3).map(d => '“' + d.slice(0, 30) + '”').join(', ')}${dropped.length > 3 ? ', …' : ''}) - check the options on that slide.`);
+      }
       stages.push(mcqStage(uniqueId(taken, kebab(question) || 'poll-' + n),
                            question, options, path, 'slideImage'));
       markedPolls++;
@@ -358,7 +373,10 @@ async function importPptx(file, onProgress) {
     title = title || body[0] || 'Slide ' + (n + 1);
 
     if (allText.some(l => POLL_MARKER.test(l))) {
-      const { question, options } = pollFrom(title, body, notes ? notes.split('\n') : null);
+      const { question, options, dropped } = pollFrom(title, body, notes ? notes.split('\n') : null);
+      if (dropped.length) {
+        warnings.push(`Slide ${n + 1}: left ${dropped.length} line(s) out of the poll options - check the options on that slide.`);
+      }
       stages.push(mcqStage(uniqueId(taken, kebab(question) || 'poll-' + (n + 1)),
                            question, options, figure));
     } else {

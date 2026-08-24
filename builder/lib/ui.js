@@ -18,6 +18,9 @@ export function el(tag, cls, props) {
 export function field(labelText, control, hint) {
   const wrap = el('label', 'b-field');
   wrap.appendChild(el('span', 'b-field-label', { text: labelText }));
+  // Stable key so the editor can restore keyboard focus to this control after
+  // a structural re-render (which used to silently drop focus).
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(control.tagName || '')) control.dataset.fkey = labelText;
   wrap.appendChild(control);
   if (hint) wrap.appendChild(el('span', 'b-field-hint', { text: hint }));
   return wrap;
@@ -130,7 +133,7 @@ export function imageField(currentPath, mediaBlobs, onPath, resolvePreview) {
         currentPath = path;
         onPath(path);
         paint();
-      } catch (err) { alert('Could not load image: ' + err.message); }
+      } catch (err) { toast("Couldn't load that image - use a PNG or JPG."); }
       e.target.value = '';
     } }
   });
@@ -153,4 +156,98 @@ export function debounce(fn, ms) {
 export function kebab(s) {
   return String(s || '').toLowerCase().trim()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'item';
+}
+
+// ---- in-page dialogs + toasts ----------------------------------------------
+// The builder used native prompt()/alert()/confirm() for everything - naming,
+// the GitHub token, import reports, deletions. Native dialogs look broken in
+// 2026, block the tab, and discard the user's input when mis-dismissed. These
+// two primitives replace all of them.
+
+// dialog({ title, body, fields, buttons, danger }) -> Promise<{button, values} | null>
+//   body:    html string (trusted, builder-authored copy only)
+//   fields:  [{ key, label, value, placeholder, hint, type }]
+//   buttons: [{ label, value, primary, danger }]  (Escape/backdrop -> null)
+export function dialog(opts) {
+  return new Promise(resolve => {
+    const overlay = el('div', 'b-modal-overlay');
+    const box = el('div', 'b-modal');
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+
+    if (opts.title) {
+      const h = el('h3', 'b-modal-title', { text: opts.title });
+      box.appendChild(h);
+    }
+    if (opts.body) box.appendChild(el('div', 'b-modal-body', { html: opts.body }));
+
+    const inputs = {};
+    (opts.fields || []).forEach(f => {
+      const control = f.type === 'textarea'
+        ? el('textarea', 'b-input b-textarea', { rows: f.rows || 3, value: f.value == null ? '' : f.value, placeholder: f.placeholder || '' })
+        : el('input', 'b-input', { type: f.type || 'text', value: f.value == null ? '' : f.value, placeholder: f.placeholder || '' });
+      inputs[f.key] = control;
+      box.appendChild(field(f.label || '', control, f.hint));
+      if (f.onInput) control.addEventListener('input', () => f.onInput(control.value, box));
+    });
+
+    const row = el('div', 'b-modal-actions');
+    const done = (value) => {
+      overlay.remove();
+      document.removeEventListener('keydown', onKey, true);
+      if (value === null) return resolve(null);
+      const values = {};
+      for (const k in inputs) values[k] = inputs[k].value.trim();
+      resolve({ button: value, values });
+    };
+    const buttons = opts.buttons || [{ label: 'OK', value: 'ok', primary: true }];
+    buttons.forEach(b => {
+      const btn = button(b.label, () => done(b.value),
+        b.primary ? 'b-btn--primary' : (b.danger ? 'b-btn--danger' : 'b-btn--ghost'));
+      if (b.primary) btn.dataset.primary = '1';
+      row.appendChild(btn);
+    });
+    row.appendChild(button('Cancel', () => done(null), 'b-btn--link'));
+    box.appendChild(row);
+
+    function onKey(e) {
+      if (e.key === 'Escape') { e.stopPropagation(); done(null); }
+      if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+        e.preventDefault();
+        const primary = row.querySelector('[data-primary]');
+        if (primary) primary.click();
+      }
+    }
+    document.addEventListener('keydown', onKey, true);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) done(null); });
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    const first = box.querySelector('input, textarea') || row.querySelector('button');
+    if (first) first.focus();
+    if (first && first.select && first.value) first.select();
+  });
+}
+
+// toast(message, { action: {label, onClick}, duration }) - transient notice
+// with an optional action button ("Undo"). One at a time; new replaces old.
+let activeToast = null;
+export function toast(message, opts) {
+  opts = opts || {};
+  if (activeToast) activeToast.remove();
+  const t = el('div', 'b-toast');
+  t.setAttribute('role', 'status');
+  t.appendChild(el('span', null, { text: message }));
+  if (opts.action) {
+    t.appendChild(button(opts.action.label, () => {
+      t.remove();
+      if (activeToast === t) activeToast = null;
+      opts.action.onClick();
+    }, 'b-btn--toast'));
+  }
+  document.body.appendChild(t);
+  activeToast = t;
+  setTimeout(() => {
+    if (activeToast === t) { t.remove(); activeToast = null; }
+  }, opts.duration || (opts.action ? 6000 : 3500));
 }
