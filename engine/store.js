@@ -210,8 +210,10 @@ async function createFirebaseStore() {
       return ref.id;
     },
     async removeVote(voteId) {
+      // Rethrow: "Change my vote" needs the failure, or it clears the local
+      // lock while the old vote is still counted - a silent double vote.
       try { await deleteDoc(doc(db, LESSON_ID + '_votes', voteId)); }
-      catch (e) { console.warn('[' + LESSON_ID + '] removeVote failed:', e); }
+      catch (e) { console.warn('[' + LESSON_ID + '] removeVote failed:', e); throw e; }
     },
     async clearVotes() {
       // Bump epoch first so phones unlock as soon as they see the change.

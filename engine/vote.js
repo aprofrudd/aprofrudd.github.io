@@ -65,6 +65,24 @@
   const SRESET_KEY = LESSON_ID + '_sreset_nonce';
   const VOTED_PREFIX = LESSON_ID + '_voted_';
 
+  // A pending vote's write lives only in this page instance's SDK queue - it
+  // dies with the page. Any pending flag found at startup is therefore stale:
+  // clear it so the student can vote again instead of being locked forever on
+  // a "Sending…" screen, and remember which stages to explain that on.
+  const PAGE_TOKEN = String(Date.now()) + Math.random().toString(36).slice(2, 8);
+  const staleSwept = new Set();
+  Object.keys(localStorage)
+    .filter(k => k.startsWith(VOTED_PREFIX))
+    .forEach(k => {
+      try {
+        const rec = JSON.parse(localStorage.getItem(k));
+        if (rec && rec.pending) {
+          staleSwept.add(k.slice(VOTED_PREFIX.length));
+          localStorage.removeItem(k);
+        }
+      } catch (e) { /* unreadable record - leave it */ }
+    });
+
   function votedKey(stageId) { return VOTED_PREFIX + stageId; }
   function hasVoted(stageId) { return localStorage.getItem(votedKey(stageId)) !== null; }
   function currentStage() { return (window.STAGES || [])[currentStageIndex] || null; }
@@ -90,7 +108,8 @@
     localStorage.setItem(votedKey(stageId), JSON.stringify({
       choices: Array.isArray(choices) ? choices : [choices],
       voteIds: Array.isArray(voteIds) ? voteIds : [voteIds || null],
-      pending: !!pending
+      pending: !!pending,
+      pageToken: pending ? PAGE_TOKEN : undefined
     }));
   }
   function clearVoted(stageId) { localStorage.removeItem(votedKey(stageId)); }
@@ -122,12 +141,23 @@
 
   // Teacher re-ran a single question (stageReset on the state doc): unlock just
   // that stage on this phone, leaving every other answer intact.
+  //
+  // The FIRST snapshot after page load only records the baseline (an old stamp
+  // from a previous lecture must not clear anything) - but any nonce change on
+  // a later snapshot unlocks, INCLUDING the very first re-run of a lesson,
+  // where connected phones have no stored nonce yet.
+  let stageResetBaselined = false;
   function syncStageReset(stageReset) {
-    if (!stageReset || stageReset.nonce == null) return false;
+    const nonce = stageReset && stageReset.nonce != null ? String(stageReset.nonce) : 'none';
+    if (!stageResetBaselined) {
+      stageResetBaselined = true;
+      localStorage.setItem(SRESET_KEY, nonce);
+      return false;
+    }
     const seen = localStorage.getItem(SRESET_KEY);
-    if (String(seen) === String(stageReset.nonce)) return false;
-    localStorage.setItem(SRESET_KEY, String(stageReset.nonce));
-    if (seen === null) return false;   // first sight of the field - nothing to undo
+    if (seen === nonce) return false;
+    localStorage.setItem(SRESET_KEY, nonce);
+    if (nonce === 'none') return false;   // field removed - nothing to unlock
     clearVoted(stageReset.stage);
     const cur = currentStage();
     return !!(cur && cur.id === stageReset.stage);
@@ -161,9 +191,13 @@
       new Promise(res => setTimeout(() => res({ slow: true }), ACK_WAIT_MS))
     ]);
 
+    const onThisStage = () => { const cur = currentStage(); return !!(cur && cur.id === stage.id); };
+
     if (outcome.ok) {
       markVoted(stage.id, choices, outcome.ids, false);
-      renderThanks(stage);
+      // The teacher may have advanced while the ack was in flight - never
+      // paint the old stage's thanks screen over the new question.
+      if (onThisStage()) renderThanks(stage);
       announce('Got it - your vote is in.');
       return;
     }
@@ -172,18 +206,24 @@
       // Not failed - queued. The SDK delivers it when the connection returns,
       // so lock the stage but say honestly that it is still on its way.
       markVoted(stage.id, choices, choices.map(() => null), true);
-      renderThanks(stage);
+      if (onThisStage()) renderThanks(stage);
       announce('Still sending your vote - keep this page open.');
+      // This attempt's pending record may be gone by the time the write
+      // settles (teacher reset, or a newer vote) - only touch our own record.
+      const isOurPending = () => {
+        const cur = readVoted(stage.id);
+        return !!(cur && cur.pending && cur.pageToken === PAGE_TOKEN);
+      };
       all.then(ids => {
+        if (!isOurPending()) return;
         markVoted(stage.id, choices, ids, false);
-        const cur = currentStage();
-        if (cur && cur.id === stage.id && hasVoted(stage.id)) renderThanks(stage);
+        if (onThisStage()) renderThanks(stage);
         announce('Your vote is in.');
       }).catch(e => {
         console.warn('[' + LESSON_ID + '] queued vote rejected:', e);
+        if (!isOurPending()) return;
         clearVoted(stage.id);
-        const cur = currentStage();
-        if (cur && cur.id === stage.id) { render(currentStageIndex); showVoteError(); }
+        if (onThisStage()) { render(currentStageIndex); showVoteError(); }
         announce("Your vote didn't send - tap your answer to try again.");
       });
       return;
@@ -541,6 +581,16 @@
       case 'content': renderWait(stage.title); break;
       case 'slide':   renderWait(stage.title); break;
       case 'poster':  renderPosterCta(stage); break;
+    }
+
+    // This stage had a vote stuck in "sending" when the page was last closed -
+    // the write died with the page, so ask the student to pick again.
+    if (staleSwept.has(stage.id)) {
+      staleSwept.delete(stage.id);
+      const note = el('div', 'vote-error');
+      note.textContent = "Your earlier vote didn't finish sending - please pick your answer again.";
+      root.prepend(note);
+      announce("Your earlier vote didn't finish sending. Please pick your answer again.");
     }
   }
 

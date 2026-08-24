@@ -219,7 +219,11 @@ export function dialog(opts) {
       }
     }
     document.addEventListener('keydown', onKey, true);
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) done(null); });
+    // Close on a true backdrop click only: a drag-select that starts inside
+    // the dialog and releases over the backdrop must not discard the input.
+    let downOnOverlay = false;
+    overlay.addEventListener('mousedown', (e) => { downOnOverlay = e.target === overlay; });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay && downOnOverlay) done(null); });
 
     overlay.appendChild(box);
     document.body.appendChild(overlay);

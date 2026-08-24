@@ -74,15 +74,18 @@ function pollFrom(title, bodyLines, notesLines) {
   // of it, not just an exact match.
   const notTitle = l => l !== title && !(title && title.includes(l));
   // A slide carries more text than its answer choices: page numbers, footers,
-  // stray fragments. Filter the obvious junk rather than turning it into
-  // options a student can vote for.
-  const looksLikeOption = l => !/^\d+$/.test(l) && l.length > 2 && !/^https?:\/\//i.test(l);
+  // stray fragments. Filter the obvious junk - but "Yes", "No", "A"-"D" are
+  // real answers, so short strings are NOT junk, and if filtering leaves fewer
+  // than two options the deck author knew better than the filter: trust them.
+  const looksLikeOption = l => !/^\d{1,4}$/.test(l) && !/^https?:\/\//i.test(l);
 
   function pick(lines) {
     const candidates = strip(lines).filter(notTitle);
-    const options = candidates.filter(looksLikeOption).slice(0, MAX_OPTIONS);
-    const dropped = candidates.filter(l => !options.includes(l));
-    return { question: title, options, dropped };
+    let options = candidates.filter(looksLikeOption);
+    if (options.length < 2) options = candidates;
+    const kept = options.slice(0, MAX_OPTIONS);
+    const dropped = candidates.filter(l => !kept.includes(l));
+    return { question: title, options: kept, dropped };
   }
 
   if (notesLines && notesLines.some(l => POLL_MARKER.test(l))) {

@@ -80,12 +80,18 @@ function undoLast() {
   const snap = undoStack.pop();
   if (!snap || !state) return;
   if (snap.slug !== state.spec.slug) { undoStack.push(snap); return; }
+  // Push the CURRENT state before restoring, so an accidental Cmd+Z (which
+  // would otherwise silently discard every edit made since the snapshot) is
+  // itself undoable by pressing Cmd+Z again.
+  undoStack.push({ label: 'the undo of "' + snap.label + '"', slug: state.spec.slug,
+                   spec: JSON.parse(JSON.stringify(state.spec)), selected: state.selected });
+  if (undoStack.length > 30) undoStack.shift();
   state.spec = snap.spec;
   state.selected = Math.min(snap.selected, snap.spec.stages.length - 1);
   saveDraftDebounced();
   renderEditor();
   refreshPreview();
-  toast('Undone: ' + snap.label);
+  toast('Undone: ' + snap.label + ' - press again to restore');
 }
 document.addEventListener('keydown', (e) => {
   if (!(e.metaKey || e.ctrlKey) || e.key !== 'z' || e.shiftKey) return;
@@ -113,9 +119,9 @@ async function loadDraftFull(slug) {
     const media = d.mediaBlobs;
     delete d.mediaBlobs;
     try { localStorage.setItem(DRAFT_PREFIX + slug, JSON.stringify(d)); } catch (e) {}
-    return { spec: d.spec, published: d.published, mediaBlobs: media };
+    return { spec: d.spec, published: d.published, publishedHash: d.publishedHash, mediaBlobs: media };
   }
-  return { spec: d.spec, published: d.published, mediaBlobs: await loadMedia(slug) };
+  return { spec: d.spec, published: d.published, publishedHash: d.publishedHash, mediaBlobs: await loadMedia(slug) };
 }
 function listDrafts() {
   const out = [];
@@ -206,8 +212,12 @@ window.addEventListener('beforeunload', () => { if (state) saveDraft(); });
 // ---- dashboard -------------------------------------------------------------
 
 let lastManifest = [];
+// Slugs deleted this session: the served manifest lags the deploy by minutes,
+// so without this a just-deleted presentation pops straight back onto the
+// dashboard looking alive.
+const deletedSlugs = new Set();
 async function ensureManifest() {
-  try { lastManifest = await fetchManifest(); } catch (e) {}
+  try { lastManifest = (await fetchManifest()).filter(p => !deletedSlugs.has(p.slug)); } catch (e) {}
   return lastManifest;
 }
 // Where is this name already in use? Returns a human phrase, or null if free.
@@ -310,6 +320,7 @@ async function deletePresFlow(slug, published, isDraft) {
   }
   localStorage.removeItem(DRAFT_PREFIX + slug);
   await deleteMedia(slug);
+  deletedSlugs.add(slug);
   toast('Deleted "' + slug + '"');
   renderDashboard();
 }
@@ -361,14 +372,16 @@ async function tokenDialog() {
 async function askName(title, initial) {
   await ensureManifest();
   while (true) {
+    // kebab('') falls back to 'item', which must never leak into the preview.
+    const slugPreview = v => (v && v.trim()) ? kebab(v) : '…';
     const res = await dialog({
       title,
       body: '<p class="b-note">Students will join at <strong>alanruddock.com/<span id="b-url-prev">' +
-            escapeHtml(kebab(initial || '') || '…') + '</span>/</strong> - short names make easier joins.</p>',
+            escapeHtml(slugPreview(initial)) + '</span>/</strong> - short names make easier joins.</p>',
       fields: [{ key: 'name', label: 'Name', value: initial || '', placeholder: 'Heat & Hydration',
         onInput: (v) => {
           const prev = document.getElementById('b-url-prev');
-          if (prev) prev.textContent = kebab(v) || '…';
+          if (prev) prev.textContent = slugPreview(v);
         } }],
       buttons: [{ label: 'Create', value: 'create', primary: true }]
     });
@@ -392,13 +405,48 @@ async function createNew() {
   saveDraft();
   location.hash = '#/edit/' + spec.slug;
 }
+// Pull a published presentation's media files back into a blob map, so a
+// duplicate made on a fresh browser doesn't publish a deck of 404ing images.
+async function fetchPublishedMedia(slug, spec) {
+  const paths = new Set();
+  (spec.stages || []).forEach(s => MEDIA_KEYS.forEach(k => {
+    if (s[k] && /^media\//.test(s[k])) paths.add(s[k]);
+  }));
+  if (spec.logo && /^media\//.test(spec.logo)) paths.add(spec.logo);
+  const bg = spec.theme && spec.theme.background;
+  if (bg && bg.src && /^media\//.test(bg.src)) paths.add(bg.src);
+  const blobs = {};
+  let failed = 0;
+  await Promise.all([...paths].map(async (path) => {
+    try {
+      const res = await fetch('../' + slug + '/' + path);
+      if (!res.ok) { failed++; return; }
+      const blob = await res.blob();
+      blobs[path] = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onerror = () => reject(r.error);
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(blob);
+      });
+    } catch (e) { failed++; }
+  }));
+  return { blobs, failed, total: paths.size };
+}
+
 async function duplicate(slug) {
   let src = await loadDraftFull(slug);
   if (!src) {
-    // Published but never edited here: duplicate straight from the site.
+    // Published but never edited here: duplicate straight from the site,
+    // INCLUDING its images - an empty media map would publish a copy whose
+    // every image 404s.
     try {
       const res = await fetch('../' + slug + '/presentation.json?t=' + Date.now(), { cache: 'no-store' });
-      if (res.ok) src = { spec: await res.json(), mediaBlobs: {} };
+      if (res.ok) {
+        const spec = await res.json();
+        const media = await fetchPublishedMedia(slug, spec);
+        if (media.failed) toast(media.failed + ' of ' + media.total + " images couldn't be copied - check the copy before publishing.");
+        src = { spec, mediaBlobs: media.blobs };
+      }
     } catch (e) {}
   }
   if (!src) {
@@ -435,6 +483,7 @@ async function onSlugChange(next) {
   if (state.spec.lessonId === old) state.spec.lessonId = next;
   if (state.spec.lessonUrl === 'alanruddock.com/' + old) state.spec.lessonUrl = 'alanruddock.com/' + next;
   state.spec.slug = next;
+  undoStack = [];   // snapshots carry the old address; restoring one would half-revert the rename
   localStorage.removeItem(DRAFT_PREFIX + old);
   await saveMedia(next, Object.assign({}, state.mediaBlobs));
   await deleteMedia(old);
@@ -593,7 +642,10 @@ async function openEditor(slug) {
     if (!d) { toast("Couldn't find that presentation."); location.hash = '#/'; return; }
     state = { spec: d.spec, mediaBlobs: d.mediaBlobs || {}, mediaDirty: false,
               selected: d.spec.stages.length ? 0 : -1,
-              mode: 'projector', tab: 'slide', published: !!d.published };
+              mode: 'projector', tab: 'slide', published: !!d.published,
+              // Freshly fetched published spec === what is live, so its own
+              // hash is the correct baseline for "unpublished changes".
+              publishedHash: d.publishedHash || (d.published ? specHash(d.spec) : undefined) };
   }
   state.mediaBlobs = watchMedia(state.mediaBlobs);
   renderEditor();
@@ -688,6 +740,7 @@ function slideListCol() {
   list.setAttribute('aria-label', 'Slides');
   (state.spec.stages || []).forEach((s, i) => {
     const item = el('div', 'b-slide-item' + (i === state.selected ? ' sel' : ''));
+    item.dataset.fkey = 'slide-' + s.id;   // focus restore across re-renders
     item.setAttribute('role', 'option');
     item.setAttribute('tabindex', '0');
     item.setAttribute('aria-selected', String(i === state.selected));
@@ -713,6 +766,7 @@ function slideListCol() {
       try { e.dataTransfer.setData('text/plain', String(i)); } catch (err) {}
     });
     item.addEventListener('dragend', () => {
+      dragSrcIndex = null;   // an aborted drag must not leave a live source index
       item.classList.remove('dragging');
       list.querySelectorAll('.drop-above, .drop-below').forEach(n => n.classList.remove('drop-above', 'drop-below'));
     });
@@ -738,10 +792,13 @@ function slideListCol() {
     const ctrls = el('div', 'b-slide-ctrls');
     const up = button('↑', () => { move(i, -1); }, 'b-btn--icon');
     up.setAttribute('aria-label', 'Move slide ' + (i + 1) + ' up');
+    up.dataset.fkey = 'up-' + s.id;
     const down = button('↓', () => { move(i, 1); }, 'b-btn--icon');
     down.setAttribute('aria-label', 'Move slide ' + (i + 1) + ' down');
+    down.dataset.fkey = 'down-' + s.id;
     const del = button('✕', () => { removeStage(i); }, 'b-btn--icon');
     del.setAttribute('aria-label', 'Delete slide ' + (i + 1) + ': ' + (s.title || 'untitled'));
+    del.dataset.fkey = 'del-' + s.id;
     ctrls.appendChild(up); ctrls.appendChild(down); ctrls.appendChild(del);
     item.appendChild(ctrls);
     list.appendChild(item);
@@ -913,22 +970,38 @@ async function doPublish() {
   }
   publishing = true;
   if (btn) { btn.disabled = true; btn.textContent = 'Publishing…'; }
+  // Long awaits follow; the user may navigate meanwhile and `state` may be
+  // replaced or nulled. Work from captured references throughout.
+  const pubState = state;
+  const spec = pubState.spec;
+  const media = pubState.mediaBlobs;
   try {
-    const { url, publishedAt } = await publishPresentation(state.spec, state.mediaBlobs,
+    const { url, publishedAt } = await publishPresentation(spec, media,
       (done, total) => { if (status) status.textContent = 'Uploading ' + done + '/' + total + '…'; });
-    state.published = true;
-    state.publishedHash = specHash(state.spec);
-    saveDraft();
+    pubState.published = true;
+    pubState.publishedHash = specHash(spec);
+    if (state === pubState) saveDraft();
+    else {
+      // The editor moved on - persist into the draft record directly.
+      try {
+        const raw = JSON.parse(localStorage.getItem(DRAFT_PREFIX + spec.slug) || 'null');
+        if (raw) {
+          raw.published = true;
+          raw.publishedHash = pubState.publishedHash;
+          localStorage.setItem(DRAFT_PREFIX + spec.slug, JSON.stringify(raw));
+        }
+      } catch (e) {}
+    }
     // "Published" used to mean "the commit landed" - but the page 404s until
     // the Pages build finishes and can serve the OLD deck for a few minutes.
     // Poll until this publish is actually what the site returns.
     if (status) status.textContent = 'Deploying to the site…';
-    const live = await waitForDeploy(state.spec.slug, publishedAt,
+    const live = await waitForDeploy(spec.slug, publishedAt,
       (n) => { if (status) status.textContent = 'Deploying to the site… ' + (n * 5) + 's'; });
     if (status) status.textContent = live ? 'Live ✓' : 'Published ✓';
     const fresh = '?fresh=' + Date.now();   // fresh CDN cache key for the shells
     const projector = url + fresh;
-    const student = '../' + state.spec.slug + '/' + fresh;
+    const student = '../' + spec.slug + '/' + fresh;
     dialog({
       title: live ? 'Your presentation is live' : 'Published - still deploying',
       body: (live
@@ -936,7 +1009,7 @@ async function doPublish() {
         : '<p>The upload succeeded, but the site is taking longer than usual to update - the links below will be current within a few minutes.</p>')
         + '<p><a href="' + projector + '" target="_blank" rel="noopener">Open the projector view ↗</a></p>'
         + '<p><a href="' + student + '" target="_blank" rel="noopener">Open the student view ↗</a></p>'
-        + '<p class="b-note">Students join at <strong>' + escapeHtml(state.spec.lessonUrl || ('alanruddock.com/' + state.spec.slug)) + '</strong> - the projector shows a QR code they can scan.</p>',
+        + '<p class="b-note">Students join at <strong>' + escapeHtml(spec.lessonUrl || ('alanruddock.com/' + spec.slug)) + '</strong> - the projector shows a QR code they can scan.</p>',
       buttons: [{ label: 'Done', value: 'ok', primary: true }]
     });
   } catch (e) {

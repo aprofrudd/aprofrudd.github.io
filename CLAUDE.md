@@ -51,11 +51,13 @@ A presentation is one JSON object (`slug`, `title`, `theme`, `stages[]`). `build
 
 ### Runtime model
 
-- `engine/store.js` is the storage abstraction. Same API either way: **Firebase Firestore** when `window.IS_LIVE`, **localStorage** otherwise. Everything is namespaced by `window.LESSON_ID` (set in `lesson.config.js`), so one Firebase project serves every presentation — a new presentation needs no Firebase setup, just a unique lesson id.
+- `engine/store.js` is the storage abstraction. Same API either way: **Firebase Firestore** when `window.IS_LIVE`, **localStorage** otherwise. Everything is namespaced by `window.LESSON_ID` (set in `lesson.config.js`), so one Firebase project serves every presentation — a new presentation needs no Firebase setup, just a unique lesson id. In live mode a failed Firebase init resolves `{failed: true}` and both pages render a reconnect screen — **never** re-add a silent localStorage fallback there; it made phones collect votes that never reached the projector.
+- **Voting is ack-gated.** `vote.js` marks a stage voted and shows "your vote is in" only after Firestore confirms the write; a >4s wait shows an honest "still sending" state (`pending` flag in the voted record — the SDK keeps the write queued); a rejection reopens the question with a retry message. Never mark voted before the ack.
 - **The Firebase keys in `generate.js` are public by design.** Security lives entirely in the Firestore rules, which use wildcard matches (`.+_votes`, `.+_posters`).
-- **Teacher gate:** in live mode the Next/Back/Reset controls are locked until a Google sign-in. The rules only accept stage writes from the teacher's email, so a student who opens the projector URL can watch but not drive.
-- **Epoch:** `clearVotes()` bumps an epoch counter on the state doc. Phones compare it against their stored epoch and wipe their local `_voted_` flags, which is what unlocks a phone after a teacher reset.
+- **Teacher gate:** being signed in is not enough — after auth, `results.js` calls `store.probeControl()` (a harmless merge write to the state doc, which the rules only accept from the teacher's account) and only unlocks the controls if it succeeds. A wrong Google account is told so in plain English.
+- **Epoch and stageReset:** `clearVotes()` bumps an epoch counter on the state doc — phones see it and wipe all their `_voted_` flags. `clearVotesForStage(id)` instead stamps `stageReset: {stage, nonce}` — phones clear just that one stage's flag, which is what the projector's "Re-run question" button uses. The field holds ONE stamp: a phone offline across re-runs of two *different* questions only unlocks the later one (known, accepted; a full Reset covers it). Phones baseline the nonce on their first snapshot and act only on changes seen while connected.
 - Phones that sleep or drop WiFi suspend their Firestore listener. `refreshStage()` / `refreshVotes()` exist so `vote.js` and `results.js` can resync on wake — do not remove those call sites.
+- Both engines expose `window.__previewRefresh(stages)` so the builder preview can update content without reloading the iframe. Harmless in production; don't remove it.
 
 ### Adding or changing a stage type
 
@@ -79,6 +81,15 @@ Two non-obvious constraints, both load-bearing:
 
 - PDF pages are rendered with **`intent: 'print'`**. The default `display` intent steps through the operator list on `requestAnimationFrame`, which browsers stop firing in a backgrounded tab — an import would hang forever with no error.
 - An imported poll stores its image as **`slideImage`, not `figure`**. `slideImage` means "this image *is* the whole slide", so the projector suppresses its own heading and option list rather than printing the question three times. `figure` means "a picture on the slide" and renders above a normally-drawn question.
+
+### Builder conventions
+
+- **No native dialogs.** `prompt()`/`alert()`/`confirm()` are banned; use `dialog()` and `toast()` from `ui.js`. Toast supports an action button (used for Undo).
+- **Destructive edits snapshot first.** Call `snapshotUndo(label)` (app.js) — or `ctx.snapshot(label)` from a panel — before deleting anything; Cmd/Ctrl+Z and the toast's Undo restore it.
+- **Names collide loudly.** `askName()` checks drafts and the published manifest before accepting a slug; `onSlugChange` *migrates* the draft + IndexedDB media to the new key (the old behaviour forked a ghost draft per keystroke).
+- **Publish is a three-beat flow** (`doPublish`): upload with progress → `waitForDeploy` polls the served `presentation.json?probe=<ts>` for the `publishedAt` stamp (fresh query = fresh CDN cache key) → success dialog with cache-busted links. `publishPresentation` returns `{url, publishedAt}`; `publishedAt` lives only in the committed presentation.json, not the editable spec (`duplicate()` strips it).
+- The preview has two refresh paths: `refreshPreviewContent()` posts into the running iframe via `__previewApply` (content edits — never reloads); `refreshPreview()` reloads the frame (mode/slide/structure changes).
+- `deletePresentation(slug)` removes a published folder with one commit of `sha: null` tree entries plus a manifest update.
 
 ### Draft storage in the builder
 

@@ -66,6 +66,23 @@ function dataUrlToBase64(dataUrl) {
   return i >= 0 ? dataUrl.slice(i + 1) : dataUrl;
 }
 
+// The manifest AS THE REPO KNOWS IT - read through the authenticated Contents
+// API, never the CDN. Publish/delete commits must build on the repo's actual
+// HEAD manifest: the served copy lags a deploy behind, and upserting onto the
+// stale copy silently dropped presentations published in the last few minutes.
+async function fetchRepoManifest() {
+  try {
+    const f = await gh(`/repos/${OWNER}/${REPO}/contents/presentations.json?ref=${BRANCH}`);
+    const bytes = Uint8Array.from(atob(String(f.content || '').replace(/\n/g, '')), c => c.charCodeAt(0));
+    const j = JSON.parse(new TextDecoder().decode(bytes));
+    return Array.isArray(j) ? j : (j.presentations || []);
+  } catch (e) {
+    if (e && e.status === 404) return [];   // no manifest yet
+    // Fall back to the served copy rather than failing the whole publish.
+    return fetchManifest();
+  }
+}
+
 // ---- publish ---------------------------------------------------------------
 
 // Returns { url, publishedAt }. spec = the presentation spec; mediaBlobs =
@@ -108,7 +125,7 @@ export async function publishPresentation(spec, mediaBlobs, onProgress) {
   }
 
   // Update the root manifest in the SAME commit.
-  const manifest = upsertManifest(await fetchManifest(), {
+  const manifest = upsertManifest(await fetchRepoManifest(), {
     slug, title: spec.title || slug, updated: Date.now(),
     hasMap: (spec.stages || []).some(s => s.type === 'map'),
     hasPoster: (spec.stages || []).some(s => s.type === 'poster')
@@ -179,7 +196,7 @@ export async function deletePresentation(slug) {
       .map(t => ({ path: t.path, mode: t.mode, type: 'blob', sha: null }));
     if (!tree.length) return;   // nothing published under that slug
 
-    const manifest = (await fetchManifest()).filter(p => p.slug !== slug);
+    const manifest = (await fetchRepoManifest()).filter(p => p.slug !== slug);
     const manBlob = await gh(`/repos/${OWNER}/${REPO}/git/blobs`, {
       method: 'POST', body: JSON.stringify({ content: JSON.stringify(manifest, null, 2) + '\n', encoding: 'utf-8' })
     });

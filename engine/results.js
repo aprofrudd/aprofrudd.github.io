@@ -34,6 +34,11 @@
     reload.className = 'mcq-submit';
     reload.addEventListener('click', () => location.reload());
     stagePane.appendChild(reload);
+    // The shell's controls can't do anything without a store - don't leave
+    // them looking clickable.
+    [prevBtn, nextBtn, resetBtn].forEach(b => { if (b) b.disabled = true; });
+    if (authBtn) authBtn.hidden = true;
+    if (authWho) authWho.hidden = true;
     return;
   }
 
@@ -404,12 +409,12 @@
     const locked = store.isLive && !isTeacher;
     prevBtn.disabled = locked || currentStage <= 0;
     nextBtn.disabled = locked || currentStage >= stagesTotal() - 1;
-    resetBtn.disabled = locked;
+    resetBtn.disabled = locked || !!resetBtn.dataset.busy;
     const rsBtn = document.getElementById('reset-stage-btn');
     if (rsBtn) {
       const cur = window.STAGES[currentStage];
       const votable = !!cur && (cur.type === 'mcq' || cur.type === 'map');
-      rsBtn.disabled = locked || !votable;
+      rsBtn.disabled = locked || !votable || !!rsBtn.dataset.busy;
       rsBtn.hidden = !votable;
     }
     stageIndic.textContent = `${currentStage + 1} / ${stagesTotal()}`;
@@ -467,29 +472,41 @@
   // Destructive controls use an arm-then-confirm press on the button itself -
   // a native confirm() dialog on the projector, in front of the class, is
   // both jarring and (in some setups) blocks the screen share.
+  const disarmers = [];
   function armThenRun(btn, armedLabel, run) {
     const original = btn.textContent;
-    let armed = false, timer = null;
+    let armed = false, timer = null, armedAt = 0;
+    function disarm() {
+      armed = false;
+      clearTimeout(timer);
+      btn.classList.remove('armed');
+      if (!btn.dataset.busy) btn.textContent = original;
+    }
+    disarmers.push(disarm);
     btn.addEventListener('click', async () => {
-      if (btn.disabled) return;
+      if (btn.disabled || btn.dataset.busy) return;
       if (!armed) {
         armed = true;
+        armedAt = Date.now();
         btn.classList.add('armed');
         btn.textContent = armedLabel;
-        timer = setTimeout(() => {
-          armed = false;
-          btn.classList.remove('armed');
-          btn.textContent = original;
-        }, 5000);
+        timer = setTimeout(disarm, 5000);
         return;
       }
+      // A double-click must not arm-and-confirm in one motion: the confirming
+      // press has to be a distinct second decision.
+      if (Date.now() - armedAt < 500) return;
       clearTimeout(timer);
       armed = false;
       btn.classList.remove('armed');
+      // dataset.busy keeps renderControls (fired by the deletion snapshots
+      // streaming in) from re-enabling the button mid-wipe.
+      btn.dataset.busy = '1';
       btn.disabled = true;
       btn.textContent = 'Working…';
       try { await run(); }
       finally {
+        delete btn.dataset.busy;
         btn.disabled = false;
         btn.textContent = original;
         renderControls();
@@ -539,13 +556,20 @@
   });
 
   // Keyboard: arrows advance the lesson, and so do the keys presenter
-  // clickers actually send (PageDown/PageUp, plus space bar).
+  // clickers actually send (PageDown/PageUp, plus space bar). Handled keys are
+  // always consumed - an unconsumed Space on the last slide used to fall
+  // through and activate whichever button had focus (sign-out, say). Space on
+  // a FOCUSED button stays native: that's how keyboard users press buttons.
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    const next = e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ';
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    const onControl = tag === 'BUTTON' || tag === 'A';
+    const next = e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && !onControl);
     const prev = e.key === 'ArrowLeft'  || e.key === 'PageUp';
-    if (next && !nextBtn.disabled) { e.preventDefault(); nextBtn.click(); }
-    if (prev && !prevBtn.disabled) { e.preventDefault(); prevBtn.click(); }
+    if (!next && !prev) return;
+    e.preventDefault();
+    if (next && !nextBtn.disabled) nextBtn.click();
+    if (prev && !prevBtn.disabled) prevBtn.click();
   });
 
   // --- Teacher sign-in gate ------------------------------------------------
@@ -576,7 +600,9 @@
                    : 'Sign-in failed - check the connection and try again.';
                });
       });
+      let authGen = 0;
       onAuthStateChanged(auth, async (user) => {
+        const gen = ++authGen;
         if (authBtn) authBtn.textContent = user ? 'Sign out' : 'Sign in to control';
         if (!user) {
           isTeacher = false;
@@ -592,6 +618,7 @@
         if (authWho) authWho.textContent = 'Checking this account…';
         renderControls();
         const allowed = await store.probeControl();
+        if (gen !== authGen) return;   // signed out / switched account meanwhile
         isTeacher = allowed;
         // Don't show the email on the projector (it's in front of the class);
         // just confirm the state.
@@ -653,7 +680,13 @@
     rerender();
   };
 
-  store.onStage(({stage}) => { currentStage = stage; rerender(); });
+  store.onStage(({stage}) => {
+    // An armed "Clear this question?" must not survive slide navigation and
+    // wipe whichever question is current when finally confirmed.
+    if (stage !== currentStage) disarmers.forEach(d => d());
+    currentStage = stage;
+    rerender();
+  });
   store.onVotes((votes)   => { allVotes = votes; rerender(); });
 
   // If the projector sleeps or drops its connection, pull the current stage AND

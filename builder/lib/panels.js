@@ -268,6 +268,8 @@ export function settingsPanel(spec, ctx) {
   // which used to strand a ghost draft per pause while typing.
   const slugInput = textInput(spec.slug, () => {}, 'heat-2026');
   slugInput.addEventListener('change', () => {
+    // A cleared field must not silently rename to kebab('') === 'item'.
+    if (!slugInput.value.trim()) { slugInput.value = spec.slug; return; }
     const next = kebab(slugInput.value);
     slugInput.value = next;
     if (next && next !== spec.slug && ctx.onSlugChange) ctx.onSlugChange(next);

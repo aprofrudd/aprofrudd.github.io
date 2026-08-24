@@ -1253,16 +1253,19 @@ body.projector.stage-slide .deck-slide img {
 }
 
 /* Legible from the back row: the live bars are the whole point of the
-   projector, so they get lecture-hall sizes, not dashboard sizes. */
-body.projector .results-row {
-  grid-template-columns: 14rem 1fr 3.5rem;
-  font-size: 1.15rem;
+   projector, so they get lecture-hall sizes, not dashboard sizes. Scoped to
+   wide screens so the narrow-viewport collapse keeps its own layout. */
+@media (min-width: 701px) {
+  body.projector .results-row {
+    grid-template-columns: 14rem 1fr 3.5rem;
+    font-size: 1.15rem;
+  }
+  body.projector .results-row .bar { height: 22px; border-radius: 11px; }
+  body.projector .results-row .bar-fill { border-radius: 11px; }
+  body.projector .results-row .count { font-size: 1.2rem; }
+  body.projector .qr-corner { width: 260px; }
+  body.projector .qr-corner img { width: 236px; height: 236px; }
 }
-body.projector .results-row .bar { height: 22px; border-radius: 11px; }
-body.projector .results-row .bar-fill { border-radius: 11px; }
-body.projector .results-row .count { font-size: 1.2rem; }
-body.projector .qr-corner { width: 260px; }
-body.projector .qr-corner img { width: 236px; height: 236px; }
 
 /* Static "connecting" placeholder in the shells, replaced by the first
    render - so joining is never a silent white page. */
@@ -1276,5 +1279,7 @@ body.projector .qr-corner img { width: 236px; height: 236px; }
 @media (prefers-reduced-motion: reduce) { .connecting { animation: none; } }
 
 /* The QR corner grew to 260px; keep the projector layout clear of it. */
-body.projector .main { padding-right: calc(2rem + 280px); }
-body.projector .header { padding-right: calc(1.25rem + 280px); }
+@media (min-width: 701px) {
+  body.projector .main { padding-right: calc(2rem + 280px); }
+  body.projector .header { padding-right: calc(1.25rem + 280px); }
+}
