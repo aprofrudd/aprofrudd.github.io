@@ -192,6 +192,12 @@
       "url": "https://doi.org/10.3390/jfmk10020227"
     },
     {
+      "name": "Doubly Labelled Water Assessment of Elite Male-Squash Player’s Energy Balance During a Seven-Day Training Microcycle",
+      "publisher": "Research Square (preprint)",
+      "releaseDate": "2025-06-09",
+      "url": "https://doi.org/10.21203/rs.3.rs-6779000/v1"
+    },
+    {
       "name": "Strength Training Practices in Amateur and Professional Boxing",
       "publisher": "Journal of Strength and Conditioning Research",
       "releaseDate": "2025-01-01",
@@ -389,6 +395,6 @@
   "meta": {
     "canonical": "https://alanruddock.com/resume.json",
     "version": "v1.0.0",
-    "lastModified": "2026-08-15"
+    "lastModified": "2026-09-01"
   }
 }
