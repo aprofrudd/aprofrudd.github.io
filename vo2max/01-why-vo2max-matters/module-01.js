@@ -28,11 +28,12 @@
 
 import { initModulePage } from '../lib/reveal.js';
 import { h } from '../lib/figure.js';
-import { LIMITATIONS, PAPER, STUDY, FIGURE2, TABLE2 } from './data.js';
+import { LIMITATIONS, PAPER, STUDY, FIGURE2, TABLE2, FIRSTBEAT, GARMIN } from './data.js';
 import { PUBMED_SERIES, PUBMED_META } from './pubmed-data.js';
 
 import { trendsChart } from './interactives/trends-chart.js';
 import { pubmedChart } from './interactives/pubmed-chart.js';
+import { watchVo2max } from './interactives/watch-vo2max.js';
 import { cohortFlow } from './interactives/cohort-flow.js';
 import { metExplorer } from './interactives/met-explorer.js';
 import { table2Distributions } from './interactives/table2-distributions.js';
@@ -70,11 +71,68 @@ function focus(mount) {
     `other way, and went late. ` +
     `<br><br>So the honest answer to &ldquo;why the sudden focus&rdquo; is that there was nothing sudden about ` +
     `the evidence. <strong>The science had largely settled before most people had heard of it.</strong> ` +
-    `What changed was who was listening. ` +
-    `<br><br>Which raises the obvious question: what did the research actually find that was worth all this? ` +
-    `The rest of this page is one paper &mdash; the one most often pointed at &mdash; published in ` +
-    `<strong>${PAPER.year}</strong>, while that research curve was still climbing.`;
+    `What changed was who was listening &mdash; and one very concrete reason is sitting on people&rsquo;s wrists. ` +
+    `That&rsquo;s next. After that, the rest of this page is one paper &mdash; the one most often pointed at ` +
+    `&mdash; published in <strong>${PAPER.year}</strong>, while that research curve was still climbing.`;
   mount.appendChild(synthesis);
+}
+
+/* ---------------------------------------------------------------------------
+   Section 02 — wearables. Garmin (and the brands that use the same engine)
+   put a VO2max estimate front and centre without anyone breathing into a
+   mask. Firstbeat Analytics is the physiology behind it, and — unusually for
+   what happens inside a smartwatch — they publish exactly how it works.
+   ------------------------------------------------------------------------ */
+function wearables(mount) {
+  mount.appendChild(h('div', { class: 'v-prose' },
+    h('p', { html:
+      'Open a modern running watch and there it is, front and centre &mdash; not buried in a menu, ' +
+      'the headline number on the screen. This is a real Garmin watch face:'
+    })
+  ));
+
+  mount.appendChild(h('figure', { class: 'v-figure', style: 'max-width:280px;margin:0 auto 1.5rem' },
+    h('img', {
+      src: GARMIN.image, alt: GARMIN.imageAlt, loading: 'lazy',
+      style: 'width:100%;display:block;border-radius:16px;box-shadow:var(--shadow)',
+    }),
+    h('figcaption', { class: 'v-caption', html: `A ${GARMIN.device} VO&#8322;max screen, captured ${GARMIN.captured}.` })
+  ));
+
+  mount.appendChild(h('blockquote', { class: 'v-quote' },
+    GARMIN.attribution,
+    h('cite', { html: 'Garmin Connect, &ldquo;About VO2 Max Estimates&rdquo; support page' })
+  ));
+
+  const introCallout = h('div', { class: 'v-callout' });
+  introCallout.innerHTML =
+    '<span class="v-callout-head">Firstbeat shows its working</span>' +
+    'Firstbeat Analytics is the physiology company named in that small print. Most of what happens ' +
+    'inside a smartwatch is a trade secret; Firstbeat instead publish a white paper laying out exactly ' +
+    'how the estimate is calculated. ' +
+    `<a href="${FIRSTBEAT.url}" target="_blank" rel="noopener">Read it here</a> &mdash; the three charts ` +
+    'below rebuild its central idea with an invented example, not their artwork. ' +
+    `In their own words: &ldquo;${FIRSTBEAT.physiologyQuote}&rdquo;`;
+  mount.appendChild(introCallout);
+
+  watchVo2max(mount);
+
+  const accuracy = h('div', { class: 'v-callout' });
+  accuracy.innerHTML =
+    '<span class="v-callout-head">How accurate is it, really?</span>' +
+    `&ldquo;${FIRSTBEAT.accuracyQuote}&rdquo; That is a genuinely strong result for a method that needs ` +
+    'no lab, no mask, and no maximal effort &mdash; but it still depends on catching a good stretch of ' +
+    'clean data. Firstbeat&rsquo;s own method automatically throws out data from situations like ' +
+    `${FIRSTBEAT.excludedSituations.join(', ')}, because any of those would throw the heart-rate-to-speed ` +
+    'relationship off.';
+  mount.appendChild(accuracy);
+
+  mount.appendChild(h('p', {
+    class: 'v-caption', style: 'max-width:680px;margin:1.5rem auto 0;text-align:center',
+    html:
+      'This same idea &mdash; estimated is not measured &mdash; comes up again in a moment, when the ' +
+      'treadmill data behind the rest of this page turns out to have been worked out the same way.',
+  }));
 }
 
 /* ---------------------------------------------------------------------------
@@ -163,6 +221,7 @@ function boot() {
   };
 
   wire('mount-focus', focus);
+  wire('mount-wearables', wearables);
   wire('mount-cohort', cohortFlow);
   wire('mount-met', metExplorer);
   wire('mount-table2', table2Distributions);

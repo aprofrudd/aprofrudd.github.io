@@ -362,3 +362,112 @@ export const LIMITATIONS = [
   { head: 'Cause of death unknown',  body: 'Only whether a man had died was known, not what he died of.' },
   { head: 'A different era',         body: 'The men were tested between 1987 and 2000. Treatment for heart disease has changed a great deal since.' },
 ];
+
+/* ---------------------------------------------------------------------------
+ * Wearables and the Firstbeat method.
+ *
+ * SOURCE: Firstbeat Technologies Ltd. "Automated Fitness Level (VO2max)
+ * Estimation with Heart Rate and Speed Data." White paper, published
+ * 07/11/2014, updated 30/06/2017.
+ * https://www.firstbeat.com/wp-content/uploads/2017/06/white_paper_VO2max_30.6.2017.pdf
+ * Read directly from the PDF; quotes below are verbatim (only the numbered
+ * reference markers, e.g. "[6]", have been dropped).
+ *
+ * Firstbeat is the physiology engine behind Garmin's on-device VO2max
+ * estimate — the Garmin Connect support page for the Forerunner VO2max
+ * screen states this directly in its own small print (quoted below,
+ * screenshot captured 2026-09-03).
+ * ------------------------------------------------------------------------ */
+export const FIRSTBEAT = {
+  publisher: 'Firstbeat Technologies Ltd.',
+  title: 'Automated Fitness Level (VO2max) Estimation with Heart Rate and Speed Data',
+  updated: '30 June 2017',
+  url: 'https://www.firstbeat.com/wp-content/uploads/2017/06/white_paper_VO2max_30.6.2017.pdf',
+  // "Physiological basis of the method", verbatim:
+  physiologyQuote:
+    'It is well known that there is a linear relationship between oxygen ' +
+    'consumption and running speed. The oxygen cost of running increases ' +
+    'when running speed increases.',
+  // "Calculation steps", step 4, verbatim:
+  calculationQuote:
+    "The most reliable data segments are used for estimating the person's " +
+    'aerobic fitness level (VO2max) by utilizing either linear or nonlinear ' +
+    "dependency between the person's heart rate and speed data.",
+  // "Validation of the Firstbeat model", verbatim:
+  accuracyQuote:
+    'The accuracy of the method when applied for running is 95% (Mean ' +
+    'absolute percentage error, MAPE ~5%), based on a database of 2690 ' +
+    'freely performed runs from 79 runners whose VO2max was tested four ' +
+    'times during their 6-9-month preparation period for a marathon.',
+  // Same section, on getting the age-based maximum heart rate wrong, verbatim:
+  hrMaxErrorQuote:
+    'If the HRmax is estimated 15 beats/min too low, the error in the ' +
+    'VO2max result is about 9%. Respectively, if the HRmax is estimated 15 ' +
+    'beats/min too high, the error in VO2max result is 7%.',
+  // "Only reliable data used for VO2max estimation", paraphrased list of the
+  // situations the method automatically excludes:
+  excludedSituations: [
+    'running on soft ground',
+    'a steep downhill',
+    'stopped at a traffic light (speed zero, heart rate still elevated)',
+    'a long run, once cardiovascular drift sets in',
+  ],
+};
+
+export const GARMIN = {
+  device: 'Garmin Forerunner',
+  captured: '2026-09-03',
+  // Verbatim from the Garmin Connect support page, "About VO2 Max Estimates".
+  aboutQuote:
+    'VO2 max. is the maximum volume of oxygen (in milliliters) you can ' +
+    'consume per minute per kilogram of body weight at your maximum ' +
+    'performance. In simple terms, VO2 max. is an indication of athletic ' +
+    'performance and should increase as your level of fitness improves. ' +
+    'The Forerunner® device requires wrist-based heart rate or a ' +
+    'compatible chest heart rate monitor to display your VO2 max. estimate.',
+  // Verbatim, the line that names Firstbeat directly:
+  attribution:
+    'VO2 max. data is provided by Firstbeat Analytics™. VO2 max. ' +
+    'analysis is provided with permission from The Cooper Institute®.',
+  image: 'garmin-vo2max-gauge.png',
+  imageAlt: 'A Garmin watch screen showing a VO2 max estimate of 48, rated "Superior", on a coloured gauge running from red (poor) through to purple (superior).',
+};
+
+/* ---------------------------------------------------------------------------
+ * An ILLUSTRATIVE example of the Firstbeat method — not real data from a
+ * real runner.
+ *
+ * Eight (speed, heart rate) pairs stand in for a single freely performed
+ * submaximal run, spanning an easy jog to a hard tempo effort — the kind of
+ * everyday data the method uses, never a maximal test. Heart rate follows a
+ * straight line against speed plus a little random scatter, which is the
+ * well-established real-world pattern this whole method depends on.
+ *
+ * VO2 was never measured — nobody wears a mask on a training run. Each VO2
+ * value was instead calculated from that same speed using the standard ACSM
+ * equation for level running (the same kind of published equation Myers et
+ * al. used to turn treadmill speed and grade into METs earlier in this
+ * module), plus a little scatter of its own:
+ *
+ *   VO2 (mL/kg/min) = 0.2 x speed (m/min) + 3.5
+ *
+ * Source: American College of Sports Medicine, Guidelines for Exercise
+ * Testing and Prescription (the running/horizontal equation).
+ * ------------------------------------------------------------------------ */
+export const WATCH_RUN = {
+  points: [
+    { speed: 7,  hr: 121, vo2: 25.4 },
+    { speed: 8,  hr: 128, vo2: 30.0 },
+    { speed: 9,  hr: 138, vo2: 32.2 },
+    { speed: 10, hr: 142, vo2: 35.6 },
+    { speed: 11, hr: 153, vo2: 39.9 },
+    { speed: 12, hr: 159, vo2: 44.5 },
+    { speed: 13, hr: 165, vo2: 45.7 },
+    { speed: 14, hr: 175, vo2: 49.3 },
+  ],
+  hrMaxMin: 178,      // kept above the highest heart rate in the data, so the
+  hrMaxMax: 210,      // slider always extrapolates forward, never backward
+  hrMaxDefault: 190,  // the naive 220-minus-age estimate for a 30-year-old
+  acsmCoefficient: 0.2,  // mL O2 per kg per metre run (ACSM running equation)
+  acsmIntercept: 3.5,    // resting VO2, mL/kg/min — 1 MET
+};
