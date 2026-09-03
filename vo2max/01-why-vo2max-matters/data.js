@@ -410,21 +410,19 @@ export const FIRSTBEAT = {
     'running on soft ground',
     'a steep downhill',
     'stopped at a traffic light (speed zero, heart rate still elevated)',
-    'a long run, once cardiovascular drift sets in',
+    'the later part of a long run once cardiovascular drift sets in',
   ],
 };
 
 export const GARMIN = {
   device: 'Garmin Forerunner',
   captured: '2026-09-03',
-  // Verbatim from the Garmin Connect support page, "About VO2 Max Estimates".
-  aboutQuote:
-    'VO2 max. is the maximum volume of oxygen (in milliliters) you can ' +
-    'consume per minute per kilogram of body weight at your maximum ' +
-    'performance. In simple terms, VO2 max. is an indication of athletic ' +
-    'performance and should increase as your level of fitness improves. ' +
-    'The Forerunner® device requires wrist-based heart rate or a ' +
-    'compatible chest heart rate monitor to display your VO2 max. estimate.',
+  // Verbatim from the Garmin Connect support page, "About VO2 Max Estimates" —
+  // the sentence that states, in Garmin's own words, what the watch needs.
+  requirementQuote:
+    'You must run either outside with GPS or ride with a compatible power ' +
+    'meter at a moderate level of intensity for several minutes to get an ' +
+    'accurate VO2 max. estimate.',
   // Verbatim, the line that names Firstbeat directly:
   attribution:
     'VO2 max. data is provided by Firstbeat Analytics™. VO2 max. ' +
@@ -437,7 +435,7 @@ export const GARMIN = {
  * An ILLUSTRATIVE example of the Firstbeat method — not real data from a
  * real runner.
  *
- * Eight (speed, heart rate) pairs stand in for a single freely performed
+ * Seven (speed, heart rate) pairs stand in for a single freely performed
  * submaximal run, spanning an easy jog to a hard tempo effort — the kind of
  * everyday data the method uses, never a maximal test. Heart rate follows a
  * straight line against speed plus a little random scatter, which is the
@@ -452,11 +450,13 @@ export const GARMIN = {
  *   VO2 (mL/kg/min) = 0.2 x speed (m/min) + 3.5
  *
  * Source: American College of Sports Medicine, Guidelines for Exercise
- * Testing and Prescription (the running/horizontal equation).
+ * Testing and Prescription (the running/horizontal equation). ACSM gives it
+ * for running at roughly 8 km/h (134 m/min) and above; walking has a
+ * different slope, so the example starts at 8 and the reference line on the
+ * chart is not drawn below the data.
  * ------------------------------------------------------------------------ */
 export const WATCH_RUN = {
   points: [
-    { speed: 7,  hr: 121, vo2: 25.4 },
     { speed: 8,  hr: 128, vo2: 30.0 },
     { speed: 9,  hr: 138, vo2: 32.2 },
     { speed: 10, hr: 142, vo2: 35.6 },

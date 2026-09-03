@@ -112,7 +112,9 @@ function wearables(mount) {
     'how the estimate is calculated. ' +
     `<a href="${FIRSTBEAT.url}" target="_blank" rel="noopener">Read it here</a> &mdash; the three charts ` +
     'below rebuild its central idea with an invented example, not their artwork. ' +
-    `In their own words: &ldquo;${FIRSTBEAT.physiologyQuote}&rdquo;`;
+    `In their own words: &ldquo;${FIRSTBEAT.physiologyQuote}&rdquo; ` +
+    `<br><br>Garmin&rsquo;s own instructions say what the watch needs to do it: &ldquo;${GARMIN.requirementQuote}&rdquo; ` +
+    'Heart rate, speed, a moderate effort, a few minutes. That is the whole recipe.';
   mount.appendChild(introCallout);
 
   watchVo2max(mount);

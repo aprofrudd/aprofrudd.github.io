@@ -82,7 +82,9 @@ export function watchVo2max(mount) {
 
   const figA = figure({
     label: '',
-    caption: 'Panel A &mdash; heart rate against running speed, the watch&rsquo;s raw material.',
+    caption:
+      'Panel A &mdash; heart rate against running speed, the watch&rsquo;s raw material. In ' +
+      `Firstbeat&rsquo;s words: &ldquo;${FIRSTBEAT.calculationQuote}&rdquo;`,
   });
   const figB = figure({
     label: '',
@@ -135,11 +137,16 @@ export function watchVo2max(mount) {
     renderPanelB(est);
     renderPanelC(est);
 
-    out.setAll([`${round(est.maxSpeed, 1)} km/h`, `${round(est.vo2max, 1)} mL/kg/min`]);
+    out.setAll([`${est.maxSpeed.toFixed(1)} km/h`, `${est.vo2max.toFixed(1)} mL/kg/min`]);
+    const gap = Math.abs(est.vo2AtMaxSpeed - est.vo2max);
     sentence.innerHTML =
       `Assuming a maximum heart rate of <strong>${hrMax} bpm</strong>, this run&rsquo;s numbers ` +
-      `extrapolate to a top speed of about <strong>${round(est.maxSpeed, 1)} km/h</strong> &mdash; and a ` +
-      `VO&#8322;max of about <strong>${round(est.vo2max, 1)} mL/kg/min</strong>.`;
+      `extrapolate to a top speed of about <strong>${est.maxSpeed.toFixed(1)} km/h</strong> &mdash; and a ` +
+      `VO&#8322;max of about <strong>${est.vo2max.toFixed(1)} mL/kg/min</strong>. ` +
+      `<span class="v-caption" style="display:block;margin-top:0.5rem">Panel B reaches ` +
+      `${est.vo2AtMaxSpeed.toFixed(1)} by way of the top speed; Panel C reaches ${est.vo2max.toFixed(1)} ` +
+      `by fitting heart rate to oxygen cost directly. Two routes through the same data, ` +
+      `${gap < 1 ? 'within a unit of each other' : gap.toFixed(1) + ' apart'} &mdash; the headline uses Panel C.</span>`;
 
     const lowEst = estimate(hrMax - 15).vo2max;
     const highEst = estimate(hrMax + 15).vo2max;
@@ -149,8 +156,8 @@ export function watchVo2max(mount) {
       '<span class="v-callout-head">The whole estimate leans on one guess</span>' +
       `Nobody in this example ran anywhere near their actual maximum &mdash; the watch has to assume ` +
       `one. In this data, guessing 15 beats too low (${hrMax - 15} bpm) would put the estimate at ` +
-      `<strong>${round(lowEst, 1)}</strong> (${lowPct >= 0 ? '+' : ''}${round(lowPct, 0)}%); guessing 15 too high ` +
-      `(${hrMax + 15} bpm) would put it at <strong>${round(highEst, 1)}</strong> ` +
+      `<strong>${lowEst.toFixed(1)}</strong> (${lowPct >= 0 ? '+' : ''}${round(lowPct, 0)}%); guessing 15 too high ` +
+      `(${hrMax + 15} bpm) would put it at <strong>${highEst.toFixed(1)}</strong> ` +
       `(${highPct >= 0 ? '+' : ''}${round(highPct, 0)}%). Firstbeat report a similar order of error from ` +
       `their own real-world database: &ldquo;${FIRSTBEAT.hrMaxErrorQuote}&rdquo;`;
   }
@@ -198,17 +205,17 @@ export function watchVo2max(mount) {
     add(plot,
       el('line', { x1: ex, y1: hy, x2: ex, y2: PHA, stroke: 'var(--secondary-color)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }),
       el('circle', { cx: ex, cy: hy, r: 5, fill: 'var(--secondary-color)' }),
-      el('text', { x: ex, y: -18, 'text-anchor': 'middle', class: 'v-label-strong' }, `${round(est.maxSpeed, 1)} km/h`)
+      el('text', { x: ex, y: -18, 'text-anchor': 'middle', class: 'v-label-strong' }, `${est.maxSpeed.toFixed(1)} km/h`)
     );
 
     add(root, plot);
     figA.chart.innerHTML = '';
     figA.chart.appendChild(root);
     figA.setLabel(
-      `Scatter plot of heart rate against running speed for eight points from an imagined run, ` +
+      `Scatter plot of heart rate against running speed for ${pts.length} points from an imagined run, ` +
       `speeds ${lo} to ${hi} kilometres per hour. A fitted line, extrapolated to an assumed maximum ` +
       `heart rate of ${hrMax} beats per minute, reads off an estimated top speed of ` +
-      `${round(est.maxSpeed, 1)} kilometres per hour.`
+      `${est.maxSpeed.toFixed(1)} kilometres per hour.`
     );
     figA.setTable({
       caption: 'Panel A data — heart rate against running speed (illustrative)',
@@ -235,11 +242,22 @@ export function watchVo2max(mount) {
       'Running speed (km/h)'));
     add(plot, axisTitle('Oxygen cost (mL/kg/min)', -40, PHB / 2, -90));
 
-    // The known physiological relationship, drawn across the full axis —
-    // this line was never fitted to data, it is the ACSM equation itself.
-    const refPts = [];
-    for (let v = SPEED_MIN; v <= SPEED_MAX; v += 1) refPts.push([x(v), y(acsmVo2(v))]);
-    add(plot, el('path', { d: line(refPts), fill: 'none', stroke: 'var(--v-risk)', 'stroke-width': 2, opacity: 0.55 }));
+    // The known physiological relationship. This line was never fitted to
+    // data — it is the ACSM running equation itself — but it is only drawn
+    // where that equation applies: solid across the speeds actually run,
+    // dashed beyond them, and not at all down at walking pace, where the
+    // oxygen cost follows a different slope.
+    const lo = speeds[0], hi = speeds[speeds.length - 1];
+    add(plot,
+      el('path', {
+        d: line([[x(lo), y(acsmVo2(lo))], [x(hi), y(acsmVo2(hi))]]),
+        fill: 'none', stroke: 'var(--v-risk)', 'stroke-width': 2, opacity: 0.55,
+      }),
+      el('path', {
+        d: line([[x(hi), y(acsmVo2(hi))], [x(SPEED_MAX), y(acsmVo2(SPEED_MAX))]]),
+        fill: 'none', stroke: 'var(--v-risk)', 'stroke-width': 2, opacity: 0.55, 'stroke-dasharray': '6 4',
+      })
+    );
 
     pts.forEach((p) => add(plot,
       el('circle', { cx: x(p.speed), cy: y(p.vo2), r: 5, fill: 'var(--v-risk)', stroke: '#fff', 'stroke-width': 1.5 })
@@ -254,7 +272,7 @@ export function watchVo2max(mount) {
       el('line', { x1: mx, y1: my, x2: PWB, y2: my, stroke: 'var(--secondary-color)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }),
       el('circle', { cx: mx, cy: my, r: 5, fill: 'var(--secondary-color)' }),
       el('text', { x: PWB, y: my - 8, 'text-anchor': 'end', class: 'v-label-strong' },
-        `${round(est.vo2AtMaxSpeed, 1)} mL/kg/min`)
+        `${est.vo2AtMaxSpeed.toFixed(1)} mL/kg/min`)
     );
 
     add(root, plot);
@@ -262,8 +280,8 @@ export function watchVo2max(mount) {
     figB.chart.appendChild(root);
     figB.setLabel(
       `Oxygen cost against running speed. The reference line comes from the standard ACSM running ` +
-      `equation, not measurement. At the estimated top speed of ${round(est.maxSpeed, 1)} kilometres per ` +
-      `hour, the equation predicts an oxygen cost of ${round(est.vo2AtMaxSpeed, 1)} millilitres per ` +
+      `equation, not measurement. At the estimated top speed of ${est.maxSpeed.toFixed(1)} kilometres per ` +
+      `hour, the equation predicts an oxygen cost of ${est.vo2AtMaxSpeed.toFixed(1)} millilitres per ` +
       `kilogram per minute.`
     );
     figB.setTable({
@@ -313,7 +331,7 @@ export function watchVo2max(mount) {
       el('line', { x1: ex, y1: ey, x2: PWC, y2: ey, stroke: 'var(--secondary-color)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }),
       el('circle', { cx: ex, cy: ey, r: 6, fill: 'var(--secondary-color)' }),
       el('text', { x: ex, y: -18, 'text-anchor': 'middle', class: 'v-label-strong' },
-        `VO₂max ≈ ${round(est.vo2max, 1)}`)
+        `VO₂max ≈ ${est.vo2max.toFixed(1)}`)
     );
 
     add(root, plot);
@@ -323,7 +341,7 @@ export function watchVo2max(mount) {
       `Heart rate against oxygen cost, the relationship that makes the whole method possible. The ` +
       `points fall close to a straight line (R squared ${round(regHrVo2.r2, 2)}). Extrapolated to an ` +
       `assumed maximum heart rate of ${hrMax} beats per minute, the line reads off an estimated VO2max ` +
-      `of ${round(est.vo2max, 1)} millilitres per kilogram per minute.`
+      `of ${est.vo2max.toFixed(1)} millilitres per kilogram per minute.`
     );
     figC.setTable({
       caption: 'Panel C data — heart rate against oxygen cost (illustrative)',
