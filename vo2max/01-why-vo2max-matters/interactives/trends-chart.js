@@ -70,8 +70,11 @@ export function trendsChart(mount) {
     add(plot, axisLeft(y, 0, PLOT_W, ticks(0, 100, 5), (v) => String(round(v, 0))));
     add(plot, el('line', { x1: 0, y1: PLOT_H, x2: PLOT_W, y2: PLOT_H, class: 'v-axis-line' }));
 
-    const startYear = Math.ceil(x0);
-    for (let yr = startYear; yr <= x1; yr += 2) {
+    // Tick spacing follows the span: a three-year export needs yearly labels,
+    // a twenty-year one would be unreadable with them.
+    const span = x1 - x0;
+    const step = span > 24 ? 5 : span > 8 ? 2 : 1;
+    for (let yr = Math.ceil(x0); yr <= x1; yr += step) {
       add(plot,
         el('line', { x1: x(yr), y1: PLOT_H, x2: x(yr), y2: PLOT_H + 5, class: 'v-axis-line' }),
         el('text', { x: x(yr), y: PLOT_H + 19, 'text-anchor': 'middle', class: 'v-label-sm' }, String(yr))

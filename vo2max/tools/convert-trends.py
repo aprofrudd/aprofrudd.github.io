@@ -27,21 +27,43 @@ import re
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
-CSV_PATH = HERE.parent / "01-why-vo2max-matters" / "trends.csv"
 OUT_PATH = HERE.parent / "01-why-vo2max-matters" / "trends-data.js"
+
+# Where a Trends export plausibly lands. First match wins; a path given on the
+# command line beats all of them.
+SEARCH = [
+    HERE.parent / "01-why-vo2max-matters" / "trends.csv",
+    HERE.parent / "01-why-vo2max-matters" / "multiTimeline.csv",
+    pathlib.Path.home() / "Projects" / "VO2max" / "multiTimeline.csv",
+    pathlib.Path.home() / "Downloads" / "multiTimeline.csv",
+]
 
 DATE_RE = re.compile(r"^\d{4}(-\d{2}){0,2}$")
 
 
+def find_csv() -> pathlib.Path | None:
+    if len(sys.argv) > 1:
+        given = pathlib.Path(sys.argv[1]).expanduser()
+        return given if given.exists() else None
+    for candidate in SEARCH:
+        if candidate.exists():
+            return candidate
+    return None
+
+
 def main() -> int:
-    if not CSV_PATH.exists():
-        print(f"No CSV found at {CSV_PATH}", file=sys.stderr)
-        print("Export one from trends.google.com first - see the notes at the "
-              "top of this script.", file=sys.stderr)
+    csv_path = find_csv()
+    if csv_path is None:
+        print("No Trends CSV found. Looked in:", file=sys.stderr)
+        for c in SEARCH:
+            print(f"  {c}", file=sys.stderr)
+        print("Pass a path explicitly:  ./convert-trends.py ~/path/to/export.csv",
+              file=sys.stderr)
         return 1
+    print(f"Reading {csv_path}")
 
     rows, term, interval = [], None, "Month"
-    with CSV_PATH.open(newline="", encoding="utf-8-sig") as fh:
+    with csv_path.open(newline="", encoding="utf-8-sig") as fh:
         for parts in csv.reader(fh):
             if len(parts) < 2:
                 continue
@@ -58,9 +80,22 @@ def main() -> int:
                 rows.append((first, value))
 
     if not rows:
-        print(f"Parsed no data rows from {CSV_PATH}. Is it a Trends export?",
+        print(f"Parsed no data rows from {csv_path}. Is it a Trends export?",
               file=sys.stderr)
         return 1
+
+    dropped = None
+    if rows and interval in ("Week", "Day", "Month"):
+        span = {"Day": 1, "Week": 7, "Month": 31}[interval]
+        last = rows[-1][0]
+        parts = [int(x) for x in last.split("-")]
+        while len(parts) < 3:
+            parts.append(1)
+        end = datetime.date(*parts) + datetime.timedelta(days=span)
+        if end > datetime.date.today():
+            dropped = rows.pop()
+            print(f"  dropped trailing partial {interval.lower()} {dropped[0]} "
+                  f"(it has not finished yet)")
 
     term = term or "search term"
     peak = max(r[1] for r in rows)
