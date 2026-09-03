@@ -95,6 +95,34 @@ Two non-obvious constraints, both load-bearing:
 
 Specs go in `localStorage` (`builder_draft_<slug>`); **media goes in IndexedDB** via `builder/lib/media-store.js`. This split is not stylistic — an imported deck is tens of megabytes of data URLs and blows the ~5MB localStorage quota. `state.mediaBlobs` is a Proxy so any write flags the draft dirty; pass a plain object to `saveMedia()` (structured clone). For the same reason `previewStages()` inlines data URLs only for the **selected** stage — inlining all of them overflows sessionStorage.
 
+## Learning modules (`/vo2max/`)
+
+Hand-written, **not** builder-generated, and unrelated to the presentation platform. `/vo2max/` is a hub page listing modules; each module lives in its own folder (`01-why-vo2max-matters/`). Vanilla ES modules, no build step, loaded with `<script type="module">`.
+
+```
+vo2max/
+  index.html          hub
+  module.css          all module styling; loaded AFTER /styles.css, adds no new site tokens
+  lib/                svg.js (scales/axes/paths), figure.js (accessible <figure> + controls),
+                      reveal.js (progress bar, scroll reveal, nav, focus mode), quiz.js
+  01-.../
+    index.html        prose and mount points only
+    data.js           EVERY number, each with a source comment
+    module-01.js      wires interactives to mount points
+    interactives/     one file per chart
+```
+
+- **`data.js` is the single source of truth.** No chart hardcodes a value. Numbers read off a published figure rather than a printed table are flagged `approx: true` and labelled as approximate in the UI. Do not add a number without a source comment.
+- **Charts are hand-built inline SVG.** No chart library, matching the site's no-dependency rule. They follow the same accessible-figure pattern as the homepage collaboration map: `role="img"` + `aria-label`, `aria-hidden` SVG, `<figcaption>`, and a `<details>` data table.
+- **Chart colours reuse existing tokens**: `--primary-color` for protective/fitter, `--collab-applied` (#c2410c, already declared for the collaboration figure) for risk, `--text-light` for reference. No new palette.
+- **Charts render lazily** on first scroll into view, via `onFirstView()`. `revealOnScroll()` also sweeps for anything already on screen at load — without that sweep a deep link or focus mode leaves the chart blank forever.
+- **`.v-chart` scrolls horizontally** and its SVG has `min-width: 560px`. Chart text is sized in viewBox units, so a 760-wide chart on a 340px phone would render 12px labels at ~5px. Scrolling keeps them legible; do not remove the min-width without solving that.
+- **SVG font sizes must be set via `style`, not the `font-size` attribute** — `module.css` sets `.v-chart text { font-size: 12px }` and a CSS rule beats a presentation attribute.
+- **Animated bars need `transform-box: fill-box`.** SVG transform-origin resolves against the viewBox otherwise, so `scaleY(0)` launches a bar from the bottom of the whole chart.
+- **`?focus=<section-id>`** dims everything but one section for screen recording. It force-renders every chart first, disables `history.scrollRestoration`, and overrides `scroll-behavior: smooth` for one instant jump — all three are required or it lands in the wrong place with a blank chart.
+- Every interactive is wrapped in try/catch in `module-01.js`, so one failure cannot blank the other nine.
+- Figures are **rebuilt from the published numbers**; none of the journal's artwork is copied.
+
 ## Gotchas
 
 - **`wcweather/` is a frozen, fully self-contained copy of an older engine** — its own `store.js`, `results.js`, `styles.css`, everything. It does *not* load `../engine/`. Changes to `engine/` have no effect on it, and it is not in `presentations.json`. Treat it as an archived lesson, not as code to keep in sync.
