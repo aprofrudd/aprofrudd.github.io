@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Why Fitness Predicts How Long You Live | VO₂max Module 1 | Dr Alan Ruddock</title>
-    <meta name="description" content="An interactive walk through the landmark 2002 study that found exercise capacity predicts death better than smoking, blood pressure, cholesterol or diabetes. Explore the data yourself.">
+    <title>Why All the Focus on VO₂max? | Module 1 | Dr Alan Ruddock</title>
+    <meta name="description" content="Public interest in VO₂max has taken off, but the research settled it a decade ago. An interactive look at the landmark 2002 study that found exercise capacity predicts death better than smoking, blood pressure or cholesterol.">
     <link rel="canonical" href="https://alanruddock.com/vo2max/01-why-vo2max-matters/">
     <meta property="og:type" content="article">
     <meta property="og:title" content="Why Fitness Predicts How Long You Live">
-    <meta property="og:description" content="Six thousand men walked on a treadmill. What predicted who was still alive years later was not cholesterol or blood pressure. It was how far they could walk. An interactive explainer.">
+    <meta property="og:description" content="Everyone is suddenly talking about VO₂max. The research settled it a decade ago. Here is what the landmark study actually found, and why it matters.">
     <meta property="og:url" content="https://alanruddock.com/vo2max/01-why-vo2max-matters/">
     <meta property="og:image" content="https://alanruddock.com/alan-ruddock-sport-physiologist.jpg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@ruddock_boxsci">
     <meta name="twitter:title" content="Why Fitness Predicts How Long You Live">
-    <meta name="twitter:description" content="An interactive explainer on the landmark study that made fitness a clinical vital sign.">
+    <meta name="twitter:description" content="Everyone is suddenly talking about VO₂max. The research settled it a decade ago. Here is what it found.">
     <meta name="twitter:image" content="https://alanruddock.com/alan-ruddock-sport-physiologist.jpg">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/styles.css">
@@ -40,10 +40,10 @@
         "name": "Dr Alan Ruddock"
       },
       "teaches": [
+        "Why cardiorespiratory fitness became a focus of research and public interest",
         "What a MET is and how it relates to oxygen consumption",
-        "How to read a hazard ratio and a confidence interval",
-        "What relative risk means and why a reference group matters",
-        "How to read a Kaplan-Meier survival curve"
+        "Why estimated exercise capacity is not the same as measured VO2max",
+        "How to read a survival curve"
       ],
       "citation": {
         "@type": "ScholarlyArticle",
@@ -68,16 +68,14 @@
                 <span></span>
             </button>
             <ul class="nav-menu">
-                <li><a href="#why">Why</a></li>
+                <li><a href="#focus">Why the focus</a></li>
                 <li><a href="#study">The study</a></li>
                 <li><a href="#mets">METs</a></li>
                 <li><a href="#table2">Who lived</a></li>
-                <li><a href="#hazard">Hazard ratios</a></li>
-                <li><a href="#riskfactors">Risk factors</a></li>
-                <li><a href="#quintiles">Relative risk</a></li>
-                <li><a href="#survival">Survival curves</a></li>
-                <li><a href="#sowhat">So what</a></li>
-                <li><a href="#quiz">Quiz</a></li>
+                <li><a href="#quintiles">Compared with what</a></li>
+                <li><a href="#survival">Survival</a></li>
+                <li><a href="#limits">Limits</a></li>
+                <li><a href="#takeaways">Takeaways</a></li>
                 <li><a href="/vo2max/">All modules</a></li>
             </ul>
         </div>
@@ -92,11 +90,6 @@
                 checked who was still alive. The thing that predicted it best was not their cholesterol,
                 their blood pressure, their weight, or whether they smoked. It was how far they could walk.
             </p>
-            <div class="v-hero-meta">
-                <span class="v-chip">About 20 minutes</span>
-                <span class="v-chip">8 things to play with</span>
-                <span class="v-chip">No maths needed</span>
-            </div>
             <div class="v-source">
                 <div class="v-source-label">The paper this is built on</div>
                 <div class="v-source-title">Exercise Capacity and Mortality among Men Referred for Exercise Testing</div>
@@ -113,41 +106,14 @@
     <article>
 
         <!-- 01 ------------------------------------------------------------ -->
-        <section id="why" class="section">
+        <section id="focus" class="section">
             <div class="container">
                 <div class="v-section-head">
                     <span class="v-num">01</span>
-                    <h2>Why anyone cares about this</h2>
-                    <p>Doctors have a long list of things they measure to work out how likely you are to die. This study asked which one actually wins.</p>
+                    <h2>Why the sudden focus on VO&#8322;max?</h2>
+                    <p>It is hard to avoid at the moment. But look at who has actually been paying attention, and when.</p>
                 </div>
-                <div class="v-prose">
-                    <p>
-                        If you go to a doctor for a check-up, they will weigh you, take your blood pressure,
-                        ask whether you smoke, and send off a blood sample for cholesterol and blood sugar.
-                        Every one of those is a genuine risk factor. Every one of them is on the list because
-                        good research put it there.
-                    </p>
-                    <p>
-                        What they will almost certainly <strong>not</strong> do is find out how fit you are.
-                    </p>
-                    <p>
-                        In 2002 a team led by Jonathan Myers published a study that made this look like an odd
-                        omission. They had treadmill test results for 6,213 men, and they had records of who
-                        had died in the years afterwards. So they could ask a simple question: of everything we
-                        measure, which one tells us the most?
-                    </p>
-                    <p>
-                        The answer was fitness. Not by a small margin, and not only in the healthy men. This
-                        module walks through how they got there, and lets you pull the results apart yourself.
-                    </p>
-                </div>
-                <div class="v-callout">
-                    <span class="v-callout-head">The headline</span>
-                    Among the healthy men in this study, <strong>only two</strong> of the things measured
-                    clearly predicted who would die: how fit they were, and how much they had smoked.
-                    Blood pressure, diabetes, cholesterol and heart rate did not separate the survivors
-                    from the rest. You will see exactly why in section 05.
-                </div>
+                <div id="mount-focus"></div>
             </div>
         </section>
 
@@ -156,7 +122,7 @@
             <div class="container">
                 <div class="v-section-head">
                     <span class="v-num">02</span>
-                    <h2>The study in one screen</h2>
+                    <h2>The Myers study</h2>
                     <p>Who they were, what was done to them, and what was counted.</p>
                 </div>
                 <div id="mount-cohort"></div>
@@ -195,82 +161,46 @@
         </section>
 
         <!-- 05 ------------------------------------------------------------ -->
-        <section id="hazard" class="section">
-            <div class="container">
-                <div class="v-section-head">
-                    <span class="v-num">05</span>
-                    <h2>What is a hazard ratio?</h2>
-                    <p>This is the number the paper actually reports, and it is the one people most often get wrong. Three short steps to understanding it.</p>
-                </div>
-                <div id="mount-hazard"></div>
-            </div>
-        </section>
-
-        <!-- 06 ------------------------------------------------------------ -->
-        <section id="riskfactors" class="section section-alt">
-            <div class="container">
-                <div class="v-section-head">
-                    <span class="v-num">06</span>
-                    <h2>Being unfit made every risk factor worse</h2>
-                    <p>Take only the men with diabetes. Or only the smokers. Or only the men with high blood pressure. Within every single group, the same pattern appears.</p>
-                </div>
-                <div id="mount-riskfactors"></div>
-            </div>
-        </section>
-
-        <!-- 07 ------------------------------------------------------------ -->
         <section id="quintiles" class="section">
             <div class="container">
                 <div class="v-section-head">
-                    <span class="v-num">07</span>
+                    <span class="v-num">05</span>
                     <h2>&ldquo;Four times the risk&rdquo; &mdash; but compared with what?</h2>
-                    <p>Relative risk is one of the most quoted numbers in health reporting and one of the most slippery. This one is worth poking at.</p>
+                    <p>This is the result that explains why aerobic capacity gets so much attention. It is also one of the most slippery numbers in health reporting, so it is worth poking at.</p>
                 </div>
                 <div id="mount-quintiles"></div>
             </div>
         </section>
 
-        <!-- 08 ------------------------------------------------------------ -->
+        <!-- 06 ------------------------------------------------------------ -->
         <section id="survival" class="section section-alt">
             <div class="container">
                 <div class="v-section-head">
-                    <span class="v-num">08</span>
-                    <h2>Reading a survival curve</h2>
-                    <p>These stepped lines turn up in every medical paper you will ever read. Once you see how they are built they are easy.</p>
+                    <span class="v-num">06</span>
+                    <h2>Fourteen years, three levels of fitness</h2>
+                    <p>The same men, followed forward, split into three groups by how far they got on the treadmill.</p>
                 </div>
                 <div id="mount-km"></div>
             </div>
         </section>
 
-        <!-- 09 ------------------------------------------------------------ -->
-        <section id="sowhat" class="section">
+        <!-- 07 ------------------------------------------------------------ -->
+        <section id="limits" class="section">
             <div class="container">
                 <div class="v-section-head">
-                    <span class="v-num">09</span>
-                    <h2>So what?</h2>
-                    <p>What happened after this paper, where you would sit in it, and the things it cannot tell you.</p>
+                    <span class="v-num">07</span>
+                    <h2>What this study cannot tell you</h2>
+                    <p>A fair reading of any paper includes the parts that do not support the headline.</p>
                 </div>
-                <div id="mount-sowhat"></div>
+                <div id="mount-limits"></div>
             </div>
         </section>
 
-        <!-- 10 ------------------------------------------------------------ -->
-        <section id="quiz" class="section section-alt">
+        <!-- 08 ------------------------------------------------------------ -->
+        <section id="takeaways" class="section section-alt">
             <div class="container">
                 <div class="v-section-head">
-                    <span class="v-num">10</span>
-                    <h2>Check your understanding</h2>
-                    <p>Five questions. The explanation appears whether you get it right or not &mdash; that is the useful bit.</p>
-                </div>
-                <div class="v-quiz" id="mount-quiz"></div>
-            </div>
-        </section>
-
-        <!-- 11 ------------------------------------------------------------ -->
-        <section id="takeaways" class="section">
-            <div class="container">
-                <div class="v-section-head">
-                    <span class="v-num">11</span>
+                    <span class="v-num">08</span>
                     <h2>What to take away</h2>
                 </div>
                 <div id="mount-takeaways"></div>

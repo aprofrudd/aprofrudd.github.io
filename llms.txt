@@ -73,7 +73,7 @@ Expert commentary across broadcast, print and digital platforms including The Ti
 
 Interactive learning modules at https://alanruddock.com/vo2max/ — short explainers that take one piece of primary research at a time and make it interactive, written for a general audience.
 
-- Module 1: "The number that predicts how long you live" (https://alanruddock.com/vo2max/01-why-vo2max-matters/) — an interactive walk through Myers et al., "Exercise Capacity and Mortality among Men Referred for Exercise Testing", N Engl J Med 2002;346:793-801. Covers what a MET is, how to read a hazard ratio and a confidence interval, what relative risk means and why the reference group matters, and how to read a Kaplan-Meier survival curve. Every figure is rebuilt from the published data.
+- Module 1: "The number that predicts how long you live" (https://alanruddock.com/vo2max/01-why-vo2max-matters/) — an interactive walk through Myers et al., "Exercise Capacity and Mortality among Men Referred for Exercise Testing", N Engl J Med 2002;346:793-801. Opens with Google Trends and PubMed data showing that public interest in VO2max surged only recently while research interest levelled off around 2019, then covers what a MET is, why estimated exercise capacity differs from measured VO2max, what relative risk means and why the reference group matters, and how to read a survival curve. Every figure is rebuilt from the published data.
 
 ## Links
 

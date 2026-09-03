@@ -17,7 +17,7 @@ import { svg, el, add, group, scaleLinear, normalPdf, normalCdf, line, comma, ro
 import { onFirstView } from '../../lib/reveal.js';
 
 const W = 760, H = 360;
-const M = { top: 24, right: 24, bottom: 62, left: 30 };
+const M = { top: 54, right: 24, bottom: 62, left: 30 };
 const PLOT_W = W - M.left - M.right;
 const PLOT_H = H - M.top - M.bottom;
 const MET_MIN = 0, MET_MAX = 22;
@@ -43,15 +43,19 @@ export function table2Distributions(mount) {
     'Choose which group of men to show'
   );
 
+  // A sentence carries the meaning; the two tiles just hold the numbers.
+  // "Survivors below the line" on its own left people guessing what was
+  // being counted.
+  const sentence = h('p', { class: 'v-card-sub', style: 'margin:0 0 1rem;text-align:center' });
+
   const out = readout([
-    { value: '', label: 'Survivors below the line' },
-    { value: '', label: 'Men who died below the line' },
-    { value: '', label: 'Gap in averages' },
+    { value: '', label: 'Of the men who survived' },
+    { value: '', label: 'Of the men who died' },
   ]);
 
   const fig = figure({
     label: '',
-    caption: 'Built from Table 2 of Myers et al. (2002). Curves are drawn from the reported mean and standard deviation of each group.',
+    caption: 'Built from Table 2 of Myers et al. (2002). Curves are drawn from the reported mean and standard deviation of each group; the dashed lines mark each group&rsquo;s average.',
     onReset: () => { cut = START_CUT; cutSlider.set(START_CUT); groupKey = 'normal'; tog.select('normal'); render(); },
   });
 
@@ -71,6 +75,7 @@ export function table2Distributions(mount) {
   ]));
   box.body.appendChild(fig.figure);
   box.body.appendChild(cutSlider);
+  box.body.appendChild(sentence);
   box.body.appendChild(out);
   box.body.appendChild(note);
   mount.appendChild(box);
@@ -109,22 +114,29 @@ export function table2Distributions(mount) {
       return out2;
     };
 
-    series.forEach((s) => {
+    series.forEach((s, si) => {
+      const other = series[1 - si].d.met;
       const p = pts(s);
       const area = `${line(p)} L${PLOT_W},${PLOT_H} L0,${PLOT_H} Z`;
       add(plot,
         el('path', { d: area, fill: s.colour, opacity: 0.16 }),
         el('path', { d: line(p), fill: 'none', stroke: s.colour, 'stroke-width': 2.5 })
       );
-      // Mean marker.
+      // Mean marker. The label used to sit at this curve's own peak, which
+      // put the survivors' text straight on top of the deaths' curve. Both
+      // now run the full height of the plot and are labelled above it, where
+      // nothing can cover them.
       const mx = x(s.d.met);
-      const my = y(normalPdf(s.d.met, s.d.met, s.d.sd));
       add(plot,
-        el('line', { x1: mx, y1: my, x2: mx, y2: PLOT_H, stroke: s.colour, 'stroke-width': 1, 'stroke-dasharray': '3 3' }),
+        el('line', {
+          x1: mx, y1: 0, x2: mx, y2: PLOT_H,
+          stroke: s.colour, 'stroke-width': 1.5, 'stroke-dasharray': '3 3',
+        }),
         el('text', {
-          x: mx, y: my - 8, 'text-anchor': 'middle', class: 'v-label-strong',
-          fill: s.colour,
-        }, `${s.label}: ${s.d.met}`)
+          x: mx + (s.d.met < other ? -4 : 4), y: -8,
+          'text-anchor': s.d.met < other ? 'end' : 'start',
+          class: 'v-label-sm', fill: s.colour, style: 'font-weight:700',
+        }, `avg ${s.d.met.toFixed(1)}`)
       );
     });
 
@@ -132,8 +144,8 @@ export function table2Distributions(mount) {
     const cx = x(cut);
     add(plot,
       el('rect', { x: 0, y: 0, width: cx, height: PLOT_H, fill: 'var(--secondary-color)', opacity: 0.05 }),
-      el('line', { x1: cx, y1: -6, x2: cx, y2: PLOT_H, stroke: 'var(--secondary-color)', 'stroke-width': 2 }),
-      el('text', { x: cx, y: -12, 'text-anchor': 'middle', class: 'v-label-strong' }, `${cut.toFixed(1)} METs`)
+      el('line', { x1: cx, y1: 0, x2: cx, y2: PLOT_H, stroke: 'var(--secondary-color)', 'stroke-width': 2 }),
+      el('text', { x: cx, y: -30, 'text-anchor': 'middle', class: 'v-label-strong' }, `${cut.toFixed(1)} METs`)
     );
 
     add(root, plot);
@@ -143,8 +155,11 @@ export function table2Distributions(mount) {
     // Readouts.
     const belowSurv = normalCdf(cut, g.survived.met, g.survived.sd) * 100;
     const belowDied = normalCdf(cut, g.died.met, g.died.sd) * 100;
-    const gap = round(g.survived.met - g.died.met, 1);
-    out.setAll([`${Math.round(belowSurv)}%`, `${Math.round(belowDied)}%`, `${gap} METs`]);
+    out.setAll([`${Math.round(belowSurv)}%`, `${Math.round(belowDied)}%`]);
+    sentence.innerHTML =
+      `The line is at <strong>${cut.toFixed(1)} METs</strong>. Below that level sit ` +
+      `<strong>${Math.round(belowSurv)}%</strong> of the men who survived &mdash; and ` +
+      `<strong>${Math.round(belowDied)}%</strong> of the men who died.`;
 
     fig.setLabel(
       `Two overlapping bell curves of exercise capacity for ${g.label.toLowerCase()}. ` +
@@ -165,7 +180,8 @@ export function table2Distributions(mount) {
       `Among the <strong>${g.label.toLowerCase()}</strong>, ${comma(g.survived.n)} men survived and ` +
       `${comma(g.died.n)} died. The men who survived averaged <strong>${g.survived.met} METs</strong>; ` +
       `the men who died averaged <strong>${g.died.met} METs</strong>. That difference is ` +
-      `statistically solid (p&nbsp;${g.p}) &mdash; and it is only ${gap} METs. ` +
+      `statistically solid (p&nbsp;${g.p}) &mdash; and it is only ` +
+      `${round(g.survived.met - g.died.met, 1)} METs. ` +
       `Look at how far the two curves overlap. Fitness shifts the odds across a whole population; ` +
       `it does not tell you what will happen to any one person. Both of those statements come from ` +
       `this same picture, and people routinely take only the first one away from it.`;

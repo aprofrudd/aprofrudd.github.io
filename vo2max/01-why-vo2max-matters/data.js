@@ -317,6 +317,10 @@ export const MET_ML = 3.5; // 1 MET = 3.5 mL of oxygen per kg of body weight per
 
 /* ---------------------------------------------------------------------------
  * Studies that came afterwards and found the same thing.
+ *
+ * PARKED: the tiles built from this were removed when the module was cut back
+ * to "why the focus on VO2max". The data is kept because the section may come
+ * back — see the parked list at the top of module-01.js.
  * ------------------------------------------------------------------------ */
 export const FOLLOW_UPS = [
   {

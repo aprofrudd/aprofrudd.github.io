@@ -325,8 +325,11 @@ export function kmCurves(mount) {
 
     caveat.innerHTML =
       '<span class="v-callout-head">One thing this paper did differently</span>' +
-      'The worked example above showed censoring &mdash; the proper way to handle people you stop being ' +
-      'able to follow. This study says plainly that it did not do it: &ldquo;' + STUDY.censoringNote + '&rdquo; ' +
+      'A chart like this normally has to deal with people it loses track of &mdash; someone who moves away, ' +
+      'or who is simply still alive when the study stops. The usual practice is to drop them from the ' +
+      'running total at that point without counting them as a death. It is called <em>censoring</em>, and ' +
+      'handling it properly is the reason this kind of chart exists at all. ' +
+      'This study says plainly that it did not do it: &ldquo;' + STUDY.censoringNote + '&rdquo; ' +
       'Men who later had bypass surgery or a stent stayed in the count as though nothing had changed. ' +
       'It is a genuine limitation, and the authors put it in the paper themselves rather than leaving ' +
       'someone else to find it.';
