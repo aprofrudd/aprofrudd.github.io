@@ -104,7 +104,9 @@ vo2max/
   index.html          hub
   module.css          all module styling; loaded AFTER /styles.css, adds no new site tokens
   lib/                svg.js (scales/axes/paths), figure.js (accessible <figure> + controls),
-                      reveal.js (progress bar, scroll reveal, nav, focus mode), quiz.js
+                      reveal.js (progress bar, scroll reveal, nav, focus mode),
+                      slides.js (one section per screen), notation.js (the dot in V̇O₂max),
+                      quiz.js
   tools/              fetch-pubmed.sh, convert-trends.py — regenerate the data files
   01-.../
     index.html        prose and mount points only
@@ -121,6 +123,8 @@ vo2max/
 - **Chart colours reuse existing tokens**: `--primary-color` for protective/fitter, `--collab-applied` (#c2410c, already declared for the collaboration figure) for risk, `--text-light` for reference. No new palette.
 - **Charts render lazily** on first scroll into view, via `onFirstView()`. `revealOnScroll()` also sweeps for anything already on screen at load — without that sweep a deep link or focus mode leaves the chart blank forever.
 - **`.v-chart` scrolls horizontally** and its SVG has `min-width: 560px`. Chart text is sized in viewBox units, so a 760-wide chart on a 340px phone would render 12px labels at ~5px. Scrolling keeps them legible; do not remove the min-width without solving that.
+- **V̇O₂max is typeset, not typed: a drawn dot over the V and "2max" as one subscript.** U+0307 COMBINING DOT ABOVE is the correct character and every source string carries it (`VO2MAX` in `data.js`), but no font in the site's stack anchors that mark to a capital V — browsers park it between the V and the O — and Unicode has no subscript "max". `lib/notation.js` uses the mark as a sentinel and rewrites the string once it is in the page: in HTML to `<span class="v-vo2max"><span class="v-vdot">V</span>O<span class="v-sub">2max</span></span>` (dot from a `::before`, subscript by CSS, both in `/styles.css`); in SVG to tspans plus a `<circle>` positioned from canvas text metrics (canvas, not `getComputedTextLength()`, so a chart inside a hidden slide still typesets). A MutationObserver keeps up with lazy charts and live readouts. Static HTML outside the module — the hub, the homepage — writes the span by hand, and must match the class names exactly. Machine-facing text (meta, JSON-LD, `llms.txt`, `aria-label`, `alt`) stays plain `VO2max` so searches match and screen readers do not read the mark aloud; the two `<title>` tags are the one exception and use the Unicode form, because CSS cannot reach a browser tab. Verbatim quotes stay verbatim.
+- **Anything in a flex row needs its text in an element, not a bare text node** — `legend()` learned this the hard way. `.v-key` is `inline-flex` with a `gap`, so the moment notation.js wraps the V the label became two flex items and a gap opened mid-word.
 - **SVG font sizes must be set via `style`, not the `font-size` attribute** — `module.css` sets `.v-chart text { font-size: 12px }` and a CSS rule beats a presentation attribute.
 - **Animated bars need `transform-box: fill-box`.** SVG transform-origin resolves against the viewBox otherwise, so `scaleY(0)` launches a bar from the bottom of the whole chart.
 - **`?focus=<section-id>`** dims everything but one section for screen recording. It force-renders every chart first, disables `history.scrollRestoration`, and overrides `scroll-behavior: smooth` for one instant jump — all three are required or it lands in the wrong place with a blank chart.
@@ -129,7 +133,7 @@ vo2max/
 
 ### Parked interactives
 
-Module 1 was cut back from eleven sections to eight. The removed interactives are **still in `interactives/` and still parse** — they are simply not wired up. `module-01.js` opens with a list of what is parked and the one line that restores each. Do not delete them, and keep them syntax-checking when touching shared helpers in `lib/`. The full version is in the commit *"VO2max learning module: full build before strip-back"*.
+Module 1 was cut back from eleven sections and rebuilt around a narrower question. The removed interactives are **still in `interactives/` and still parse** — they are simply not wired up. `module-01.js` opens with a list of what is parked and the one line that restores each. Do not delete them, and keep them syntax-checking when touching shared helpers in `lib/`. The full version is in the commit *"VO2max learning module: full build before strip-back"*.
 
 ### The two generated data files
 

@@ -8,7 +8,7 @@
  * reader reaches section 07 the numbers already mean something physical.
  */
 
-import { ACTIVITIES, MET_ML, BANDS, STUDY, PAPER, UNIT_ABS, UNIT_REL } from '../data.js';
+import { ACTIVITIES, MET_ML, BANDS, STUDY, PAPER, UNIT_ABS, UNIT_REL, UNIT_KCAL } from '../data.js';
 import { card, slider, readout, h } from '../../lib/figure.js';
 import { svg, el, add, group, scaleLinear, round } from '../../lib/svg.js';
 import { onFirstView } from '../../lib/reveal.js';
@@ -52,7 +52,7 @@ export function metExplorer(mount) {
 
   const perPerson = readout([
     { value: '', labelHtml: `Oxygen uptake, <span class="v-nocase">${UNIT_ABS}</span>` },
-    { value: '', label: 'Calories / min' },
+    { value: '', labelHtml: `Energy cost, <span class="v-nocase">${UNIT_KCAL}</span>` },
   ]);
 
   const sld = slider({

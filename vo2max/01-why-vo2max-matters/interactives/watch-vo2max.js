@@ -99,7 +99,7 @@ export function watchVo2max(mount) {
 
   const out = readout([
     { value: '', label: 'Estimated top speed' },
-    { value: '', labelHtml: `Estimated <span class="v-nocase">${VO2MAX}</span>` },
+    { value: '', labelHtml: `Estimated ${VO2MAX}` },
   ]);
   const sentence = h('p', { class: 'v-card-sub', style: 'margin:0 0 1rem;text-align:center' });
   const hrSlider = slider({

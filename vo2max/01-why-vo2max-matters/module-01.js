@@ -31,6 +31,7 @@
 
 import { initModulePage } from '../lib/reveal.js';
 import { initSlides } from '../lib/slides.js';
+import { watchNotation } from '../lib/notation.js';
 import { h } from '../lib/figure.js';
 import { LIMITATIONS, PAPER, STUDY, FIGURE2, TABLE2, FIRSTBEAT, GARMIN, VO2MAX } from './data.js';
 import { PUBMED_SERIES, PUBMED_META } from './pubmed-data.js';
@@ -149,6 +150,10 @@ function takeaways(mount) {
 
 /* ------------------------------------------------------------------------ */
 function boot() {
+  // Typeset V̇O₂max — dot over the V, "2max" subscript — here and in
+  // everything the interactives build after this point. See lib/notation.js.
+  watchNotation(document.body);
+
   // Each interactive is independent, so an error in one must not stop the
   // rest of the page building. Log it and carry on.
   const wire = (id, fn) => {

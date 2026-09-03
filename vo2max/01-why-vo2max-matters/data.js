@@ -28,15 +28,25 @@ export const PAPER = {
 };
 
 /* ---------------------------------------------------------------------------
- * Notation. A dot over the V — it is a rate — and a subscript 2. Used for
- * every visible mention on the page. Machine-facing text (the <title>, meta
- * tags, JSON-LD, llms.txt) keeps plain "VO2max" so searches still match, and
- * verbatim quotes stay exactly as their sources wrote them.
+ * Notation. A dot over the V — it is a rate, per unit time — and the whole
+ * of "2max" as a subscript. Used for every visible mention on the page.
+ *
+ * The string here carries U+0307 COMBINING DOT ABOVE and U+2082 SUBSCRIPT
+ * TWO. No font in the site's stack anchors that mark to a capital V, and
+ * there is no subscript "max" in Unicode at all, so lib/notation.js
+ * rewrites the string once it is in the page: it draws the dot and sets
+ * "2max" as a true subscript. The mark is also the sentinel that tells it
+ * which strings to touch.
+ *
+ * Machine-facing text (the <title>, meta tags, JSON-LD, llms.txt) keeps plain
+ * "VO2max" so searches still match, and verbatim quotes — Garmin's screen
+ * attribution, Firstbeat's own words — stay exactly as their sources wrote
+ * them.
  * ------------------------------------------------------------------------ */
 export const VO2MAX = 'V\u0307O\u2082max';
-export const VO2 = 'V\u0307O\u2082';
 export const UNIT_ABS = 'L\u00b7min\u207b\u00b9';                  // L·min⁻¹
 export const UNIT_REL = 'mL\u00b7kg\u207b\u00b9\u00b7min\u207b\u00b9';  // mL·kg⁻¹·min⁻¹
+export const UNIT_KCAL = 'kcal\u00b7min\u207b\u00b9';               // kcal·min⁻¹
 
 /* ---------------------------------------------------------------------------
  * The study. All from the Abstract and Methods.

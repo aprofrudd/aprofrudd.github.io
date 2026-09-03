@@ -164,7 +164,8 @@ export function readout(stats) {
   const nodes = stats.map((s) => {
     const num = h('span', { class: 'v-stat-num' + (s.small ? ' v-stat-num-sm' : '') }, s.value);
     // labelHtml lets a label carry markup — a <span class="v-nocase"> keeps
-    // notation like V̇O₂max or mL·kg⁻¹·min⁻¹ out of the uppercase transform.
+    // a unit like mL·kg⁻¹·min⁻¹ out of the uppercase transform. (V̇O₂max
+    // needs nothing: notation.js supplies its own wrapper.)
     const label = s.labelHtml
       ? h('span', { class: 'v-stat-label', html: s.labelHtml })
       : h('span', { class: 'v-stat-label' }, s.label);
@@ -179,9 +180,12 @@ export function readout(stats) {
 /** A colour key. `keys` is [{ swatch: 'safe'|'risk'|'neutral', label }]. */
 export function legend(keys) {
   return h('div', { class: 'v-legend' },
+    // The label goes in its own span: .v-key is a flex row with a gap, so a
+    // bare text node would be split into two flex items the moment
+    // notation.js wraps the V of V̇O₂max, opening a gap mid-word.
     keys.map((k) => h('span', { class: 'v-key' },
       h('span', { class: `v-swatch v-swatch-${k.swatch}` }),
-      k.label
+      h('span', {}, k.label)
     ))
   );
 }

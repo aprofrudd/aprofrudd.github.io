@@ -38,8 +38,8 @@ const PLOT_H = H - M.top - M.bottom;
 const PLOT_FROM = 1975;
 
 const SERIES = [
-  { key: 'vo2', label: `${VO2MAX} and cardiorespiratory fitness`, short: `${VO2MAX} / fitness`, colour: 'var(--v-safe)', swatch: 'safe' },
-  { key: 'aerobic', label: '“aerobic capacity”', short: '“aerobic capacity”', colour: 'var(--v-risk)', swatch: 'risk' },
+  { key: 'vo2', label: `${VO2MAX} and cardiorespiratory fitness`, short: `${VO2MAX} / fitness`, plain: 'VO2max / fitness', colour: 'var(--v-safe)', swatch: 'safe' },
+  { key: 'aerobic', label: '“aerobic capacity”', short: '“aerobic capacity”', plain: '“aerobic capacity”', colour: 'var(--v-risk)', swatch: 'risk' },
 ];
 
 export function pubmedChart(mount) {
@@ -155,7 +155,7 @@ export function pubmedChart(mount) {
     fig.setLabel(
       `Line chart of PubMed publications per year from ${y0} to ${y1}, ` +
       (mode === 'share' ? 'as a share of all papers published that year. ' : 'as raw counts. ') +
-      SERIES.map((s) => `${s.short} rose from ${fmt(valueOf(first, s.key))} in ${y0} to ${fmt(valueOf(lastRow, s.key))} in ${y1}`).join('; ') +
+      SERIES.map((s) => `${s.plain} rose from ${fmt(valueOf(first, s.key))} in ${y0} to ${fmt(valueOf(lastRow, s.key))} in ${y1}`).join('; ') +
       '. ' + (mode === 'share'
         ? `Both peaked in the 2010s and have been flat since.`
         : `Raw counts keep climbing, partly because PubMed itself grew.`));

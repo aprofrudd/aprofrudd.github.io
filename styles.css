@@ -1535,3 +1535,52 @@ a.publication-link:hover .publication-title {
         grid-template-columns: 1fr;
     }
 }
+
+/* ---------------------------------------------------------------------------
+   Scientific notation — V̇O₂max
+   ---------------------------------------------------------------------------
+   Convention: a dot over the V (it is a rate, per unit time) and "2max" as a
+   subscript. Markup:
+
+     <span class="v-vo2max"><span class="v-vdot">V</span>O<span class="v-sub">2max</span></span>
+
+   The dot is drawn, not typed: U+0307 COMBINING DOT ABOVE is the correct
+   character, but no font in the stack above anchors it to a capital V, so
+   browsers park it between the V and the O. The subscript is a plain "2max"
+   so a copy-paste gives "VO2max". On the module pages vo2max/lib/notation.js
+   writes this markup at run time; the hub and the homepage write it by hand.
+
+   Sized in em so it tracks the font size, painted in currentColor so it
+   tracks the text colour. line-height: 0 plus a relative shift on the
+   subscript keeps a line of body text from growing.
+--------------------------------------------------------------------------- */
+.v-vo2max {
+    text-transform: none;   /* "max" stays lowercase inside uppercase labels */
+    white-space: nowrap;
+}
+
+.v-vdot {
+    position: relative;
+}
+
+.v-vdot::before {
+    content: "";
+    position: absolute;
+    top: 0.07em;
+    left: 50%;
+    width: 0.115em;
+    height: 0.115em;
+    margin-left: -0.0575em;
+    border-radius: 50%;
+    background: currentColor;
+    pointer-events: none;
+}
+
+.v-sub {
+    font-size: 0.68em;
+    line-height: 0;
+    position: relative;
+    top: 0.22em;
+    vertical-align: baseline;
+    letter-spacing: 0;
+}
