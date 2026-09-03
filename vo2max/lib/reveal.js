@@ -86,6 +86,12 @@ function show(node) {
   runEnter(node);
 }
 
+/** Reveal everything inside `root` at once — used when a slide is shown. */
+export function revealAll(root) {
+  if (root.classList && root.classList.contains('v-reveal')) show(root);
+  root.querySelectorAll('.v-reveal').forEach(show);
+}
+
 function runEnter(node) {
   if (node.__entered) return;
   node.__entered = true;

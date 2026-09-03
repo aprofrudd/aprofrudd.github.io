@@ -811,3 +811,56 @@ input[type="range"].v-range::-moz-range-thumb {
     .v-card { padding: 1rem; }
     .v-field input { width: 100%; }
 }
+
+/* ---------------------------------------------------------------------------
+   Slide mode — one section at a time, for narrating over.
+   Each section (and the hero) carries .v-slide; the body gets .v-slides.
+   Scrolling still works inside a slide; moving between them is a transition.
+   `?view=scroll` leaves the body class off and the whole page shows.
+   ------------------------------------------------------------------------ */
+.v-slides .v-slide { display: none; }
+.v-slides .v-slide.is-active {
+    display: block;
+    padding-bottom: 6rem;                  /* clear the fixed control bar */
+    animation: v-slide-in 380ms ease both;
+}
+.v-slides .v-hero.is-active { min-height: 100vh; }
+.v-slides .section.is-active { min-height: calc(100vh - 71px); }
+.v-slides .footer { display: none; }
+.v-slides.is-last .footer { display: block; }
+
+@keyframes v-slide-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.v-slidebar {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 0.4rem 0.6rem;
+    box-shadow: var(--shadow-lg);
+}
+.v-slidebar-count {
+    min-width: 4.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+.v-slidebar .v-btn:disabled { opacity: 0.4; cursor: default; }
+.v-slidebar .v-btn:disabled:hover { color: var(--text-secondary); border-color: var(--border-color); }
+
+/* Notation inside an uppercase label. */
+.v-nocase { text-transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .v-slides .v-slide.is-active { animation: none; }
+}

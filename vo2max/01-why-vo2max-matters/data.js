@@ -28,6 +28,17 @@ export const PAPER = {
 };
 
 /* ---------------------------------------------------------------------------
+ * Notation. A dot over the V — it is a rate — and a subscript 2. Used for
+ * every visible mention on the page. Machine-facing text (the <title>, meta
+ * tags, JSON-LD, llms.txt) keeps plain "VO2max" so searches still match, and
+ * verbatim quotes stay exactly as their sources wrote them.
+ * ------------------------------------------------------------------------ */
+export const VO2MAX = 'V\u0307O\u2082max';
+export const VO2 = 'V\u0307O\u2082';
+export const UNIT_ABS = 'L\u00b7min\u207b\u00b9';                  // L·min⁻¹
+export const UNIT_REL = 'mL\u00b7kg\u207b\u00b9\u00b7min\u207b\u00b9';  // mL·kg⁻¹·min⁻¹
+
+/* ---------------------------------------------------------------------------
  * The study. All from the Abstract and Methods.
  * ------------------------------------------------------------------------ */
 export const STUDY = {
@@ -383,46 +394,21 @@ export const FIRSTBEAT = {
   title: 'Automated Fitness Level (VO2max) Estimation with Heart Rate and Speed Data',
   updated: '30 June 2017',
   url: 'https://www.firstbeat.com/wp-content/uploads/2017/06/white_paper_VO2max_30.6.2017.pdf',
-  // "Physiological basis of the method", verbatim:
-  physiologyQuote:
-    'It is well known that there is a linear relationship between oxygen ' +
-    'consumption and running speed. The oxygen cost of running increases ' +
-    'when running speed increases.',
   // "Calculation steps", step 4, verbatim:
   calculationQuote:
     "The most reliable data segments are used for estimating the person's " +
     'aerobic fitness level (VO2max) by utilizing either linear or nonlinear ' +
     "dependency between the person's heart rate and speed data.",
-  // "Validation of the Firstbeat model", verbatim:
-  accuracyQuote:
-    'The accuracy of the method when applied for running is 95% (Mean ' +
-    'absolute percentage error, MAPE ~5%), based on a database of 2690 ' +
-    'freely performed runs from 79 runners whose VO2max was tested four ' +
-    'times during their 6-9-month preparation period for a marathon.',
-  // Same section, on getting the age-based maximum heart rate wrong, verbatim:
-  hrMaxErrorQuote:
-    'If the HRmax is estimated 15 beats/min too low, the error in the ' +
-    'VO2max result is about 9%. Respectively, if the HRmax is estimated 15 ' +
-    'beats/min too high, the error in VO2max result is 7%.',
-  // "Only reliable data used for VO2max estimation", paraphrased list of the
-  // situations the method automatically excludes:
-  excludedSituations: [
-    'running on soft ground',
-    'a steep downhill',
-    'stopped at a traffic light (speed zero, heart rate still elevated)',
-    'the later part of a long run once cardiovascular drift sets in',
-  ],
+  // "Validation of the Firstbeat model": "The accuracy of the method when
+  // applied for running is 95% (Mean absolute percentage error, MAPE ~5%),
+  // based on a database of 2690 freely performed runs from 79 runners".
+  accuracyPct: 95,
+  errorPct: 5,
 };
 
 export const GARMIN = {
   device: 'Garmin Forerunner',
   captured: '2026-09-03',
-  // Verbatim from the Garmin Connect support page, "About VO2 Max Estimates" —
-  // the sentence that states, in Garmin's own words, what the watch needs.
-  requirementQuote:
-    'You must run either outside with GPS or ride with a compatible power ' +
-    'meter at a moderate level of intensity for several minutes to get an ' +
-    'accurate VO2 max. estimate.',
   // Verbatim, the line that names Firstbeat directly:
   attribution:
     'VO2 max. data is provided by Firstbeat Analytics™. VO2 max. ' +
@@ -466,8 +452,11 @@ export const WATCH_RUN = {
     { speed: 14, hr: 175, vo2: 49.3 },
   ],
   hrMaxMin: 178,      // kept above the highest heart rate in the data, so the
-  hrMaxMax: 210,      // slider always extrapolates forward, never backward
+  hrMaxMax: 202,      // slider always extrapolates forward; 202 also keeps the
+                      // extrapolated top speed inside the 18 km/h axis
   hrMaxDefault: 190,  // the naive 220-minus-age estimate for a 30-year-old
+  massKg: 70,         // body mass of the imagined runner — turns the relative
+                      // mL/kg/min the equation gives into absolute L/min
   acsmCoefficient: 0.2,  // mL O2 per kg per metre run (ACSM running equation)
   acsmIntercept: 3.5,    // resting VO2, mL/kg/min — 1 MET
 };

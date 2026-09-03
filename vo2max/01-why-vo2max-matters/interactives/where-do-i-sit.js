@@ -8,7 +8,7 @@
  * referred by a doctor, tested between 1987 and 2000.
  */
 
-import { FIGURE2, BANDS, MET_ML, ACTIVITIES } from '../data.js';
+import { FIGURE2, BANDS, MET_ML, ACTIVITIES, VO2MAX, UNIT_REL } from '../data.js';
 import { card, toggle, readout, h } from '../../lib/figure.js';
 import { onFirstView } from '../../lib/reveal.js';
 
@@ -20,12 +20,12 @@ export function whereDoISit(mount) {
   const box = card(
     'Where would you sit in this study?',
     'Enter a number',
-    'If you know your VO&#8322;max or your MET score from a test, this places it against ' +
+    `If you know your ${VO2MAX} or your MET score from a test, this places it against ` +
     'the bands the paper used. Read the caveat underneath before you take it to heart.'
   );
 
   const unitTog = toggle(
-    [{ value: 'met', label: 'METs' }, { value: 'vo2', label: 'mL/kg/min' }],
+    [{ value: 'met', label: 'METs' }, { value: 'vo2', label: UNIT_REL }],
     unit,
     (v) => { unit = v; input.value = String(unit === 'met' ? 10 : 35); sync(); },
     'Choose which unit you want to type in'
@@ -47,7 +47,7 @@ export function whereDoISit(mount) {
 
   const out = readout([
     { value: '', label: 'In METs' },
-    { value: '', label: 'In mL/kg/min' },
+    { value: '', labelHtml: `In <span class="v-nocase">${UNIT_REL}</span>` },
     { value: '', label: 'The study’s band' },
     { value: '', label: 'Which fifth', small: true },
   ]);

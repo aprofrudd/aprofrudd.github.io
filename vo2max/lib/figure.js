@@ -163,7 +163,12 @@ export function readout(stats) {
   const wrap = h('div', { class: 'v-readout' });
   const nodes = stats.map((s) => {
     const num = h('span', { class: 'v-stat-num' + (s.small ? ' v-stat-num-sm' : '') }, s.value);
-    wrap.appendChild(h('div', { class: 'v-stat' }, num, h('span', { class: 'v-stat-label' }, s.label)));
+    // labelHtml lets a label carry markup — a <span class="v-nocase"> keeps
+    // notation like V̇O₂max or mL·kg⁻¹·min⁻¹ out of the uppercase transform.
+    const label = s.labelHtml
+      ? h('span', { class: 'v-stat-label', html: s.labelHtml })
+      : h('span', { class: 'v-stat-label' }, s.label);
+    wrap.appendChild(h('div', { class: 'v-stat' }, num, label));
     return num;
   });
   wrap.set = (i, value) => { nodes[i].textContent = value; };

@@ -14,7 +14,7 @@
  */
 
 import { PUBMED_SERIES, PUBMED_META } from '../pubmed-data.js';
-import { PAPER } from '../data.js';
+import { PAPER, VO2MAX } from '../data.js';
 import { figure, toggle, card, legend, h } from '../../lib/figure.js';
 import { svg, el, add, group, scaleLinear, axisLeft, axisTitle, line, ticks, round, drawIn, fadeIn, comma } from '../../lib/svg.js';
 import { onFirstView } from '../../lib/reveal.js';
@@ -38,7 +38,7 @@ const PLOT_H = H - M.top - M.bottom;
 const PLOT_FROM = 1975;
 
 const SERIES = [
-  { key: 'vo2', label: 'VO₂max and cardiorespiratory fitness', short: 'VO₂max / fitness', colour: 'var(--v-safe)', swatch: 'safe' },
+  { key: 'vo2', label: `${VO2MAX} and cardiorespiratory fitness`, short: `${VO2MAX} / fitness`, colour: 'var(--v-safe)', swatch: 'safe' },
   { key: 'aerobic', label: '“aerobic capacity”', short: '“aerobic capacity”', colour: 'var(--v-risk)', swatch: 'risk' },
 ];
 
@@ -46,10 +46,9 @@ export function pubmedChart(mount) {
   let mode = 'share';   // 'share' | 'count'
 
   const box = card(
-    'What the researchers have been publishing',
+    `Papers per year, ${PLOT_FROM}\u2013${PUBMED_META.lastYear}`,
     'Try both views',
-    'Every paper in PubMed whose title or abstract mentions these terms, counted by year. ' +
-    'The second view is the honest one &mdash; see what happens to the shape when you switch.',
+    'Every paper in PubMed whose title or abstract mentions these terms, counted by year.',
     true
   );
 
@@ -71,12 +70,10 @@ export function pubmedChart(mount) {
     onReset: () => { mode = 'share'; tog.select('share'); render(true); },
   });
 
-  const note = h('div', { class: 'v-callout' });
 
   box.body.appendChild(h('div', { class: 'v-controls' }, tog));
   box.body.appendChild(legend(SERIES.map((s) => ({ swatch: s.swatch, label: s.label }))));
   box.body.appendChild(fig.figure);
-  box.body.appendChild(note);
   mount.appendChild(box);
   onFirstView(box, () => render(true));
 
@@ -152,10 +149,6 @@ export function pubmedChart(mount) {
     // Numbers used in the summary, computed rather than typed.
     const first = rows[0];
     const lastRow = rows[rows.length - 1];
-    const peak = SERIES.map((s) => {
-      const best = rows.reduce((a, b) => (valueOf(b, s.key) > valueOf(a, s.key) ? b : a));
-      return { key: s.key, short: s.short, year: best.year, value: valueOf(best, s.key) };
-    });
 
     const fmt = (v) => (mode === 'share' ? round(v, 2).toFixed(2) : comma(Math.round(v)));
 
@@ -169,7 +162,7 @@ export function pubmedChart(mount) {
 
     fig.setTable({
       caption: `PubMed publications per year, ${PUBMED_META.firstYear} to ${y1}`,
-      head: ['Year', '"aerobic capacity"', 'VO₂max / fitness', 'All PubMed papers', '"aerobic capacity" per 10,000', 'VO₂max / fitness per 10,000', 'Plotted?'],
+      head: ['Year', '"aerobic capacity"', `${VO2MAX} / fitness`, 'All PubMed papers', '"aerobic capacity" per 10,000', `${VO2MAX} / fitness per 10,000`, 'Plotted?'],
       rows: PUBMED_SERIES.map((r) => [
         String(r.year), comma(r.aerobic), comma(r.vo2), comma(r.total),
         round((r.aerobic * 10000) / r.total, 2).toFixed(2),
@@ -178,22 +171,6 @@ export function pubmedChart(mount) {
       ]),
     });
 
-    note.innerHTML = mode === 'share'
-      ? '<span class="v-callout-head">This is the view that tells the truth</span>' +
-        `Out of every 10,000 papers published, those mentioning VO₂max or cardiorespiratory fitness went ` +
-        `from <strong>${fmt(valueOf(first, 'vo2'))}</strong> in ${y0} to a peak of ` +
-        `<strong>${fmt(peak[0].value)}</strong> around ${peak[0].year} &mdash; and then <strong>stopped rising</strong>. ` +
-        `It sits at ${fmt(valueOf(lastRow, 'vo2'))} today. The same flattening shows in ` +
-        `&ldquo;aerobic capacity&rdquo;, which peaked around ${peak[1].year}. ` +
-        `<br><br>That is the finding worth sitting with. Researchers did not discover this subject in ` +
-        `the last few years &mdash; they worked on it hard for four decades and had largely settled it by ` +
-        `the middle of the 2010s.`
-      : '<span class="v-callout-head">Why this view flatters the story</span>' +
-        `By raw count the rise looks unstoppable &mdash; ${comma(first.vo2)} papers in ${y0} against ` +
-        `${comma(lastRow.vo2)} in ${y1}. But PubMed indexed ${comma(first.total)} papers in ${y0} and ` +
-        `${comma(lastRow.total)} in ${y1}, so a large part of that is simply more science being published ` +
-        `about everything. <strong>Switch to the share view</strong> to take the growth of the database out ` +
-        `of the picture, and watch the last decade go flat.`;
   }
 
   return { render };

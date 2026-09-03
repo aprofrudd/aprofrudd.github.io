@@ -52,10 +52,8 @@ export function trendsChart(mount) {
     wide: true,
     onReplay: () => render(true),
   });
-  const note = h('div', { class: 'v-callout' });
 
   box.body.appendChild(fig.figure);
-  box.body.appendChild(note);
   onFirstView(box, () => render(true));
 
   function render(animate) {
@@ -146,16 +144,6 @@ export function trendsChart(mount) {
       rows: TRENDS_SERIES.map(([stamp, v]) => [stamp, String(v)]),
     });
 
-    note.innerHTML =
-      '<span class="v-callout-head">The other half of the story</span>' +
-      (growth && growth > 1.5
-        ? `Search interest averaged <strong>${round(a, 0)}</strong> in ${firstFull} and ` +
-          `<strong>${round(b, 0)}</strong> in ${lastFull} &mdash; about <strong>${round(growth, 1)}×</strong> higher &mdash; ` +
-          `and peaked in ${peak.stamp}. `
-        : `Search interest peaked in ${peak.stamp}. `) +
-      `<br><br><em>One caveat worth knowing: this is a 0–100 index of relative interest, not a count of ` +
-      `searches. It shows the shape of public attention, not its size, and Google rescales it to whatever ` +
-      `window you ask for.</em>`;
   }
 }
 
