@@ -1,7 +1,7 @@
 /*
  * slides.js — one section at a time, for narrating over.
  *
- * Every element carrying .v-slide (the hero and each section) becomes a
+ * Every element carrying .v-slide (each section) becomes a
  * slide. Next / Back buttons and the arrow keys move between them, nav links
  * jump straight to one, and the URL hash follows so any slide is linkable.
  * Scrolling still works inside a slide — the three-chart card is taller than

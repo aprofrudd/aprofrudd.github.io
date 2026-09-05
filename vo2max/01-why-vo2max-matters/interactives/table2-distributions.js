@@ -11,9 +11,9 @@
  * line, it catches a similar share of both groups.
  */
 
-import { TABLE2, TABLE2_FULL } from '../data.js';
-import { figure, toggle, card, slider, readout, legend, h } from '../../lib/figure.js';
-import { svg, el, add, group, scaleLinear, normalPdf, normalCdf, line, comma, round } from '../../lib/svg.js';
+import { TABLE2, TABLE2_FULL, PAPER } from '../data.js';
+import { figure, toggle, card, slider, legend, h } from '../../lib/figure.js';
+import { svg, el, add, group, scaleLinear, normalPdf, normalCdf, line, comma } from '../../lib/svg.js';
 import { onFirstView } from '../../lib/reveal.js';
 
 const W = 760, H = 360;
@@ -43,19 +43,9 @@ export function table2Distributions(mount) {
     'Choose which group of men to show'
   );
 
-  // A sentence carries the meaning; the two tiles just hold the numbers.
-  // "Survivors below the line" on its own left people guessing what was
-  // being counted.
-  const sentence = h('p', { class: 'v-card-sub', style: 'margin:0 0 1rem;text-align:center' });
-
-  const out = readout([
-    { value: '', label: 'Of the men who survived' },
-    { value: '', label: 'Of the men who died' },
-  ]);
-
   const fig = figure({
     label: '',
-    caption: 'Built from Table 2 of Myers et al. (2002). Curves are drawn from the reported mean and standard deviation of each group; the dashed lines mark each group&rsquo;s average.',
+    caption: `Built from Table 2 of <a href="https://doi.org/${PAPER.doi}" target="_blank" rel="noopener">Myers et al. (2002)</a>. Curves are drawn from the reported mean and standard deviation of each group; the dashed lines mark each group&rsquo;s average.`,
     onReset: () => { cut = START_CUT; cutSlider.set(START_CUT); groupKey = 'normal'; tog.select('normal'); render(); },
   });
 
@@ -75,8 +65,6 @@ export function table2Distributions(mount) {
   ]));
   box.body.appendChild(fig.figure);
   box.body.appendChild(cutSlider);
-  box.body.appendChild(sentence);
-  box.body.appendChild(out);
   box.body.appendChild(note);
   mount.appendChild(box);
 
@@ -155,11 +143,6 @@ export function table2Distributions(mount) {
     // Readouts.
     const belowSurv = normalCdf(cut, g.survived.met, g.survived.sd) * 100;
     const belowDied = normalCdf(cut, g.died.met, g.died.sd) * 100;
-    out.setAll([`${Math.round(belowSurv)}%`, `${Math.round(belowDied)}%`]);
-    sentence.innerHTML =
-      `The line is at <strong>${cut.toFixed(1)} METs</strong>. Below that level sit ` +
-      `<strong>${Math.round(belowSurv)}%</strong> of the men who survived &mdash; and ` +
-      `<strong>${Math.round(belowDied)}%</strong> of the men who died.`;
 
     fig.setLabel(
       `Two overlapping bell curves of exercise capacity for ${g.label.toLowerCase()}. ` +
@@ -179,12 +162,9 @@ export function table2Distributions(mount) {
     note.innerHTML =
       `Among the <strong>${g.label.toLowerCase()}</strong>, ${comma(g.survived.n)} men survived and ` +
       `${comma(g.died.n)} died. The men who survived averaged <strong>${g.survived.met} METs</strong>; ` +
-      `the men who died averaged <strong>${g.died.met} METs</strong>. That difference is ` +
-      `statistically solid (p&nbsp;${g.p}) &mdash; and it is only ` +
-      `${round(g.survived.met - g.died.met, 1)} METs. ` +
+      `the men who died averaged <strong>${g.died.met} METs</strong>. ` +
       `Look at how far the two curves overlap. Fitness shifts the odds across a whole population; ` +
-      `it does not tell you what will happen to any one person. Both of those statements come from ` +
-      `this same picture, and people routinely take only the first one away from it.`;
+      `it does not tell you what will happen to any one person.`;
   }
 
   return { render };

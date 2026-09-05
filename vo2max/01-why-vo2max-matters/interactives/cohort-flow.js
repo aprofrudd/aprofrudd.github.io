@@ -24,7 +24,7 @@ export function cohortFlow(mount) {
   const box = card(
     'Who was in this study',
     'One dot = 25 men',
-    'Press play to see how 6,213 men were sorted, and what had happened to them by the end.',
+    'Work through the three views to see how 6,213 men were sorted, and what had happened to them by the end.',
     true
   );
 
@@ -45,14 +45,15 @@ export function cohortFlow(mount) {
   box.body.appendChild(h('dl', { class: 'v-beats', style: 'margin-top:1.75rem' },
     h('dt', {}, 'Who'), h('dd', {}, `${comma(STUDY.total)} men, referred for a treadmill test because a doctor wanted one. Not volunteers, and not a random sample of the public.`),
     h('dt', {}, 'When'), h('dd', {}, `Tested from ${STUDY.dataFrom} onwards; who was still alive was checked in ${STUDY.vitalStatusTo}.`),
-    h('dt', {}, 'What was done'), h('dd', {}, 'Each man walked on a treadmill that got progressively harder until he had to stop. Most tests lasted 8 to 12 minutes.'),
-    h('dt', {}, 'What was measured'), h('dd', {}, 'Exercise capacity in METs — worked out from the speed and slope of the treadmill, not from measuring the oxygen he actually breathed.'),
-    h('dt', {}, 'What was counted'), h('dd', {}, `Whether he had died of any cause. Not what he died of — that was not known.`),
+    h('dt', {}, 'What was done'), h('dd', {}, 'Each man walked on a treadmill that got progressively harder until they had to stop. Most tests lasted 8 to 12 minutes.'),
+    h('dt', {}, 'What was measured'), h('dd', {}, 'Exercise capacity in METs — worked out from the speed and slope of the treadmill, not from assessing oxygen uptake.'),
+    h('dt', {}, 'What was counted'), h('dd', {}, `Whether they had died of any cause. Not what they died of — that was not known.`),
     h('dt', {}, 'How long'), h('dd', {}, `${STUDY.followUpYears} years on average, give or take ${STUDY.followUpSD}.`)
   ));
 
   mount.appendChild(box);
-  onFirstView(box, () => { render(); if (!prefersReducedMotion()) run(); });
+  // No autoplay: the presenter steps through the views. Play is still there.
+  onFirstView(box, () => render());
 
   function stop() { if (timer) { clearInterval(timer); timer = null; } play.textContent = 'Play'; }
 

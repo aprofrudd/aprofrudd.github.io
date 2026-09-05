@@ -14,7 +14,7 @@ import { svg, el, add, group, scaleLinear, round } from '../../lib/svg.js';
 import { onFirstView } from '../../lib/reveal.js';
 
 const W = 760, H = 150;
-const M = { left: 26, right: 26, top: 34, bottom: 44 };
+const M = { left: 26, right: 26, top: 44, bottom: 44 };   // top clears the marker's value label
 const PLOT_W = W - M.left - M.right;
 
 const MIN_MET = 1, MAX_MET = 20, START_MET = 8, START_KG = 80;
@@ -75,7 +75,7 @@ export function metExplorer(mount) {
   // The definition, in the paper's own words.
   box.body.appendChild(h('blockquote', { class: 'v-quote' },
     STUDY.metDefinition,
-    h('cite', {}, `${PAPER.authors}, ${PAPER.citation}`)
+    h('cite', { html: `${PAPER.authors}, <a href="https://doi.org/${PAPER.doi}" target="_blank" rel="noopener">${PAPER.citation}</a>` })
   ));
 
   mount.appendChild(box);
@@ -85,15 +85,9 @@ export function metExplorer(mount) {
   const caveat = h('div', { class: 'v-callout v-callout-warn' });
   caveat.innerHTML =
     '<span class="v-callout-head">One thing to hold on to: estimated, not measured</span>' +
-    'Not one of the 6,213 men had his oxygen actually measured. The METs in this study were worked ' +
+    'Not one of the 6,213 men had their oxygen uptake actually measured. The METs in this study were worked ' +
     'out from how fast and how steep the treadmill was &mdash; &ldquo;' + STUDY.metEstimation + '&rdquo; ' +
-    'The authors are straightforward about what that costs: &ldquo;' + STUDY.limitationMeasured + '&rdquo;' +
-    '<br><br>' +
-    'It matters in one direction in particular. The equations assume your body has settled into a ' +
-    'steady state at each speed, which in the last minutes of a test to exhaustion it has not, so an ' +
-    'estimated MET score tends to flatter the person being tested. A <em>measured</em> 8 METs is a ' +
-    'fitter person than an <em>estimated</em> 8 METs. Keep that in mind every time a number in this ' +
-    'module says 5 or 8.';
+    'The authors are straightforward about what that costs: &ldquo;' + STUDY.limitationMeasured + '&rdquo;';
   mount.appendChild(caveat);
 
   let marker, markerLabel;

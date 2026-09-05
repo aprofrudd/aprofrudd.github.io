@@ -33,6 +33,7 @@ import { initModulePage } from '../lib/reveal.js';
 import { initSlides } from '../lib/slides.js';
 import { watchNotation } from '../lib/notation.js';
 import { h } from '../lib/figure.js';
+import { comma } from '../lib/svg.js';
 import { LIMITATIONS, PAPER, STUDY, FIGURE2, TABLE2, FIRSTBEAT, GARMIN, VO2MAX } from './data.js';
 import { PUBMED_SERIES, PUBMED_META } from './pubmed-data.js';
 
@@ -86,16 +87,36 @@ function wearables(mount) {
   }));
 }
 
+/** The citation with its journal abbreviation in italics, e.g. <em>N Engl J Med</em> 2002;346:793-801. */
+function citationHtml() {
+  return PAPER.citation.replace(/^([A-Za-z .]+?) (\d{4};)/, '<em>$1</em> $2');
+}
+
+/* ---------------------------------------------------------------------------
+   Section 04 — the study. The paper first, then the cohort as a picture.
+   ------------------------------------------------------------------------ */
+function study(mount) {
+  const s = PAPER.scholar;
+  const floor = Math.floor(s.citedBy / 1000) * 1000;   // "more than 6,000", not a false-precise 6,012
+  mount.appendChild(h('div', { class: 'v-source', style: 'margin-bottom:2rem' },
+    h('div', { class: 'v-source-label' }, 'The paper'),
+    h('div', { class: 'v-source-title' }, PAPER.title),
+    h('div', { class: 'v-source-cite', html:
+      `${PAPER.authors}. ${citationHtml()}. ` +
+      `<a href="https://doi.org/${PAPER.doi}" target="_blank" rel="noopener">doi:${PAPER.doi}</a>` }),
+    h('div', { class: 'v-source-cite', html:
+      `Cited more than <strong>${comma(floor)}</strong> times &mdash; ` +
+      `<a href="${s.url}" target="_blank" rel="noopener">${s.source}</a>, ${s.asOf}.` })
+  ));
+  cohortFlow(mount);
+}
+
 /* ---------------------------------------------------------------------------
    Section 09 — limitations.
    ------------------------------------------------------------------------ */
 function limits(mount) {
   mount.appendChild(h('div', { class: 'v-grid' },
     LIMITATIONS.map((l) => h('div', { class: 'v-tile' }, h('h3', {}, l.head), h('p', {}, l.body)))
-  ));
-  mount.appendChild(h('blockquote', { class: 'v-quote', style: 'margin-top:2.5rem' },
-    STUDY.limitationCausal,
-    h('cite', {}, 'The authors, in the paper itself')
   ));
 }
 
@@ -115,11 +136,9 @@ function takeaways(mount) {
       ['A MET is a multiple of resting',
        'One MET is sitting still, about 3.5 mL of oxygen per kilogram per minute. Everything in this study is counted in those units, so 8 METs means eight times your resting rate.'],
       ['These METs were estimated',
-       'Nobody wore a mask. Exercise capacity was worked out from the speed and slope of the treadmill, and the authors say directly that a measured value would have been better.'],
+       'Exercise capacity was worked out from the speed and slope of the treadmill, and the authors say directly that a measured value would have been better.'],
       ['The men who lived could do more',
        `Among the healthy men, survivors averaged ${n.survived.met} METs against ${n.died.met} for those who died. Among the men with heart disease, ${c.survived.met} against ${c.died.met}.`],
-      ['But the groups overlap heavily',
-       'That gap is real and it is small. Fitness shifts the odds across a whole population; it does not tell you what will happen to any one person.'],
       ['The gradient is the striking part',
        `Split into fifths, the least fit were ${FIGURE2.headline.normal}× more likely to die than the fittest among the healthy men, and ${FIGURE2.headline.cvd}× among those with heart disease.`],
       ['It is an association',
@@ -136,7 +155,7 @@ function takeaways(mount) {
     h('div', { class: 'v-source-label' }, 'Read the original'),
     h('div', { class: 'v-source-title' }, PAPER.title),
     h('div', { class: 'v-source-cite', html:
-      `${PAPER.authors}. <em>${PAPER.journal}</em> ${PAPER.citation}. ` +
+      `${PAPER.authors}. ${citationHtml()}. ` +
       `<a href="https://doi.org/${PAPER.doi}" target="_blank" rel="noopener">doi:${PAPER.doi}</a> &middot; PMID ${PAPER.pmid}`
     })
   ));
@@ -168,7 +187,7 @@ function boot() {
   wire('mount-focus', focus);
   wire('mount-research', research);
   wire('mount-wearables', wearables);
-  wire('mount-cohort', cohortFlow);
+  wire('mount-cohort', study);
   wire('mount-met', metExplorer);
   wire('mount-table2', table2Distributions);
   wire('mount-quintiles', quintileRisk);

@@ -13,7 +13,7 @@
  * caveat card says what the paper did instead.
  */
 
-import { FIGURE3, STUDY } from '../data.js';
+import { FIGURE3, STUDY, PAPER } from '../data.js';
 import { figure, toggle, card, slider, readout, h } from '../../lib/figure.js';
 import { svg, el, add, group, scaleLinear, stepLine, line, drawIn, fadeIn } from '../../lib/svg.js';
 import { onFirstView } from '../../lib/reveal.js';
@@ -179,7 +179,7 @@ export function kmCurves(mount) {
   const box = card(
     'Survival over fourteen years, by fitness',
     'Drag the year',
-    'The same chart, drawn from the study. The three lines are the men who managed less than ' +
+    'The three lines are the men who managed less than ' +
     '5 METs, 5 to 8 METs, and more than 8 METs. Drag the cursor to read off any year.',
     true
   );
@@ -201,9 +201,8 @@ export function kmCurves(mount) {
   const fig = figure({
     label: '',
     caption:
-      'Built from Figure 3 (panels A and C) of Myers et al. (2002). Survival percentages are read ' +
-      'from the published curves and are approximate; the paper reports P&nbsp;&lt;&nbsp;0.001 for the ' +
-      'difference between the lines, without naming the test used.',
+      `Built from Figure 3 (panels A and C) of <a href="https://doi.org/${PAPER.doi}" target="_blank" rel="noopener">Myers et al. (2002)</a>. ` +
+      'Survival percentages are read from the published curves and are approximate.',
     onReplay: () => render(true),
     onReset: () => { groupKey = 'normal'; yearSlider.set(10); tog.select('normal'); render(true); },
   });
@@ -325,14 +324,12 @@ export function kmCurves(mount) {
 
     caveat.innerHTML =
       '<span class="v-callout-head">One thing this paper did differently</span>' +
-      'A chart like this normally has to deal with people it loses track of &mdash; someone who moves away, ' +
+      'A chart like this normally has to deal with people it loses track of; someone who moves away, ' +
       'or who is simply still alive when the study stops. The usual practice is to drop them from the ' +
-      'running total at that point without counting them as a death. It is called <em>censoring</em>, and ' +
-      'handling it properly is the reason this kind of chart exists at all. ' +
+      'running total at that point without counting them as a death. It is called <em>censoring</em>. ' +
       'This study says plainly that it did not do it: &ldquo;' + STUDY.censoringNote + '&rdquo; ' +
       'Men who later had bypass surgery or a stent stayed in the count as though nothing had changed. ' +
-      'It is a genuine limitation, and the authors put it in the paper themselves rather than leaving ' +
-      'someone else to find it.';
+      'It is a limitation clearly stated by the authors.';
   }
 
   return { render };

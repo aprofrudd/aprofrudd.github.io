@@ -15,7 +15,7 @@
  * longer the paper's.
  */
 
-import { FIGURE2 } from '../data.js';
+import { FIGURE2, PAPER } from '../data.js';
 import { figure, toggle, card, h } from '../../lib/figure.js';
 import { svg, el, add, group, scaleLinear, scaleBand, axisLeft, axisTitle, bar, ticks, round, growIn, fadeIn } from '../../lib/svg.js';
 import { onFirstView } from '../../lib/reveal.js';
@@ -42,7 +42,7 @@ export function quintileRisk(mount) {
 
   const fig = figure({
     label: '',
-    caption: 'Built from Figure 2 of Myers et al. (2002). MET ranges and confidence intervals are as printed in the paper.',
+    caption: `Built from Figure 2 of <a href="https://doi.org/${PAPER.doi}" target="_blank" rel="noopener">Myers et al. (2002)</a>. MET ranges and confidence intervals are as printed in the paper.`,
     onReplay: () => { drawn = false; render(true); },
     onReset: () => { refIndex = 4; groupKey = 'normal'; tog.select('normal'); drawn = false; render(true); },
   });
@@ -197,9 +197,8 @@ export function quintileRisk(mount) {
     if (isPaperRef) {
       const headline = FIGURE2.headline[groupKey];
       note.innerHTML =
-        `This is the comparison the paper itself makes. The least fit fifth were <strong>${headline} times</strong> ` +
-        `as likely to die as the fittest fifth. The black bars are 95% confidence intervals &mdash; the range of ` +
-        `values the data are consistent with. ` +
+        `The least fit fifth were <strong>${headline} times</strong> ` +
+        `as likely to die as the fittest fifth. The black bars are 95% confidence intervals. ` +
         (groupKey === 'normal'
           ? 'Notice the fourth band: its interval runs from 0.7 to 2.2, which includes 1. This study could not tell that group apart from the fittest.'
           : 'Notice how evenly the bars step down here &mdash; among men with heart disease the fall in risk is close to a straight line.');

@@ -25,6 +25,14 @@ export const PAPER = {
   doi: '10.1056/NEJMoa011858',
   url: 'https://www.nejm.org/doi/full/10.1056/NEJMoa011858',
   pmid: '11893790',
+  // Citation count. SOURCE: Google Scholar search for the title, "Cited by
+  // 6012", checked 4 September 2026. Rendered as "more than 6,000".
+  scholar: {
+    citedBy: 6012,
+    source: 'Google Scholar',
+    asOf: 'September 2026',
+    url: 'https://scholar.google.com/scholar?q=%22Exercise+capacity+and+mortality+among+men+referred+for+exercise+testing%22',
+  },
 };
 
 /* ---------------------------------------------------------------------------
@@ -75,9 +83,6 @@ export const STUDY = {
     'directly measured exercise capacity (peak oxygen consumption) is known to ' +
     'be a more accurate and reproducible measure of exercise tolerance, as well ' +
     'as a more robust predictor of outcomes.',
-  limitationCausal:
-    'Our findings demonstrate an association between exercise capacity and ' +
-    'overall mortality, not necessarily a causal relation.',
   callToAction:
     'In terms of reducing mortality from any cause, improving exercise tolerance ' +
     'warrants at least as much attention as other major risk factors from ' +
@@ -312,25 +317,27 @@ export const BANDS = [
  * MET reference values for everyday activities.
  * SOURCE: 2024 Adult Compendium of Physical Activities (pacompendium.com),
  * the current successor to Ainsworth et al. Values differ slightly from the
- * 2011 Compendium; we cite the version we used.
+ * 2011 Compendium; we cite the version we used. The Compendium lists speeds
+ * in mph; they are shown here in km/h, rounded to 0.1, with running paces
+ * given per kilometre.
  * ------------------------------------------------------------------------ */
 export const ACTIVITIES = [
   { met: 1.0,  name: 'Sitting quietly',              note: 'This is the definition of 1 MET' },
   { met: 1.3,  name: 'Standing still',               note: 'Barely above resting' },
   { met: 2.0,  name: 'Washing up, standing',         note: 'Light housework' },
-  { met: 2.3,  name: 'Strolling, under 2 mph',       note: 'A very slow walk' },
-  { met: 3.0,  name: 'Walking 2.5 mph',              note: 'An easy walk on the flat' },
-  { met: 3.8,  name: 'Walking 3 mph',                note: 'A normal walking pace' },
-  { met: 4.8,  name: 'Walking briskly, 3.5 mph',     note: 'Walking with purpose' },
-  { met: 5.5,  name: 'Walking very briskly, 4 mph',  note: 'About as fast as walking gets' },
+  { met: 2.3,  name: 'Strolling, under 3.2 km/h',    note: 'A very slow walk' },
+  { met: 3.0,  name: 'Walking 4 km/h',               note: 'An easy walk on the flat' },
+  { met: 3.8,  name: 'Walking 4.8 km/h',             note: 'A normal walking pace' },
+  { met: 4.8,  name: 'Walking briskly, 5.6 km/h',    note: 'Walking with purpose' },
+  { met: 5.5,  name: 'Walking very briskly, 6.4 km/h', note: 'About as fast as walking gets' },
   { met: 6.8,  name: 'Climbing stairs',              note: 'A normal flight of stairs' },
   { met: 7.5,  name: 'Jogging',                      note: 'An easy jog' },
-  { met: 8.5,  name: 'Running 5 mph',                note: 'A 12-minute mile' },
-  { met: 9.3,  name: 'Running 6 mph',                note: 'A 10-minute mile' },
-  { met: 11.0, name: 'Running 7 mph',                note: 'An 8.5-minute mile' },
-  { met: 11.8, name: 'Running 8 mph',                note: 'A 7.5-minute mile' },
-  { met: 14.0, name: 'Running 9.5 mph',              note: 'Club runner pace' },
-  { met: 17.0, name: 'Running 11.5 mph',             note: 'National-standard distance runner' },
+  { met: 8.5,  name: 'Running 8 km/h',               note: 'About 7½ minutes per kilometre' },
+  { met: 9.3,  name: 'Running 9.7 km/h',             note: 'About 6 minutes per kilometre' },
+  { met: 11.0, name: 'Running 11.3 km/h',            note: 'About 5¼ minutes per kilometre' },
+  { met: 11.8, name: 'Running 12.9 km/h',            note: 'About 4¾ minutes per kilometre' },
+  { met: 14.0, name: 'Running 15.3 km/h',            note: 'Club runner pace' },
+  { met: 17.0, name: 'Running 18.5 km/h',            note: 'National-standard distance runner' },
   { met: 20.0, name: 'Elite endurance athlete',      note: 'Around the highest ever measured' },
 ];
 
@@ -377,11 +384,10 @@ export const FOLLOW_UPS = [
 export const LIMITATIONS = [
   { head: 'Men only',              body: 'Every one of the 6,213 people in this study was a man. Exercise test results are known to differ between men and women, so none of these numbers can be read straight across to women.' },
   { head: 'Patients, not the public', body: 'These men were referred for a treadmill test for a clinical reason. They are not a random sample of the population, and more than half already had heart disease.' },
-  { head: 'Fitness was estimated, not measured', body: 'METs were worked out from the speed and slope of the treadmill, not from measuring the oxygen the men actually breathed. The authors say plainly that measuring it directly is more accurate.' },
-  { head: 'Association, not proof',  body: 'This study shows fit men were less likely to die. It cannot show that getting fitter is what caused it. The authors say so in the paper.' },
+  { head: 'Fitness was estimated, not measured', body: 'METs were worked out from the speed and slope of the treadmill, not from assessing oxygen uptake. The authors say plainly that measuring it directly is more accurate.' },
+  { head: 'Association, not proof',  body: 'This study shows that fitter men were less likely to die. It cannot show that fitness itself caused the lower death rate — only that the two went together. The authors say so in the paper.' },
   { head: 'Nobody was censored',     body: 'The usual survival-analysis practice of removing people from the count when they have an operation was not done here, because the data were not available.' },
-  { head: 'Cause of death unknown',  body: 'Only whether a man had died was known, not what he died of.' },
-  { head: 'A different era',         body: 'The men were tested between 1987 and 2000. Treatment for heart disease has changed a great deal since.' },
+  { head: 'Cause of death unknown',  body: 'Only whether each man had died was known, not what they died of.' },
 ];
 
 /* ---------------------------------------------------------------------------

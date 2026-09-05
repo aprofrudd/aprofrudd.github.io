@@ -585,6 +585,19 @@ input[type="range"].v-range::-moz-range-thumb {
     margin-bottom: 0.5rem;
 }
 .v-tile p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.65; }
+/* Section 09: a card lights up under the cursor, so it can be pointed at
+   while narrating. */
+#limits .v-tile {
+    cursor: default;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+#limits .v-tile:hover {
+    background: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgb(0 113 227 / 0.15), var(--shadow);
+    transform: translateY(-2px);
+}
+#limits .v-tile:hover h3 { color: var(--primary-color); }
 .v-tile-cite {
     display: block;
     font-size: 0.78rem;
@@ -814,7 +827,7 @@ input[type="range"].v-range::-moz-range-thumb {
 
 /* ---------------------------------------------------------------------------
    Slide mode — one section at a time, for narrating over.
-   Each section (and the hero) carries .v-slide; the body gets .v-slides.
+   Each section carries .v-slide; the body gets .v-slides.
    Scrolling still works inside a slide; moving between them is a transition.
    `?view=scroll` leaves the body class off and the whole page shows.
    ------------------------------------------------------------------------ */
@@ -823,6 +836,14 @@ input[type="range"].v-range::-moz-range-thumb {
     display: block;
     padding-bottom: 6rem;                  /* clear the fixed control bar */
     animation: v-slide-in 380ms ease both;
+}
+/* The active slide (and, in scroll view, the first section) starts at the
+   very top of the document, under the fixed navbar. The site's 3rem section
+   padding on small screens is less than the navbar's 75px, so the section
+   number was disappearing behind it. */
+.v-slides .section.is-active,
+.vo2 main > article > .section:first-child {
+    padding-top: calc(75px + 1.25rem);
 }
 .v-slides .v-hero.is-active { min-height: 100vh; }
 .v-slides .section.is-active { min-height: calc(100vh - 71px); }
