@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What's V&#775;O&#8322;max? | Dr Alan Ruddock</title>
-    <meta name="description" content="VO₂max is coming into focus. An interactive explainer: how public and research interest moved, how your watch estimates it, and the 2002 study that found exercise capacity predicts death better than smoking, blood pressure or cholesterol.">
+    <meta name="description" content="VO₂max is coming into focus. An interactive explainer: how public and research interest moved, how your watch estimates it, and the 2002 study that found exercise capacity predicts death better than smoking, blood pressure or cholesterol; then what the number physically is, how big it gets in elite athletes, and whether it can be trained or lost.">
     <link rel="canonical" href="https://alanruddock.com/vo2max/01-why-vo2max-matters/">
     <meta property="og:type" content="article">
     <meta property="og:title" content="What's VO₂max?">
@@ -18,13 +18,13 @@
     <meta name="twitter:image" content="https://alanruddock.com/alan-ruddock-sport-physiologist.jpg">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/styles.css?v=20260903">
-    <link rel="stylesheet" href="/vo2max/module.css?v=20260903">
+    <link rel="stylesheet" href="/vo2max/module.css?v=20260905">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "LearningResource",
       "name": "What's VO2max?",
-      "description": "An interactive explainer on VO2max: how interest in it has moved, how consumer wearables estimate it, and the landmark 2002 New England Journal of Medicine study by Myers et al. on exercise capacity and mortality.",
+      "description": "An interactive explainer on VO2max: how interest in it has moved, how consumer wearables estimate it, the landmark 2002 New England Journal of Medicine study by Myers et al. on exercise capacity and mortality, what the number physically is, how large it gets in elite athletes, and how training, detraining, ageing and bed rest change it.",
       "url": "https://alanruddock.com/vo2max/01-why-vo2max-matters/",
       "learningResourceType": "Interactive explainer",
       "educationalLevel": "Introductory",
@@ -44,7 +44,11 @@
         "How consumer wearables estimate VO2max from heart rate and speed",
         "What a MET is and how it relates to oxygen consumption",
         "Why estimated exercise capacity is not the same as measured VO2max",
-        "How to read a survival curve"
+        "How to read a survival curve",
+        "What VO2max is as a rate: cardiac output times oxygen extraction (Fick's principle)",
+        "How large VO2max can be in elite athletes compared with everyday values",
+        "Why VO2max is one of three determinants of endurance performance",
+        "How training, detraining, ageing and bed rest change VO2max"
       ],
       "citation": {
         "@type": "ScholarlyArticle",
@@ -69,17 +73,21 @@
                 <span></span>
             </button>
             <ul class="nav-menu">
-                <li><a href="#focus">Into focus</a></li>
-                <li><a href="#research">The research</a></li>
-                <li><a href="#wearables">Your watch</a></li>
-                <li><a href="#study">The study</a></li>
+                <li><a href="#focus">Focus</a></li>
+                <li><a href="#research">Research</a></li>
+                <li><a href="#wearables">Watch</a></li>
+                <li><a href="#study">Study</a></li>
                 <li><a href="#mets">METs</a></li>
                 <li><a href="#table2">Who lived</a></li>
-                <li><a href="#quintiles">Compared with what</a></li>
+                <li><a href="#quintiles">Compared</a></li>
                 <li><a href="#survival">Survival</a></li>
                 <li><a href="#limits">Limits</a></li>
+                <li><a href="#fick">What it is</a></li>
+                <li><a href="#records">Records</a></li>
+                <li><a href="#whole-story">Whole story</a></li>
+                <li><a href="#trainable">Gain &amp; loss</a></li>
                 <li><a href="#takeaways">Takeaways</a></li>
-                <li><a href="/vo2max/">All modules</a></li>
+                <li><a href="/vo2max/">Modules</a></li>
             </ul>
         </div>
     </nav>
@@ -199,10 +207,58 @@
         </section>
 
         <!-- 10 ------------------------------------------------------------ -->
-        <section id="takeaways" class="section section-alt v-slide">
+        <section id="fick" class="section section-alt v-slide">
             <div class="container">
                 <div class="v-section-head">
                     <span class="v-num">10</span>
+                    <h2>What exactly is it?</h2>
+                    <p>A rate. How much oxygen the body can use in a minute: what the heart pumps, times what the muscles take out.</p>
+                </div>
+                <div id="mount-fick"></div>
+            </div>
+        </section>
+
+        <!-- 11 ------------------------------------------------------------ -->
+        <section id="records" class="section v-slide">
+            <div class="container">
+                <div class="v-section-head">
+                    <span class="v-num">11</span>
+                    <h2>How big can it get?</h2>
+                    <p>The Myers men, the number on a watch, and the largest ever measured.</p>
+                </div>
+                <div id="mount-records"></div>
+            </div>
+        </section>
+
+        <!-- 12 ------------------------------------------------------------ -->
+        <section id="whole-story" class="section section-alt v-slide">
+            <div class="container">
+                <div class="v-section-head">
+                    <span class="v-num">12</span>
+                    <h2>Is it the whole story?</h2>
+                    <p>It sets the ceiling. It does not pick the winner.</p>
+                </div>
+                <div id="mount-model"></div>
+            </div>
+        </section>
+
+        <!-- 13 ------------------------------------------------------------ -->
+        <section id="trainable" class="section v-slide">
+            <div class="container">
+                <div class="v-section-head">
+                    <span class="v-num">13</span>
+                    <h2>Can it be trained &mdash; or lost?</h2>
+                    <p>Twenty weeks of training. Twelve weeks of stopping. Thirty years. Three weeks in bed.</p>
+                </div>
+                <div id="mount-trainable"></div>
+            </div>
+        </section>
+
+        <!-- 14 ------------------------------------------------------------ -->
+        <section id="takeaways" class="section section-alt v-slide">
+            <div class="container">
+                <div class="v-section-head">
+                    <span class="v-num">14</span>
                     <h2>What to take away</h2>
                 </div>
                 <div id="mount-takeaways"></div>
@@ -225,6 +281,6 @@
         </div>
     </footer>
 
-    <script type="module" src="module-01.js?v=20260903"></script>
+    <script type="module" src="module-01.js?v=20260905"></script>
 </body>
 </html>

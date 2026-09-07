@@ -13,6 +13,13 @@
  * labels them as approximate. Nothing here is inferred or borrowed from a
  * secondary source.
  *
+ * Sections 10-13 draw on other papers, enumerated in SOURCES below; every
+ * block names the source it draws on. `derived: true` is arithmetic on
+ * printed numbers (the arithmetic is in the comment); `approx: true` is read
+ * off a figure or given as "~" by the source; `estimated: true` was an
+ * estimate in the source itself; `null` means the paper that holds the number
+ * has not yet been read, and the UI degrades as described where it is used.
+ *
  * No chart may hardcode a number. If it is on screen, it comes from here.
  */
 
@@ -52,9 +59,11 @@ export const PAPER = {
  * them.
  * ------------------------------------------------------------------------ */
 export const VO2MAX = 'V\u0307O\u2082max';
+export const VO2 = 'V\u0307O\u2082';                            // the rate itself, no "max"
 export const UNIT_ABS = 'L\u00b7min\u207b\u00b9';                  // L·min⁻¹
 export const UNIT_REL = 'mL\u00b7kg\u207b\u00b9\u00b7min\u207b\u00b9';  // mL·kg⁻¹·min⁻¹
 export const UNIT_KCAL = 'kcal\u00b7min\u207b\u00b9';               // kcal·min⁻¹
+export const UNIT_EXT = 'mL per 100 mL';                          // arteriovenous O₂ difference (McGuire prints "vol%")
 
 /* ---------------------------------------------------------------------------
  * The study. All from the Abstract and Methods.
@@ -344,6 +353,265 @@ export const ACTIVITIES = [
 export const MET_ML = 3.5; // 1 MET = 3.5 mL of oxygen per kg of body weight per minute
 
 /* ---------------------------------------------------------------------------
+ * SOURCES — every paper cited in sections 10-13. `checked` is the date the
+ * abstract was read on PubMed (NCBI E-utilities); `abstractOnly: true` means
+ * the full text has NOT been consulted and only abstract numbers appear on
+ * the page. Linked by DOI where there is one, otherwise PubMed.
+ * ------------------------------------------------------------------------ */
+export const SOURCES = {
+  myers: PAPER,
+  haugen2018: {
+    authors: 'Haugen T, Paulsen G, Seiler S, Sandbakk Ø',
+    title: 'New Records in Human Power',
+    journal: 'International Journal of Sports Physiology and Performance',
+    year: 2018, citation: 'Int J Sports Physiol Perform 2018;13(6):678-686',
+    doi: '10.1123/ijspp.2017-0441', pmid: '28872385',
+    checked: '2026-09-05', abstractOnly: true,
+  },
+  bouchard1999: {
+    authors: 'Bouchard C, An P, Rice T, Skinner JS, Wilmore JH, Gagnon J, Pérusse L, Leon AS, Rao DC',
+    title: 'Familial aggregation of VO2max response to exercise training: results from the HERITAGE Family Study',
+    journal: 'Journal of Applied Physiology',
+    year: 1999, citation: 'J Appl Physiol 1999;87(3):1003-1008',
+    doi: '10.1152/jappl.1999.87.3.1003', pmid: '10484570',
+    checked: '2026-09-05', abstractOnly: true,
+  },
+  coyle1984: {
+    authors: 'Coyle EF, Martin WH 3rd, Sinacore DR, Joyner MJ, Hagberg JM, Holloszy JO',
+    title: 'Time course of loss of adaptations after stopping prolonged intense endurance training',
+    journal: 'Journal of Applied Physiology',
+    year: 1984, citation: 'J Appl Physiol 1984;57(6):1857-1864',
+    doi: '10.1152/jappl.1984.57.6.1857', pmid: '6511559',
+    checked: '2026-09-05', abstractOnly: true,
+  },
+  mcguire2001: {
+    authors: 'McGuire DK, Levine BD, Williamson JW, Snell PG, Blomqvist CG, Saltin B, Mitchell JH',
+    title: 'A 30-year follow-up of the Dallas Bedrest and Training Study: I. Effect of age on the cardiovascular response to exercise',
+    journal: 'Circulation',
+    year: 2001, citation: 'Circulation 2001;104(12):1350-1357',
+    doi: '10.1161/hc3701.096099', pmid: '11560849',   // DOI from Crossref, 5 Sep 2026
+    checked: '2026-09-05', abstractOnly: true,
+  },
+  saltin1968: {
+    authors: 'Saltin B, Blomqvist G, Mitchell JH, Johnson RL Jr, Wildenthal K, Chapman CB',
+    title: 'Response to exercise after bed rest and after training',
+    journal: 'Circulation',
+    year: 1968, citation: 'Circulation 1968;38(5 Suppl):VII1-78',
+    doi: null, pmid: '5696236',
+    checked: '2026-09-05', abstractOnly: true,   // and the record carries no abstract at all
+  },
+  joyner1991: {
+    authors: 'Joyner MJ',
+    title: 'Modeling: optimal marathon performance on the basis of physiological factors',
+    journal: 'Journal of Applied Physiology',
+    year: 1991, citation: 'J Appl Physiol 1991;70(2):683-687',
+    doi: '10.1152/jappl.1991.70.2.683', pmid: '2022559',
+    checked: '2026-09-05', abstractOnly: true,
+  },
+  bassett2000: {
+    authors: 'Bassett DR Jr, Howley ET',
+    title: 'Limiting factors for maximum oxygen uptake and determinants of endurance performance',
+    journal: 'Medicine & Science in Sports & Exercise',
+    year: 2000, citation: 'Med Sci Sports Exerc 2000;32(1):70-84',
+    doi: '10.1097/00005768-200001000-00012', pmid: '10647532',
+    checked: '2026-09-05', abstractOnly: true,
+  },
+  millet2023: {
+    authors: 'Millet GP, Burtscher J, Bourdillon N, Manferdelli G, Burtscher M, Sandbakk Ø',
+    title: 'The V̇O2max Legacy of Hill and Lupton (1923)—100 Years On',
+    journal: 'International Journal of Sports Physiology and Performance',
+    year: 2023, citation: 'Int J Sports Physiol Perform 2023;18(11):1362-1365',
+    doi: '10.1123/ijspp.2023-0229', pmid: '37770066',
+    checked: '2026-09-05', abstractOnly: true,
+  },
+};
+
+/* ---------------------------------------------------------------------------
+ * Section 10 — Fick: oxygen uptake = cardiac output × arteriovenous O₂
+ * difference. Every number is from the McGuire 2001 abstract: five men first
+ * studied in 1966 at age 20, and again 30 years later.
+ * ------------------------------------------------------------------------ */
+export const FICK = {
+  // Axis extents (UI, not data): they hold both presets and put the 7.5
+  // contour inside the plot.
+  qMax: 45,      // cardiac output, L·min⁻¹
+  extMax: 22,    // arteriovenous O₂ difference, mL per 100 mL
+  contours: [1, 2, 3, 4, 5, 6, 7],   // arithmetic gridlines, L·min⁻¹
+  labelledContours: [2, 4, 6],
+  ceilingAbs: 7.5,   // SOURCE haugen2018: "∼7.5 … L·min-1 in male XC skiers". Drawn as a
+                     // contour — every pump × extraction that reaches it — so no split is asserted.
+  presets: [
+    { key: 'y20', label: 'Dallas men at 20 (1966)',
+      q: 20.0,             // maximal cardiac output, L/min — "20.0 versus 21.4 L/min"
+      ext: 16.2,           // maximal AV oxygen difference, vol% — "16.2 versus 13.8 vol%"
+      kg: 77,              // "body weight increased 25% (77 versus 100 kg)"
+      hrMax: 193, sv: 104, // "193 versus 181 bpm"; "104 versus 121 mL"
+      measuredAbs: 3.30,   // "VO2max decreased 11% (3.30 versus 2.90 L/min)"
+      measuredRel: 43,     // "(43 versus 31 mL·kg-1·min-1)"
+      age: 20, year: 1966 },
+    { key: 'y50', label: 'The same men, 30 years on',
+      q: 21.4, ext: 13.8, kg: 100, hrMax: 181, sv: 121,
+      measuredAbs: 2.90, measuredRel: 31,
+      age: 50, derived: true },   // age is 20 + "a 30-year interval"
+  ],
+  n: 5,
+  fallPct: 11,   // printed. (2.90−3.30)/3.30 = −12.1%: the paper's 11% is the mean of the
+                 // individual changes, which is not the change in the means. Show 11.
+  // Verbatim, on the arteriovenous O₂ difference:
+  entireDecreaseQuote: 'accounted for the entire decrease',
+  source: 'mcguire2001',
+};
+
+/* ---------------------------------------------------------------------------
+ * Section 11 — how big it gets. Markers on one scale. `unit` is 'rel'
+ * (mL·kg⁻¹·min⁻¹) or 'abs' (L·min⁻¹); the two views hold different markers
+ * because Haugen gives no body masses to convert between them.
+ * ------------------------------------------------------------------------ */
+export const RECORDS = {
+  relMax: 100, absMax: 8,           // axis extents (UI)
+  referenceKey: 'myersSurvived',    // the "× …" readout compares with this in the per-kg view
+  referenceAbsKey: 'dallas20',      // and with this in the whole-body view
+  markers: [
+    // Myers 2002, Table 2 (healthy men): estimated METs × 3.5. 8.4 × 3.5 = 29.4 and
+    // 9.7 × 3.5 = 33.95, rounded to whole numbers because the METs were estimates.
+    { key: 'myersDied', unit: 'rel', value: Math.round(TABLE2.normal.died.met * MET_ML),
+      tag: 'Myers, died', label: 'Myers: healthy men who died', estimated: true, derived: true, source: 'myers', tone: 'neutral' },
+    { key: 'myersSurvived', unit: 'rel', value: Math.round(TABLE2.normal.survived.met * MET_ML),
+      tag: 'Myers, survived', label: 'Myers: healthy men who survived', estimated: true, derived: true, source: 'myers', tone: 'neutral' },
+    // McGuire 2001: "(43 versus 31 mL·kg-1·min-1)"
+    { key: 'dallas50rel', unit: 'rel', value: 31, tag: 'Dallas men at 50', label: 'The Dallas men at 50', source: 'mcguire2001', tone: 'neutral' },
+    { key: 'dallas20rel', unit: 'rel', value: 43, tag: 'Dallas men at 20', label: 'The Dallas men at 20', source: 'mcguire2001', tone: 'neutral' },
+    // Coyle 1984: "(50.8 vs. 43.3 ml·kg-1·min-1)"
+    { key: 'coyleNever', unit: 'rel', value: 43.3, tag: 'never trained', label: 'Coyle: men who never trained', source: 'coyle1984', tone: 'neutral' },
+    { key: 'coyle84', unit: 'rel', value: 50.8, tag: '84 days off', label: 'Coyle: trained men, 84 days after stopping', source: 'coyle1984', tone: 'neutral' },
+    // The Garmin screen in section 03 (garmin-vo2max-gauge.png)
+    { key: 'garmin', unit: 'rel', value: 48, tag: 'the watch', label: 'The watch screen in section 03 ("Superior")', estimated: true, source: 'garmin', tone: 'watch' },
+    // Joyner 1991: "a VO2max of 84 ml·kg-1·min-1"
+    { key: 'joyner', unit: 'rel', value: 84, tag: "Joyner's runner", label: "Joyner's hypothetical marathoner", hypothetical: true, source: 'joyner1991', tone: 'elite' },
+    // Haugen 2018: "∼80 mL·kg-1·min-1 in XC skiers and runners" (women); "∼90 … in XC skiers, cyclists, and runners" (men)
+    { key: 'haugenWomen', unit: 'rel', value: 80, approx: true, tag: 'women', label: 'Upper limit, women (XC skiers, runners)', source: 'haugen2018', tone: 'elite' },
+    { key: 'haugenMen', unit: 'rel', value: 90, approx: true, tag: 'men', label: 'Upper limit, men (XC skiers, cyclists, runners)', source: 'haugen2018', tone: 'elite' },
+    // Whole-body view
+    { key: 'dallas50', unit: 'abs', value: 2.90, tag: 'Dallas men at 50', label: 'The Dallas men at 50', source: 'mcguire2001', tone: 'neutral' },
+    { key: 'dallas20', unit: 'abs', value: 3.30, tag: 'Dallas men at 20', label: 'The Dallas men at 20', source: 'mcguire2001', tone: 'neutral' },
+    // "slightly below 5.0 L·min-1 in rowers and XC skiers" (women)
+    { key: 'haugenWomenAbs', unit: 'abs', value: 5.0, below: true, tag: 'women', label: 'Upper limit, women (rowers, XC skiers)', source: 'haugen2018', tone: 'elite' },
+    { key: 'haugenRowers', unit: 'abs', value: 7.0, approx: true, tag: 'male rowers', label: 'Upper limit, male rowers', source: 'haugen2018', tone: 'elite' },
+    { key: 'haugenSkiers', unit: 'abs', value: 7.5, approx: true, tag: 'male XC skiers', label: 'Upper limit, male cross-country skiers', source: 'haugen2018', tone: 'elite' },
+  ],
+  // Elite vs sub-elite pairs, from the full Haugen paper. EMPTY until the PDF
+  // has been read; the second panel renders only when this has entries.
+  // Shape: { sport, sex: 'M'|'F', unit: 'rel'|'abs', elite: number, subElite: number, approx?: true, source: 'haugen2018' }
+  groups: [],
+  // Verbatim, Haugen 2018 abstract:
+  limitsQuote:
+    'V̇O₂max values of ∼7.5 and 7.0 L·min-1 in male XC skiers and rowers, respectively, and/or ' +
+    '∼90 mL·kg-1·min-1 in XC skiers, cyclists, and runners can be described as upper human limits ' +
+    'for aerobic power. Corresponding values for women are slightly below 5.0 L·min-1 in rowers ' +
+    'and XC skiers and ∼80 mL·kg-1·min-1 in XC skiers and runners.',
+  proceduresQuote:
+    'calibrated apparatus and strict procedures are required to ensure high measurement validity and reliability',
+  dopingQuote: 'Doping is also a potential confounding factor when interpreting the human upper limits',
+};
+
+/* ---------------------------------------------------------------------------
+ * Section 12 — Joyner's model and the limiting-factor debate.
+ * ------------------------------------------------------------------------ */
+export const JOYNER = {
+  vo2max: 84,             // "a VO2max of 84 ml·kg-1·min-1"
+  ltFraction: 0.85,       // "a lactate threshold of 85% of VO2max"
+  economy: null,          // "exceptional running economy" — no figure in the abstract; full paper not yet read
+  predicted: '1:57:58',   // "The fastest time for the marathon predicted by this model is 1:57:58"
+  recordThen: '2:06:50',  // "the current world record (2:06:50)"
+  sliders: { vo2: [60, 90], lt: [70, 90] },   // UI extents, containing the anchors
+  quote:
+    'The fastest time for the marathon predicted by this model is 1:57:58 in a hypothetical ' +
+    'subject with a VO2max of 84 ml.kg-1.min-1, a lactate threshold of 85% of VO2max, and ' +
+    'exceptional running economy.',
+  source: 'joyner1991',
+};
+
+export const LIMITING = {
+  // Bassett & Howley 2000, verbatim:
+  delivery:
+    'In the exercising human, maximal oxygen uptake (VO2max) is limited by the ability of the ' +
+    'cardiorespiratory system to deliver oxygen to the exercising muscles.',
+  ceiling:
+    'VO2max is an important variable that sets the upper limit for endurance performance (an athlete ' +
+    'cannot operate above 100% VO2max, for extended periods). Running economy and fractional ' +
+    'utilization of VO2max also affect endurance performance. The speed at lactate threshold (LT) ' +
+    'integrates all three of these variables and is the best physiological predictor of distance ' +
+    'running performance.',
+  // Millet et al. 2023, verbatim:
+  hillLupton:
+    'One hundred years ago, Hill and Lupton introduced the concept of maximal oxygen uptake ' +
+    '(V˙O2max), which is regarded as "the principal progenitor of sports physiology."',
+  debate:
+    'current debates on limiting factors for V˙O2max and the associated role of convective and ' +
+    'diffusive components',
+  hillLuptonYear: 1923,   // in Millet's title
+};
+
+/* ---------------------------------------------------------------------------
+ * Section 13 — gain and loss. One block per scenario for gain-loss.js, each
+ * in the unit its paper reports.
+ * ------------------------------------------------------------------------ */
+export const HERITAGE = {
+  key: 'train', label: 'Train for 20 weeks', unit: 'abs',
+  n: 481, families: 98, weeks: 20,   // "481 sedentary adult Caucasians from 98 two-generation families … trained for 20 wk"
+  meanGainL: 0.4,                    // "approximately 400 ml/min"
+  lowGainL: 0,                       // "some individuals experiencing little or no gain"
+  highGainL: 1.0,                    // "others gained >1.0 l/min" — a floor, not a maximum
+  heritabilityPct: 47,               // "maximal heritability estimate of 47%"
+  axis: [-0.2, 1.2],                 // UI extent, L·min⁻¹
+  quote:
+    'The mean increase in VO(2max) reached approximately 400 ml/min, but there was considerable ' +
+    'heterogeneity in responsiveness, with some individuals experiencing little or no gain, ' +
+    'whereas others gained >1.0 l/min.',
+  source: 'bouchard1999',
+};
+
+export const DETRAINING = {
+  key: 'stop', label: 'Stop training', unit: 'pct',
+  n: 7, controls: 8,        // "Seven endurance exercise-trained subjects"; "eight sedentary control subjects"
+  days: [12, 21, 56, 84],   // "studied 12, 21, 56, and 84 days after cessation of training"
+  // Per cent of the trained value. Derived from "declined 7% during the first 21
+  // days" and "stabilized after 56 days at a level 16% below". No figure is given
+  // for day 12, so it is not plotted.
+  course: [[0, 100], [21, 93], [56, 84], [84, 84]], derived: true,
+  fall21Pct: 7, fall56Pct: 16,
+  after84Rel: 50.8, neverTrainedRel: 43.3,   // "(50.8 vs. 43.3 ml X kg-1 X min-1)"
+  quote:
+    'Maximal O2 uptake (VO2 max) declined 7% (P less than 0.05) during the first 21 days of ' +
+    'inactivity and stabilized after 56 days at a level 16% (P less than 0.05) below the initial ' +
+    'trained value.',
+  source: 'coyle1984',
+};
+
+export const AGEING = {
+  key: 'age', label: 'Thirty years older', unit: 'abs',
+  n: 5, years: 30,
+  before: 3.30, after: 2.90,   // "(3.30 versus 2.90 L/min)"
+  beforeRel: 43, afterRel: 31, // "(43 versus 31 mL·kg-1·min-1)"
+  fallPct: 11,                 // printed; see FICK.fallPct for why not 12
+  axisMax: 4,                  // UI extent, L·min⁻¹
+  quote: 'On average, VO(2)max decreased 11% (3.30 versus 2.90 L/min).',
+  source: 'mcguire2001',
+};
+
+export const BEDREST = {
+  key: 'bed', label: 'Three weeks in bed', unit: 'pct',
+  n: 5, weeks: 3, year: 1966,
+  fallPct: null,      // in Saltin 1968 (Circulation 38 Suppl VII) — the full paper has not yet been read
+  exceedsPct: 11,     // derived from the McGuire sentence below: more than the 30-year fall
+  quote:
+    'Most notably, 3 weeks of bedrest in these same men at 20 years of age (1966) had a more ' +
+    'profound impact on physical work capacity than did 3 decades of aging.',
+  quoteSource: 'mcguire2001',
+  source: 'saltin1968',
+};
+
+/* ---------------------------------------------------------------------------
  * Studies that came afterwards and found the same thing.
  *
  * PARKED: the tiles built from this were removed when the module was cut back
@@ -429,6 +697,7 @@ export const GARMIN = {
   attribution:
     'VO2 max. data is provided by Firstbeat Analytics™. VO2 max. ' +
     'analysis is provided with permission from The Cooper Institute®.',
+  reading: 48, rating: 'Superior',   // read off the screen in the screenshot below
   image: 'garmin-vo2max-gauge.png',
   imageAlt: 'A Garmin watch screen showing a VO2 max estimate of 48, rated "Superior", on a coloured gauge running from red (poor) through to purple (superior).',
 };

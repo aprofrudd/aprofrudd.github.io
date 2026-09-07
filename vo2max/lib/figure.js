@@ -138,7 +138,9 @@ export function slider(opts) {
     max: opts.max,
     step: opts.step || 1,
     value: opts.value,
-    'aria-label': opts.label,
+    // ariaLabel lets a visible label carry notation while the accessible
+    // name stays plain (screen readers should not read the combining dot).
+    'aria-label': opts.ariaLabel || opts.label,
   });
   input.addEventListener('input', () => {
     const v = Number(input.value);

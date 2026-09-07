@@ -34,7 +34,8 @@ import { initSlides } from '../lib/slides.js';
 import { watchNotation } from '../lib/notation.js';
 import { h } from '../lib/figure.js';
 import { comma } from '../lib/svg.js';
-import { LIMITATIONS, PAPER, STUDY, FIGURE2, TABLE2, FIRSTBEAT, GARMIN, VO2MAX } from './data.js';
+import { LIMITATIONS, PAPER, STUDY, FIGURE2, TABLE2, FIRSTBEAT, GARMIN, VO2MAX, FICK, RECORDS, LIMITING, HERITAGE, DETRAINING, UNIT_ABS, UNIT_EXT } from './data.js';
+import { refLink, sourceCard, citationHtml } from './cite.js';
 import { PUBMED_SERIES, PUBMED_META } from './pubmed-data.js';
 
 import { trendsChart } from './interactives/trends-chart.js';
@@ -45,6 +46,10 @@ import { metExplorer } from './interactives/met-explorer.js';
 import { table2Distributions } from './interactives/table2-distributions.js';
 import { quintileRisk } from './interactives/quintile-risk.js';
 import { kmCurves } from './interactives/km-curves.js';
+import { fickExplorer } from './interactives/fick-explorer.js';
+import { recordsScale } from './interactives/records-scale.js';
+import { enduranceModel } from './interactives/endurance-model.js';
+import { gainLoss } from './interactives/gain-loss.js';
 
 const at = (id) => document.getElementById(id);
 
@@ -87,11 +92,6 @@ function wearables(mount) {
   }));
 }
 
-/** The citation with its journal abbreviation in italics, e.g. <em>N Engl J Med</em> 2002;346:793-801. */
-function citationHtml() {
-  return PAPER.citation.replace(/^([A-Za-z .]+?) (\d{4};)/, '<em>$1</em> $2');
-}
-
 /* ---------------------------------------------------------------------------
    Section 04 — the study. The paper first, then the cohort as a picture.
    ------------------------------------------------------------------------ */
@@ -102,7 +102,7 @@ function study(mount) {
     h('div', { class: 'v-source-label' }, 'The paper'),
     h('div', { class: 'v-source-title' }, PAPER.title),
     h('div', { class: 'v-source-cite', html:
-      `${PAPER.authors}. ${citationHtml()}. ` +
+      `${PAPER.authors}. ${citationHtml(PAPER)}. ` +
       `<a href="https://doi.org/${PAPER.doi}" target="_blank" rel="noopener">doi:${PAPER.doi}</a>` }),
     h('div', { class: 'v-source-cite', html:
       `Cited more than <strong>${comma(floor)}</strong> times &mdash; ` +
@@ -121,11 +121,73 @@ function limits(mount) {
 }
 
 /* ---------------------------------------------------------------------------
-   Section 10 — takeaways.
+   Small blocks the new sections share.
+   ------------------------------------------------------------------------ */
+function callout(head, html, warn) {
+  return h('div', { class: 'v-callout' + (warn ? ' v-callout-warn' : ''), html: `<span class="v-callout-head">${head}</span>${html}` });
+}
+function quoteBlock(text, citeHtml) {
+  return h('blockquote', { class: 'v-quote' }, text, h('cite', { html: citeHtml }));
+}
+
+/* ---------------------------------------------------------------------------
+   Section 10 — what it is. The Fick picture, then the two knobs in words.
+   ------------------------------------------------------------------------ */
+function whatIsIt(mount) {
+  fickExplorer(mount);
+  const [y20, y50] = FICK.presets;
+  mount.appendChild(callout('Two knobs, one number',
+    `The same five men, thirty years apart: the pump got a little bigger (${y20.q.toFixed(1)} &rarr; ${y50.q.toFixed(1)} ${UNIT_ABS}), ` +
+    `the extraction fell (${y20.ext.toFixed(1)} &rarr; ${y50.ext.toFixed(1)} ${UNIT_EXT}), and the fall in extraction &mdash; in the ` +
+    `authors&rsquo; words &mdash; &ldquo;${FICK.entireDecreaseQuote}&rdquo;.`));
+  mount.appendChild(quoteBlock(LIMITING.hillLupton, refLink('millet2023', 'Millet et al., Int J Sports Physiol Perform 2023')));
+  mount.appendChild(sourceCard('Sources', ['millet2023', 'mcguire2001']));
+}
+
+/* ---------------------------------------------------------------------------
+   Section 11 — how big it gets.
+   ------------------------------------------------------------------------ */
+function records(mount) {
+  recordsScale(mount);
+  mount.appendChild(callout('Read the ceiling carefully',
+    `The authors accept a record only where &ldquo;${RECORDS.proceduresQuote}&rdquo;, and add: ` +
+    `&ldquo;${RECORDS.dopingQuote}.&rdquo;`, true));
+  mount.appendChild(sourceCard('Sources', ['haugen2018', 'myers', 'mcguire2001', 'coyle1984']));
+  mount.appendChild(h('p', { class: 'v-caption', style: 'margin-top:1rem', html:
+    `The watch reading (${GARMIN.reading}, &ldquo;${GARMIN.rating}&rdquo;) is the screen captured on ${GARMIN.captured}, shown in section 03.` }));
+}
+
+/* ---------------------------------------------------------------------------
+   Section 12 — is it the whole story?
+   ------------------------------------------------------------------------ */
+function wholeStory(mount) {
+  enduranceModel(mount);
+  mount.appendChild(callout('Does everyone agree?',
+    `${refLink('bassett2000', 'Bassett and Howley')}: &ldquo;${LIMITING.delivery}&rdquo; A century on, ${refLink('millet2023', 'Millet and colleagues')} ` +
+    `still describe &ldquo;${LIMITING.debate}&rdquo;.`));
+  mount.appendChild(callout('Does the number justify the hype?',
+    `&ldquo;${LIMITING.ceiling}&rdquo; &mdash; ${refLink('bassett2000')}. ` +
+    `For a race, the ceiling is one of three things. For survival, the ceiling itself is what Myers measured.`));
+  mount.appendChild(sourceCard('Sources', ['joyner1991', 'bassett2000', 'millet2023']));
+}
+
+/* ---------------------------------------------------------------------------
+   Section 13 — trained, or lost.
+   ------------------------------------------------------------------------ */
+function trainable(mount) {
+  gainLoss(mount);
+  mount.appendChild(sourceCard('Sources', ['bouchard1999', 'coyle1984', 'mcguire2001', 'saltin1968']));
+}
+
+/* ---------------------------------------------------------------------------
+   Section 14 — takeaways.
    ------------------------------------------------------------------------ */
 function takeaways(mount) {
   const n = TABLE2.normal, c = TABLE2.cvd;
   const peakRow = PUBMED_SERIES.reduce((a, b) => ((b.vo2 / b.total) > (a.vo2 / a.total) ? b : a));
+  const marker = (k) => RECORDS.markers.find((m) => m.key === k);
+  const ceilMen = marker('haugenMen').value, ceilWomen = marker('haugenWomen').value;
+  const ratio = (ceilMen / marker('myersSurvived').value).toFixed(1);
 
   mount.appendChild(h('div', { class: 'v-grid' },
     [
@@ -143,6 +205,14 @@ function takeaways(mount) {
        `Split into fifths, the least fit were ${FIGURE2.headline.normal}× more likely to die than the fittest among the healthy men, and ${FIGURE2.headline.cvd}× among those with heart disease.`],
       ['It is an association',
        'This study followed men, it did not assign them to train. It shows a very strong link. It does not, on its own, prove cause.'],
+      ['It is a pump times an extraction',
+       `Oxygen uptake is what the heart pumps each minute times what the muscles take out of every 100 mL. In the Dallas men, over thirty years, the fall in extraction ${FICK.entireDecreaseQuote}.`],
+      [`The ceiling is about ${ceilMen} for men, ${ceilWomen} for women`,
+       `Measured in cross-country skiers, cyclists and runners — about ${ratio} times the average of the healthy Myers men who survived.`],
+      ['A ceiling is not the whole story',
+       `For a race, ${VO2MAX} is one of three things; how much of it you can hold and what each stride costs matter too. For survival, the ceiling itself was what predicted who lived.`],
+      ['It moves both ways',
+       `Twenty weeks of training added about ${HERITAGE.meanGainL} ${UNIT_ABS} on average, but some gained nothing and others more than ${HERITAGE.highGainL.toFixed(1)}. Stopping cost ${DETRAINING.fall21Pct}% in three weeks and ${DETRAINING.fall56Pct}% by eight. Three weeks in bed cost more than thirty years did.`],
     ].map(([head, body]) => h('div', { class: 'v-tile' }, h('h3', {}, head), h('p', {}, body)))
   ));
 
@@ -155,7 +225,7 @@ function takeaways(mount) {
     h('div', { class: 'v-source-label' }, 'Read the original'),
     h('div', { class: 'v-source-title' }, PAPER.title),
     h('div', { class: 'v-source-cite', html:
-      `${PAPER.authors}. ${citationHtml()}. ` +
+      `${PAPER.authors}. ${citationHtml(PAPER)}. ` +
       `<a href="https://doi.org/${PAPER.doi}" target="_blank" rel="noopener">doi:${PAPER.doi}</a> &middot; PMID ${PAPER.pmid}`
     })
   ));
@@ -193,6 +263,10 @@ function boot() {
   wire('mount-quintiles', quintileRisk);
   wire('mount-km', kmCurves);
   wire('mount-limits', limits);
+  wire('mount-fick', whatIsIt);
+  wire('mount-records', records);
+  wire('mount-model', wholeStory);
+  wire('mount-trainable', trainable);
   wire('mount-takeaways', takeaways);
 
   // One section at a time by default — it is narrated over. ?view=scroll

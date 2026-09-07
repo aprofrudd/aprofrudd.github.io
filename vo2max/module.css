@@ -795,6 +795,17 @@ input[type="range"].v-range::-moz-range-thumb {
 }
 
 /* ---------------------------------------------------------------------------
+   Fifteen nav items on the module page. The site's hamburger takes over at
+   1024px and below; above that the row has to fit in about 940px, so: a
+   tighter gap, slightly smaller type, and a label may never break onto two
+   lines (an overflow is visible in testing; a wrap is not).
+   ------------------------------------------------------------------------ */
+@media (min-width: 1025px) {
+    .vo2 .nav-menu { gap: 0.75rem; }
+    .vo2 .nav-menu a { white-space: nowrap; font-size: 0.8rem; }
+}
+
+/* ---------------------------------------------------------------------------
    Responsive. Matches the site's desktop-first max-width convention.
    ------------------------------------------------------------------------ */
 @media (max-width: 768px) {
