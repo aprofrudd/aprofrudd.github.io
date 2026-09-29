@@ -52,7 +52,7 @@ Provided scientific support for 15 world title fights and multiple Commonwealth,
 - Physiological assessment: VO2max and submaximal metabolic testing, gas exchange and RER, lactate profiling, critical power and critical speed, running and cycling economy
 - Thermal: core and skin temperature, sweat rate, environmental chamber protocols, heat acclimation
 - Neuromuscular: force plates, velocity-based training, isometric and isokinetic strength assessment
-- Field: speed and power analysis, blood lactate testing, load-velocity profiling, heart rate variability, wearable validation, remote monitoring in uncontrolled environments
+- Field: speed and power analysis, blood lactate testing, load-velocity profiling, heart rate variability
 - Governance: Director of CASES (elected Board director); Chair, CASES Physiology and Nutrition Division (2024 to 2027); Research Ethics Lead, Sheffield Hallam University, and member of the University Research Ethics Committee; Laboratory Director 2019 to 2024, leading preparation for the laboratory's 2024 CASES accreditation
 
 ## Doctoral Supervision
@@ -61,7 +61,7 @@ Provided scientific support for 15 world title fights and multiple Commonwealth,
 
 ## Available For
 
-Industry R&D and product science (physiological testing and study design for sports brands, wearable and technology companies, and product development; independent evaluation of performance claims), athletics coaching (England Athletics qualified, all events, youth to senior), keynote speaking, consultancy, external examining, PhD supervision, advisory boards, and media commentary.
+Industry R&D and product science (physiological testing and study design for sports brands and product development; independent evaluation of performance claims), athletics coaching (England Athletics qualified, all events, youth to senior), keynote speaking, consultancy, external examining, PhD supervision, advisory boards, and media commentary.
 
 ## Education
 
