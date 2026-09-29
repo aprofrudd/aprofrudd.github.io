@@ -9,15 +9,15 @@ Dr Alan Ruddock is an Associate Professor of Sport Physiology and Performance in
 ## Current Roles
 
 - Associate Professor of Sport Physiology and Performance, Sheffield Hallam University (2023 to present)
-- Co-Founder, Boxing Science (2014 to present)
 - Director & Chair of Physiology and Nutrition Division, CASES (2024 to present)
 - Research Ethics Lead, School of Sport and Physical Activity, Sheffield Hallam University (2019 to present)
 
 ## Previous Roles
 
+- Co-founder and Scientific Lead, Boxing Science (2014 to 2026)
 - Course Leader, BSc Sport and Exercise Technology (2021 to 2022) and BSc Sport and Exercise Science (2022 to 2025)
 - Laboratory Director, Sport and Exercise Science Laboratories, Sheffield Hallam University (2019 to 2024)
-- External Examiner, Newman University (2021/22 to 2022/23); Chief External Examiner (2023/24)
+- External Examiner, Newman University (2020/21 to 2022/23); Chief External Examiner (2023/24)
 
 ## Research Impact
 
@@ -37,15 +37,15 @@ Athletics Coaching, Applied Physiology, Sport Performance, High-Intensity Interv
 
 ## Applied Impact
 
-Lead sport scientist for 15 world title fights and multiple Commonwealth, European and British contests, coordinating strength and conditioning, nutrition and medical input for each fight camp. Delivered workshops to over 500 coaches across the UK, Europe, North America and Asia through Boxing Science, drawing over 300,000 unique visitors a year and over 11 million YouTube views. Provided laboratory testing for Russ Cook ("Hardest Geezer") ahead of his 2024 run across Africa.
+Provided scientific support for 15 world title fights and multiple Commonwealth, European and British contests. Delivered workshops to over 500 coaches across the UK, Europe, North America and Asia through Boxing Science, drawing over 300,000 unique visitors a year and over 11 million YouTube views. Provided laboratory testing for Russ Cook ("Hardest Geezer") ahead of his 2024 run across Africa.
 
 ## Applied Projects
 
-- Conditioning for world title boxing (Boxing Science): high-intensity interval responses, load-velocity profiling and weight-making physiology. Lead sport scientist for 15 world title fights.
+- Conditioning for world title boxing (Boxing Science): high-intensity interval responses, load-velocity profiling and weight-making physiology. Scientific support for 15 world title fights.
 - Recovery in elite professional football (Aston Villa FC): recovery interventions evaluated against performance and wellness outcomes in a Premier League environment, via a £40,000 funded doctoral programme embedded in the club.
 - Hydration and fluid balance in elite squash (England Squash): fluid and sodium losses were undocumented in squash. Fluid balance, sodium losses and training-day hydration practice measured, published as individualised hydration guidance and a systematic review of the sport's demands.
 - Heat acclimation before the 2014 FIFA World Cup (professional soccer match official): 13 sessions over 18 days combining isothermic running and hot water immersion, raising plasma volume 7.1% and high-intensity running performance 29%. Published as a case report in SpringerPlus.
-- Operational body armour in specialist police officers (Metropolitan Police Physical Protection Group): authored the foundational 2020 exploratory report applying doctoral thermoregulation research, then oversaw a commissioned study of 147 officers using a novel story stem method.
+- Operational body armour in specialist police officers (Metropolitan Police Physical Protection Group): lead author of the 2020 exploratory report on heat strain under body armour, weighing cooling options against practical limits; co-author of the follow-on study of 147 officers.
 
 ## Laboratory & Measurement Capability
 
@@ -53,7 +53,7 @@ Lead sport scientist for 15 world title fights and multiple Commonwealth, Europe
 - Thermal: core and skin temperature, sweat rate, environmental chamber protocols, heat acclimation
 - Neuromuscular: force plates, velocity-based training, isometric and isokinetic strength assessment
 - Field: speed and power analysis, blood lactate testing, load-velocity profiling, heart rate variability, wearable validation, remote monitoring in uncontrolled environments
-- Governance: Director of CASES (elected Board director); Chair, CASES Physiology and Nutrition Division (2024 to 2027); Research Ethics Lead, Sheffield Hallam University, and member of the University Research Ethics Committee; Laboratory Director 2019 to 2024, securing CASES Laboratory Accreditation in 2024
+- Governance: Director of CASES (elected Board director); Chair, CASES Physiology and Nutrition Division (2024 to 2027); Research Ethics Lead, Sheffield Hallam University, and member of the University Research Ethics Committee; Laboratory Director 2019 to 2024, leading preparation for the laboratory's 2024 CASES accreditation
 
 ## Doctoral Supervision
 
@@ -65,7 +65,7 @@ Industry R&D and product science (physiological testing and study design for spo
 
 ## Education
 
-- PhD in Sport Physiology, Sheffield Hallam University (2017)
+- PhD, Sheffield Hallam University (2017): thermoregulation during exercise in the heat
 - MSc in Sport Science, Sheffield Hallam University (2007)
 - BSc (Hons.) in Sport Science, Sheffield Hallam University (2005)
 
@@ -78,6 +78,17 @@ Expert commentary across broadcast, print and digital platforms including The Ti
 Interactive learning modules at https://alanruddock.com/vo2max/: short explainers that take one piece of primary research at a time and make it interactive, written for a general audience.
 
 - "What's VO2max?" (https://alanruddock.com/vo2max/01-why-vo2max-matters/): an interactive walk through Myers et al., "Exercise Capacity and Mortality among Men Referred for Exercise Testing", N Engl J Med 2002;346:793-801. Opens with Google Trends and PubMed data showing that public interest in VO2max surged only recently while research interest levelled off around 2019, then explains how consumer wearables (Garmin and others, via the Firstbeat Analytics method) estimate VO2max from heart rate and running speed, what a MET is, why estimated exercise capacity differs from measured VO2max, what relative risk means and why the reference group matters, and how to read a survival curve. Every figure is rebuilt from the published data. Then: what VO2max physically is (cardiac output times oxygen extraction, from the Dallas Bed Rest and Training Study follow-up), how large it gets in elite athletes (Haugen et al. 2018, "New Records in Human Power"), why it is one of three determinants of endurance performance (Joyner 1991; Bassett and Howley 2000), and how training (HERITAGE), detraining (Coyle 1984), ageing and bed rest change it.
+
+## Software
+
+All code: https://github.com/aprofrudd
+
+- BSAMS (https://github.com/aprofrudd/bsams-public): athlete management system built for Boxing Science, covering testing, physiology analysis (lactate thresholds, CPET, velocity-based training), combine events and training, with about 1,700 automated tests. Next.js, FastAPI, Supabase.
+- Interval Lab (https://github.com/aprofrudd/interval-lab-dashboard): speed analysis of interval sessions from GPS watch files using statistical parametric mapping, checked against a synthetic session with a known answer. Python, Streamlit, spm1d.
+- ThermoLab (https://thermolab.vercel.app): heat-balance simulator and ten lessons on thermoregulation and heat adaptation.
+- Exercise physiology modules (https://alanruddock.com/atp/): twelve interactive modules, from muscle action to glucose metabolism.
+- Air bike profiling (https://alanruddock.com/Airbike/): Bluetooth power capture from air bikes and a three-sprint anaerobic profiling protocol with blood lactate.
+- PhysQuest (https://physquest.vercel.app): a retro game where players choose tests, read the data and prescribe training.
 
 ## Links
 

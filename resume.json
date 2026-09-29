@@ -6,7 +6,7 @@
     "image": "https://alanruddock.com/alan-ruddock-sport-physiologist.jpg",
     "email": "a.ruddock@shu.ac.uk",
     "url": "https://alanruddock.com",
-    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 38 journal publications (Google Scholar h-index 27) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Lead sport scientist for 15 world title fights and multiple Commonwealth, European and British contests. Recipient of the CASES Applied Practitioner Award 2021.",
+    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 38 journal publications (Google Scholar h-index 27) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Provided scientific support for 15 world title fights and multiple Commonwealth, European and British contests. Recipient of the CASES Applied Practitioner Award 2021.",
     "location": {
       "city": "Sheffield",
       "region": "South Yorkshire",
@@ -51,19 +51,19 @@
       "url": "https://www.shu.ac.uk",
       "startDate": "2023",
       "highlights": [
-        "Course Leader for BSc Sport and Exercise Technology (2021 to 2022) and BSc Sport and Exercise Science (2022 to 2025), managing up to 350 students and 30 staff",
+        "Course Leader for BSc Sport and Exercise Technology (2021 to 2022) and BSc Sport and Exercise Science (2022 to 2025); led the 2023 curriculum restructure of the BSc Sport and Exercise Science (about 300 students)",
         "SHU Academic Board member (2021 to 2024)",
         "Currently supervising 8 PhD candidates (Director of Studies for 2), including projects embedded with Aston Villa FC and Sheffield United FC and run jointly with La Trobe University and Auckland University of Technology"
       ]
     },
     {
       "name": "Boxing Science",
-      "position": "Co-Founder",
+      "position": "Co-founder and Scientific Lead",
       "url": "https://boxingscience.co.uk",
       "startDate": "2014",
+      "endDate": "2026",
       "highlights": [
-        "Provides scientific support to boxers and combat athletes worldwide",
-        "Lead sport scientist for 15 world title fights and multiple Commonwealth, European and British contests, coordinating strength and conditioning, nutrition and medical input for each fight camp",
+        "Provided scientific support for 15 world title fights and multiple Commonwealth, European and British contests",
         "Delivered workshops to over 500 coaches across UK, Europe, North America and Asia",
         "Platform reaches over 300,000 unique visitors per year and over 11 million YouTube views"
       ]
@@ -84,6 +84,7 @@
       "startDate": "2019",
       "endDate": "2024",
       "highlights": [
+        "Led preparation of documentation, processes and procedures for the 2024 CASES laboratory accreditation",
         "Managed laboratory operations and equipment",
         "Oversaw research and teaching laboratory activities"
       ]
@@ -91,7 +92,7 @@
     {
       "name": "Birmingham Newman University",
       "position": "External Examiner (Chief External Examiner, 2023/24)",
-      "startDate": "2021",
+      "startDate": "2020",
       "endDate": "2024",
       "highlights": [
         "Ensured academic standards and quality assurance",
@@ -121,7 +122,7 @@
     {
       "institution": "Sheffield Hallam University",
       "url": "https://www.shu.ac.uk",
-      "area": "Sport Physiology",
+      "area": "Thermoregulation during exercise in the heat",
       "studyType": "Doctor of Philosophy (PhD)",
       "endDate": "2017"
     },
@@ -334,17 +335,49 @@
   ],
   "projects": [
     {
+      "name": "BSAMS: Boxing Science Athlete Management System",
+      "description": "Athlete testing, physiology analysis, combine events and training platform built for Boxing Science.",
+      "url": "https://github.com/aprofrudd/bsams-public",
+      "startDate": "2026",
+      "highlights": [
+        "Physiology analysis: lactate thresholds (LT1 and LT2), CPET imports from metabolic carts, velocity-based 1RM estimates and a three-sprint air bike protocol",
+        "About 1,700 automated tests, run with a production build on every push",
+        "Next.js, FastAPI and Supabase with row-level security"
+      ],
+      "keywords": ["TypeScript", "Python", "FastAPI", "Next.js", "Supabase"],
+      "type": "application"
+    },
+    {
+      "name": "Interval Lab",
+      "description": "Speed analysis of interval sessions from GPS watch files using statistical parametric mapping.",
+      "url": "https://github.com/aprofrudd/interval-lab-dashboard",
+      "highlights": [
+        "Checked against a synthetic session with a known fatigue trend"
+      ],
+      "keywords": ["Python", "Streamlit", "spm1d"],
+      "type": "application"
+    },
+    {
+      "name": "ThermoLab",
+      "description": "Heat-balance simulator and ten-lesson course on thermoregulation and heat adaptation.",
+      "url": "https://thermolab.vercel.app",
+      "keywords": ["React", "TypeScript"],
+      "type": "application"
+    },
+    {
       "name": "Boxing Science",
       "description": "Applied sport science consultancy supporting elite combat sport athletes worldwide",
       "url": "https://boxingscience.co.uk",
       "startDate": "2014",
+      "endDate": "2026",
       "highlights": [
-        "Lead sport scientist for 15 world title fights",
+        "Scientific support for 15 world title fights",
         "Workshops delivered to 500+ coaches across UK, Europe, North America and Asia",
         "over 300,000 unique visitors per year and over 11 million YouTube views"
       ],
       "roles": [
-        "Co-Founder"
+        "Co-founder",
+        "Scientific Lead"
       ]
     },
     {
@@ -372,7 +405,7 @@
       "description": "Physiological demands and lived experience of operational body armour use.",
       "highlights": [
         "Problem: the physiological demands and lived experience of wearing body armour on operations were not documented.",
-        "Approach: authored the foundational 2020 exploratory report applying doctoral thermoregulation research, then convened and oversaw a multidisciplinary team for a commissioned study of 147 officers using a novel story stem method.",
+        "Approach: lead author of the 2020 exploratory report on heat strain under body armour, weighing cooling options against practical limits; co-author of the follow-on study of 147 officers.",
         "Outcome: built the force's understanding of what operational body armour asks of the people wearing it."
       ],
       "entity": "Metropolitan Police Physical Protection Group"
