@@ -3,3 +3,4 @@
 *.rtf
 *.Zone.Identifier
 .claude/
+.DS_Store

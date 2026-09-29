@@ -6,7 +6,7 @@
     "image": "https://alanruddock.com/alan-ruddock-sport-physiologist.jpg",
     "email": "a.ruddock@shu.ac.uk",
     "url": "https://alanruddock.com",
-    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 50+ peer-reviewed publications (h-index: 26) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Led scientific support for boxers in 15 world championship contests including Anthony Joshua OBE. Recipient of the CASES Applied Practitioner Award 2021.",
+    "summary": "Associate Professor of Sport Physiology and Performance at Sheffield Hallam University and Co-Founder of Boxing Science. CASES Fellow, Chartered Scientist, and Senior Fellow of the HEA. 38 journal publications (Google Scholar h-index 27) spanning exercise physiology, high-intensity interval training, thermoregulation, and combat sports science. Lead sport scientist for 15 world title fights and multiple Commonwealth, European and British contests. Recipient of the CASES Applied Practitioner Award 2021.",
     "location": {
       "city": "Sheffield",
       "region": "South Yorkshire",
@@ -38,7 +38,7 @@
     {
       "name": "Chartered Association of Sport and Exercise Sciences (CASES)",
       "position": "Director & Chair of Physiology and Nutrition Division",
-      "startDate": "2024-01-01",
+      "startDate": "2024-11",
       "highlights": [
         "Providing strategic leadership for the Physiology and Nutrition Division",
         "Overseeing professional standards and accreditation processes",
@@ -49,30 +49,31 @@
       "name": "Sheffield Hallam University",
       "position": "Associate Professor of Sport Physiology and Performance",
       "url": "https://www.shu.ac.uk",
-      "startDate": "2023-01-01",
+      "startDate": "2023",
       "highlights": [
-        "Course Leader for BSc Sport Technology and BSc Sport and Exercise Science (2021-2025), managing up to 350 students and 30 staff",
-        "SHU Academic Board member (2021 - 2024)",
-        "Currently supervising 7 PhD candidates, including projects embedded with Aston Villa FC and Sheffield United FC and run jointly with La Trobe University and Auckland University of Technology"
+        "Course Leader for BSc Sport and Exercise Technology (2021 to 2022) and BSc Sport and Exercise Science (2022 to 2025), managing up to 350 students and 30 staff",
+        "SHU Academic Board member (2021 to 2024)",
+        "Currently supervising 8 PhD candidates (Director of Studies for 2), including projects embedded with Aston Villa FC and Sheffield United FC and run jointly with La Trobe University and Auckland University of Technology"
       ]
     },
     {
       "name": "Boxing Science",
       "position": "Co-Founder",
       "url": "https://boxingscience.co.uk",
-      "startDate": "2014-01-01",
+      "startDate": "2014",
       "highlights": [
         "Provides scientific support to boxers and combat athletes worldwide",
-        "Led scientific support for boxers in 15 world championship contests",
+        "Lead sport scientist for 15 world title fights and multiple Commonwealth, European and British contests, coordinating strength and conditioning, nutrition and medical input for each fight camp",
         "Delivered workshops to over 500 coaches across UK, Europe, North America and Asia",
         "Platform reaches over 300,000 unique visitors per year and over 11 million YouTube views"
       ]
     },
     {
       "name": "Sheffield Hallam University",
-      "position": "Ethics Lead, School of Sport and Physical Activity",
-      "startDate": "2019-01-01",
+      "position": "Research Ethics Lead, School of Sport and Physical Activity",
+      "startDate": "2019",
       "highlights": [
+        "Moved school research ethics review to an online workflow that handles 500 applications a year",
         "Leading research ethics governance for taught programmes",
         "Ensuring ethical compliance across student research projects"
       ]
@@ -80,8 +81,8 @@
     {
       "name": "Sheffield Hallam University",
       "position": "Laboratory Director, School of Sport and Physical Activity",
-      "startDate": "2019-01-01",
-      "endDate": "2024-12-31",
+      "startDate": "2019",
+      "endDate": "2024",
       "highlights": [
         "Managed laboratory operations and equipment",
         "Oversaw research and teaching laboratory activities"
@@ -89,9 +90,9 @@
     },
     {
       "name": "Birmingham Newman University",
-      "position": "Chief External Examiner",
-      "startDate": "2020-01-01",
-      "endDate": "2024-12-31",
+      "position": "External Examiner (Chief External Examiner, 2023/24)",
+      "startDate": "2021",
+      "endDate": "2024",
       "highlights": [
         "Ensured academic standards and quality assurance",
         "Reviewed assessment processes and student outcomes"
@@ -100,20 +101,20 @@
     {
       "name": "Sheffield Hallam University",
       "position": "Senior Lecturer",
-      "startDate": "2017-01-01",
-      "endDate": "2023-12-31"
+      "startDate": "2017",
+      "endDate": "2023"
     },
     {
       "name": "Sheffield Hallam University",
       "position": "Associate Lecturer",
-      "startDate": "2013-01-01",
-      "endDate": "2017-12-31"
+      "startDate": "2013",
+      "endDate": "2017"
     },
     {
       "name": "Sheffield Hallam University",
       "position": "Lab Technician",
-      "startDate": "2007-01-01",
-      "endDate": "2013-12-31"
+      "startDate": "2008",
+      "endDate": "2013"
     }
   ],
   "education": [
@@ -122,21 +123,21 @@
       "url": "https://www.shu.ac.uk",
       "area": "Sport Physiology",
       "studyType": "Doctor of Philosophy (PhD)",
-      "endDate": "2017-01-01"
+      "endDate": "2017"
     },
     {
       "institution": "Sheffield Hallam University",
       "url": "https://www.shu.ac.uk",
       "area": "Sport Science",
       "studyType": "Master of Science (MSc)",
-      "endDate": "2007-01-01"
+      "endDate": "2007"
     },
     {
       "institution": "Sheffield Hallam University",
       "url": "https://www.shu.ac.uk",
       "area": "Sport Science",
       "studyType": "Bachelor of Science (Hons.)",
-      "endDate": "2005-01-01"
+      "endDate": "2005"
     }
   ],
   "awards": [
@@ -149,7 +150,7 @@
   ],
   "certificates": [
     {
-      "name": "Accredited Fellow (Physiology – Scientific Support), CASES (FCASES)",
+      "name": "Accredited Fellow (Physiology: Scientific Support), CASES (FCASES)",
       "issuer": "Chartered Association of Sport and Exercise Sciences"
     },
     {
@@ -175,14 +176,14 @@
   "publications": [
     {
       "name": "Effects of Sleep Restriction on Cognition, Wellbeing & Athletic Performance in Elite Team-Sport: A Scoping Review",
-      "publisher": "Open MIND",
-      "releaseDate": "2026-01-01",
+      "publisher": "OSF Registries (study pre-registration)",
+      "releaseDate": "2026",
       "url": "https://doi.org/10.17605/osf.io/h4uae"
     },
     {
       "name": "CASES Expert Statement on Guidance for Reporting of Physiological Assessments: Sport Performance Testing",
-      "publisher": "Chartered Association of Sport and Exercise Sciences",
-      "releaseDate": "2026-01-01",
+      "publisher": "The Sport and Exercise Scientist (CASES Expert Statement)",
+      "releaseDate": "2026-03",
       "url": "https://doi.org/10.65650/vffb-se9t"
     },
     {
@@ -290,9 +291,9 @@
     {
       "name": "Editorial & Professional",
       "keywords": [
-        "Academic Editor, PLOSone",
+        "Academic Editor, PLOS ONE (2021 to 2025)",
         "Topic Editor, Frontiers",
-        "Chief Guest Editor, Applied Sciences",
+        "Guest Editor, Applied Sciences",
         "CASES Accreditation Reviewer"
       ]
     },
@@ -341,9 +342,9 @@
       "name": "Boxing Science",
       "description": "Applied sport science consultancy supporting elite combat sport athletes worldwide",
       "url": "https://boxingscience.co.uk",
-      "startDate": "2014-01-01",
+      "startDate": "2014",
       "highlights": [
-        "Scientific support for 15 world championship contests",
+        "Lead sport scientist for 15 world title fights",
         "Workshops delivered to 500+ coaches across UK, Europe, North America and Asia",
         "over 300,000 unique visitors per year and over 11 million YouTube views"
       ],
@@ -384,7 +385,7 @@
     {
       "name": "Heat Acclimation Before the 2014 FIFA World Cup",
       "description": "Mixed-methods heat acclimation for a professional soccer match official before the Brazil tournament.",
-      "startDate": "2014-01-01",
+      "startDate": "2014",
       "highlights": [
         "Problem: a northern European match official heading for the heat and humidity of Brazil, with no environmental chamber.",
         "Measured: tympanic and mean body temperature, plasma volume, sweat rate, high-intensity running performance and thermal comfort.",
@@ -395,6 +396,6 @@
   "meta": {
     "canonical": "https://alanruddock.com/resume.json",
     "version": "v1.0.0",
-    "lastModified": "2026-09-01"
+    "lastModified": "2026-09-29"
   }
 }
