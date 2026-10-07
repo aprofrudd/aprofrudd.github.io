@@ -242,18 +242,27 @@ function renderShell() {
       <button class="icon-btn menu-btn" id="menu" aria-label="Menu" aria-expanded="false">☰</button>
       <a class="brand" href="#/home"><strong>Interdisciplinary Approaches</strong><span>Optimising jump performance</span></a>
       <span class="save" id="save" aria-live="polite"></span>
-      <button class="team-chip" id="teamchip" title="Switch team">${esc(team.name)}</button>
+      <div class="team-wrap">
+        <button class="team-chip" id="teamchip" aria-expanded="false" aria-controls="teammenu">${esc(team.name)} <span aria-hidden="true">\u25be</span></button>
+        <div class="team-menu" id="teammenu" hidden>
+          <p class="small muted">You\u2019re in <strong>${esc(team.name)}</strong><br>Class ${esc(team.class_code)}</p>
+          <button type="button" class="btn primary" id="menucopy">\u{1F517} Copy team link</button>
+          <button type="button" class="btn" id="menuswitch">Switch team / start page</button>
+        </div>
+      </div>
     </header>
     <div class="layout">
       <nav id="nav" class="nav" aria-label="Sections"></nav>
       <main id="main" tabindex="-1"></main>
     </div>`;
   document.getElementById('menu').onclick = () => toggleNav();
-  document.getElementById('teamchip').onclick = () => {
-    if (confirm(`Leave ${team.name} and choose a different team? Your team’s work stays saved.`)) {
-      LS.del('ia:team'); location.hash = ''; location.reload();
-    }
-  };
+  const chip = document.getElementById('teamchip'), menu = document.getElementById('teammenu');
+  const closeMenu = () => { menu.hidden = true; chip.setAttribute('aria-expanded', 'false'); };
+  chip.onclick = (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; chip.setAttribute('aria-expanded', String(!menu.hidden)); };
+  document.addEventListener('click', (e) => { if (!menu.hidden && !menu.contains(e.target)) closeMenu(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+  document.getElementById('menucopy').onclick = (e) => copyTeamLink(e.currentTarget);
+  document.getElementById('menuswitch').onclick = switchTeam;
   bindMain(document.getElementById('main'));
   window.addEventListener('hashchange', () => { renderPage(); toggleNav(false); });
   renderPage();
@@ -374,6 +383,7 @@ function blockHTML(b) {
     case 'rotation': return region(() => rotationHTML(), 'rotation');
     case 'summary': return region(() => summaryHTML());
     case 'teamlink': return teamLinkHTML();
+    case 'teamcard': return teamCardHTML();
     case 'lens': return lensHTML(b);
     case 'frameworkMap': return frameworkMapHTML();
     case 'spectrum': return `<section class="block card spectrum">${region(() => spectrumHTML())}</section>`;
@@ -635,6 +645,24 @@ function rotationHTML() {
 }
 
 // ------------------------------------------------------------------ team link
+// Back to the join screen. The team's work stays saved; it can be rejoined from the list.
+function switchTeam() {
+  LS.del('ia:team');
+  location.href = `${location.pathname}?class=${encodeURIComponent(team.class_code)}`;
+}
+
+function teamCardHTML() {
+  return `<section class="block card teamcard">
+    <p class="eyebrow">Your team</p>
+    <p class="teamcard-name">${esc(team.name)}</p>
+    <p class="small muted">Class ${esc(team.class_code)} \u00b7 everything your team adds saves here automatically.</p>
+    <div class="teamcard-actions">
+      <button type="button" class="btn primary" data-copylink>\u{1F517} Copy team link</button>
+      <button type="button" class="btn" data-switchteam>Switch team / start page</button>
+    </div>
+  </section>`;
+}
+
 function teamLink() {
   const u = new URL(location.href);
   u.search = `?class=${encodeURIComponent(team.class_code)}&team=${team.id}`;
@@ -1290,6 +1318,8 @@ function bindMain(main) {
       const cur = parse(A.get(el.dataset.ialso))?.also || [];
       const d = el.dataset.d;
       setItem(el.dataset.ialso, { also: cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d] }); refreshDynamic(dyn);
+    } else if ('switchteam' in el.dataset) {
+      switchTeam();
     } else if ('copylink' in el.dataset) {
       copyTeamLink(el);
     } else if (el.dataset.addbtn) {

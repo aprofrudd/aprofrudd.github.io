@@ -116,6 +116,7 @@ export const PAGES = [
     id: 'home', group: 'Start', title: 'The challenge', short: 'The challenge',
     phases: [],
     blocks: [
+      { type: 'teamcard' },
       { type: 'note', html: `
         <p class="lead">Help your athlete jump onto the highest plyometric box they can: <strong>51, 61 or 76&nbsp;cm</strong>.</p>
         <p>The box is both a <strong>constraint</strong> on performance and a <strong>barrier</strong> to it. Clearing it depends on physiology, technique and belief all at once, so no single discipline can solve it alone.</p>

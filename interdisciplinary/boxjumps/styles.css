@@ -532,3 +532,14 @@ table.shift { width: 100%; border-collapse: collapse; font-size: .9rem; margin-b
 .fc-col .pill .dot { flex: none; }
 .pill { flex-wrap: nowrap; align-items: baseline; max-width: 100%; }
 .pill .dot { flex: none; position: relative; top: .05em; }
+
+/* team menu + card */
+.team-wrap { position: relative; }
+.team-menu { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 30; width: 15rem; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgb(0 0 0 / .14); padding: .8rem; display: grid; gap: .45rem; }
+.team-menu p { margin: 0 0 .2rem; }
+.team-menu .btn { width: 100%; }
+.teamcard { display: grid; gap: .2rem; border-left: 4px solid var(--accent); }
+.teamcard .eyebrow { margin: 0; }
+.teamcard-name { font-size: 1.35rem; font-weight: 700; margin: 0; }
+.teamcard-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
+@media print { .teamcard, .team-wrap { display: none !important; } }
