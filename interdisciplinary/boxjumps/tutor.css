@@ -1,0 +1,25 @@
+.tutor { max-width: 1200px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+.cls { display: flex; align-items: center; gap: .4rem; font-size: .85rem; color: var(--text-2); }
+.cls input { width: 9rem; min-height: 36px; padding: .3em .6em; }
+.clock { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.clock-state { font-weight: 600; color: var(--text-2); margin: 0; }
+.clock-big { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.05; margin: .1rem 0; }
+.clock-ctrl { display: flex; flex-wrap: wrap; gap: .5rem; }
+.btn[disabled] { opacity: .4; cursor: default; }
+.where { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .5rem; margin-bottom: 1.5rem; }
+.where li { display: flex; flex-direction: column; background: var(--card); border-radius: 10px; padding: .7rem .9rem; border-left: 5px solid var(--border); box-shadow: var(--shadow); }
+.where li.tag-phys { border-left-color: var(--phys); } .where li.tag-bio { border-left-color: var(--bio); } .where li.tag-psy { border-left-color: var(--psy); } .where li.tag-oth { border-left-color: var(--oth); }
+.where .g { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-2); }
+.where strong { font-size: 1.15rem; }
+.team-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.team-card header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.team-card h3 { margin: 0; }
+.team-card p { margin: .2rem 0; }
+.badge { font-size: .75rem; font-weight: 700; background: var(--accent); color: var(--accent-ink); padding: .15em .6em; border-radius: 980px; white-space: nowrap; }
+.bar { height: 6px; background: var(--bg-alt); border-radius: 3px; overflow: hidden; margin-top: .6rem; }
+.bar span { display: block; height: 100%; width: var(--p); background: var(--accent); }
+.best { padding-left: 1.1em; margin: .5rem 0; }
+.small-btn { font-size: .85rem; min-height: 36px; margin-top: .5rem; }
+body.projector .where strong { font-size: 1.6rem; }
+body.projector .where { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+body.projector .clock-big { font-size: clamp(4rem, 14vw, 9rem); }
