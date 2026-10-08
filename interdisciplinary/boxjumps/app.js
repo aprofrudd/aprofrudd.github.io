@@ -246,7 +246,8 @@ function renderShell() {
         <button class="team-chip" id="teamchip" aria-expanded="false" aria-controls="teammenu">${esc(team.name)} <span aria-hidden="true">\u25be</span></button>
         <div class="team-menu" id="teammenu" hidden>
           <p class="small muted">You\u2019re in <strong>${esc(team.name)}</strong><br>Class ${esc(team.class_code)}</p>
-          <button type="button" class="btn primary" id="menucopy">\u{1F517} Copy team link</button>
+          <a class="btn primary" href="#/summary" id="menusummary">\u{1F4CB} Summary &amp; screencast</a>
+          <button type="button" class="btn" id="menucopy">\u{1F517} Copy team link</button>
           <button type="button" class="btn" id="menuswitch">Switch team / start page</button>
         </div>
       </div>
@@ -263,6 +264,7 @@ function renderShell() {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
   document.getElementById('menucopy').onclick = (e) => copyTeamLink(e.currentTarget);
   document.getElementById('menuswitch').onclick = switchTeam;
+  document.getElementById('menusummary').onclick = closeMenu;
   bindMain(document.getElementById('main'));
   window.addEventListener('hashchange', () => { renderPage(); toggleNav(false); });
   renderPage();
@@ -665,6 +667,7 @@ function teamCardHTML() {
     <p class="small muted">Class ${esc(team.class_code)} \u00b7 everything your team adds saves here automatically.</p>
     ${A.get('tutor_feedback')?.trim() ? `<p class="fb-note"><a href="#/summary">\u{1F4DD} You have feedback from your tutor \u2192</a></p>` : ''}
     <div class="teamcard-actions">
+      <a class="btn" href="#/summary">\u{1F4CB} Summary &amp; screencast</a>
       <button type="button" class="btn primary" data-copylink>\u{1F517} Copy team link</button>
       <button type="button" class="btn" data-switchteam>Switch team / start page</button>
     </div>
