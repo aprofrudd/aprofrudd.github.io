@@ -2,6 +2,7 @@
 import { PAGES, SLOT_MIN, stationFor, pageHasContent } from './content.js';
 import * as store from './store.js';
 import { esc, LS, localDate, mmss, fmtCm, parse } from './util.js';
+import { answerRows, attemptRows, toCSV, download } from './export.js';
 
 const params = new URLSearchParams(location.search);
 let classCode = params.get('class') || LS.get('ia:tutor-class') || localDate();
@@ -23,6 +24,11 @@ app.innerHTML = `
     <label class="cls">Class <input id="cls" value="${esc(classCode)}" autocomplete="off"></label>
     <button class="btn" id="proj">Projector mode</button>
   </header>
+  <div class="tutor-tools">
+    <span class="small muted">Download for Excel:</span>
+    <button class="btn" id="dl-answers">\u2913 All answers</button>
+    <button class="btn" id="dl-attempts">\u2913 All jump attempts</button>
+  </div>
   <main class="tutor">
     <section class="card clock" id="clock"></section>
     <section id="where"></section>
@@ -30,6 +36,34 @@ app.innerHTML = `
   </main>`;
 
 document.getElementById('cls').onchange = (e) => { classCode = e.target.value.trim(); LS.set('ia:tutor-class', classCode); loadAll(); };
+const stamp = () => `${classCode}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}`;
+document.getElementById('dl-answers').onclick = () => {
+  const rows = teams.flatMap((t) => answerRows(t, answers.get(t.id) || new Map()));
+  if (!rows.length) { alert('No answers to download yet.'); return; }
+  download(`box-jumps-answers-${stamp()}.csv`, toCSV(rows));
+};
+document.getElementById('dl-attempts').onclick = () => {
+  const rows = teams.flatMap((t) => attemptRows(t, answers.get(t.id) || new Map(), [...(attempts.get(t.id)?.values() || [])]));
+  if (!rows.length) { alert('No jump attempts logged yet.'); return; }
+  download(`box-jumps-attempts-${stamp()}.csv`, toCSV(rows));
+};
+
+// Feedback boxes save as the team's 'tutor_feedback' answer; students see it on their Summary page.
+const fbTimers = {};
+app.addEventListener('input', (e) => {
+  const ta = e.target.closest('[data-feedback]');
+  if (!ta) return;
+  const id = ta.dataset.feedback, status = ta.parentElement.querySelector('.fb-status');
+  addAnswer({ team_id: id, field: 'tutor_feedback', value: ta.value });
+  status.textContent = 'Saving\u2026';
+  clearTimeout(fbTimers[id]);
+  fbTimers[id] = setTimeout(async () => {
+    try { await store.saveAnswer(id, 'tutor_feedback', ta.value); status.textContent = '\u2713 Saved \u00b7 visible to the team'; }
+    catch { status.textContent = 'Not saved. Check the connection and keep typing to retry.'; }
+  }, 700);
+});
+app.addEventListener('focusout', (e) => { if (e.target.closest('[data-feedback]')) setTimeout(render, 900); });
+
 document.getElementById('proj').onclick = () => {
   projector = !projector;
   document.body.classList.toggle('projector', projector);
@@ -172,12 +206,17 @@ function teamCard(t) {
     <p class="small">Stations: ${st}/${ST.length} · ${box.length + opt.length} attempts logged</p>
     ${best ? `<ul class="small best">${best}</ul>` : ''}
     <a class="btn small-btn" href="./?class=${encodeURIComponent(classCode)}&team=${t.id}#/summary" target="_blank" rel="noopener">Open team summary</a>
+    <label class="fb"><span class="small"><strong>Feedback for this team</strong></span>
+      <textarea data-feedback="${t.id}" rows="3" placeholder="Shown at the top of their Summary page">${esc(A.get('tutor_feedback') || '')}</textarea>
+      <span class="fb-status small muted">${A.get('tutor_feedback') ? '\u2713 Visible to the team' : ''}</span></label>
   </article>`;
 }
 
 function render() {
   document.getElementById('clock').innerHTML = clockHTML();
   document.getElementById('where').innerHTML = whereHTML();
+  // Don't redraw the cards while you're typing feedback; focusout redraws them.
+  if (document.activeElement?.closest?.('[data-feedback]')) return;
   document.getElementById('grid').innerHTML = projector ? '' : (teams.length
     ? teams.map(teamCard).join('')
     : `<p class="muted">No teams in class “${esc(classCode)}” yet. Students join at <strong>${esc(location.origin + location.pathname.replace(/tutor\.html$/, ''))}</strong></p>`);

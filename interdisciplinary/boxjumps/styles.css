@@ -545,3 +545,7 @@ table.shift { width: 100%; border-collapse: collapse; font-size: .9rem; margin-b
 .teamcard-name { font-size: 1.35rem; font-weight: 700; margin: 0; }
 .teamcard-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
 @media print { .teamcard, .team-wrap { display: none !important; } }
+.tutor-fb { background: color-mix(in srgb, var(--ok) 10%, var(--card)); border-left: 4px solid var(--ok); border-radius: var(--radius); padding: .9rem 1.1rem; }
+.tutor-fb .eyebrow { color: var(--ok); }
+.tutor-fb > :last-child { margin-bottom: 0; }
+.fb-note { margin: .3rem 0 0; font-weight: 600; }

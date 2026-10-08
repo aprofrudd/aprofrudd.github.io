@@ -23,3 +23,7 @@
 body.projector .where strong { font-size: 1.6rem; }
 body.projector .where { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 body.projector .clock-big { font-size: clamp(4rem, 14vw, 9rem); }
+.tutor-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; max-width: 1200px; margin: 0 auto; padding: .75rem 1rem 0; }
+.fb { display: grid; gap: .3rem; margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--border); }
+.fb textarea { font-size: .9rem; }
+body.projector .tutor-tools { display: none; }

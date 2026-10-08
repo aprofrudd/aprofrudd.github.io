@@ -383,7 +383,8 @@ function blockHTML(b) {
     case 'rotation': return region(() => rotationHTML(), 'rotation');
     case 'summary': return region(() => summaryHTML());
     case 'teamlink': return teamLinkHTML();
-    case 'teamcard': return teamCardHTML();
+    case 'teamcard': return region(() => teamCardHTML());
+    case 'feedback': return region(() => feedbackHTML());
     case 'lens': return lensHTML(b);
     case 'frameworkMap': return frameworkMapHTML();
     case 'spectrum': return `<section class="block card spectrum">${region(() => spectrumHTML())}</section>`;
@@ -651,11 +652,18 @@ function switchTeam() {
   location.href = `${location.pathname}?class=${encodeURIComponent(team.class_code)}`;
 }
 
+function feedbackHTML() {
+  const fb = A.get('tutor_feedback')?.trim();
+  if (!fb) return '';
+  return `<section class="block tutor-fb"><p class="eyebrow">Feedback from your tutor</p><p>${esc(fb).replace(/\n/g, '<br>')}</p></section>`;
+}
+
 function teamCardHTML() {
   return `<section class="block card teamcard">
     <p class="eyebrow">Your team</p>
     <p class="teamcard-name">${esc(team.name)}</p>
     <p class="small muted">Class ${esc(team.class_code)} \u00b7 everything your team adds saves here automatically.</p>
+    ${A.get('tutor_feedback')?.trim() ? `<p class="fb-note"><a href="#/summary">\u{1F4DD} You have feedback from your tutor \u2192</a></p>` : ''}
     <div class="teamcard-actions">
       <button type="button" class="btn primary" data-copylink>\u{1F517} Copy team link</button>
       <button type="button" class="btn" data-switchteam>Switch team / start page</button>
@@ -1124,6 +1132,7 @@ function compareResult() {
 // ------------------------------------------------------------------ summary
 function summaryBlocks() {
   return [
+    { type: 'feedback' },
     { type: 'note', html: `<p>Everything your team has done, organised into the five phases of the support model. Use it as the outline for your <strong>5-minute screencast</strong>.</p><p><button type="button" class="btn" onclick="window.print()">Print or save as PDF</button></p>` },
     { type: 'teamlink' },
     { type: 'summary' },
