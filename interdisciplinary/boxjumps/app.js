@@ -1148,7 +1148,7 @@ function summaryBlocks() {
     ]),
     { type: 'note', html: `<div class="callout"><h3>Taking this into your assessments</h3><ul>
       <li><strong>Assessment 1:</strong> your flow chart above shows how your team turned data into decisions. The assessment asks for one like it, for a scenario of your choice. Your spectrum votes and framework choice are starting points for critiquing definitions and frameworks.</li>
-      <li><strong>Assessment 2:</strong> pick the station closest to your discipline. How would you argue for that strategy from one discipline’s frameworks, and then show how the others made it more effective?</li></ul></div>` },
+      <li><strong>Assessment 2:</strong> pick the station closest to your discipline. How would you propose that strategy as an intervention from a mono-disciplinary perspective, and then show how the other disciplines contribute to it?</li></ul></div>` },
     { type: 'note', html: `<div class="callout"><h3>Post-session task</h3><p>As a sport science team, record a short <strong>5-minute screencast</strong> covering:</p><ol><li>your scientific support process (the five phases above), and</li><li>an evaluation of your interdisciplinary working skills: critical thinking, communication, discussion and co-operation.</li></ol><p>Send it to <a href="mailto:${EMAIL}">${EMAIL}</a>. It will help you prepare for your individual presentation at the end of the module.</p></div>` },
   ];
 }

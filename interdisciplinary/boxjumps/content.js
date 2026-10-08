@@ -132,13 +132,13 @@ export const PAGES = [
         </ol>` },
       { type: 'note', html: `
         <h3>The scientific support model</h3>
-        <p>Everything you do today maps onto the five phases of the <a href="${MODEL_URL}" target="_blank" rel="noopener">Ruddock model of scientific support</a>. The tags at the top of each page show which phase you’re in.</p>
+        <p>Everything you do today maps onto the five phases of the <a href="${MODEL_URL}" target="_blank" rel="noopener">model of scientific support</a> (Ruddock, 2021). The tags at the top of each page show which phase you’re in.</p>
         <div class="phase-strip">${PHASES.map((p, i) => `<div class="phase-cell"><span class="phase-n">${i + 1}</span><strong>${p.label}</strong><span>${p.q}</span></div>`).join('')}</div>` },
       { type: 'note', html: `
         <h3>Why this matters for your assessments</h3>
         <ul>
-          <li><strong>Assessment 1 (critique):</strong> you’ll evaluate mono-, multi- and interdisciplinary definitions, critique frameworks, and draw a flow chart showing how data becomes information a support team can act on. Today you practise all three.</li>
-          <li><strong>Assessment 2 (presentation):</strong> you’ll argue from one discipline’s frameworks, then show how other disciplines make your intervention more effective. That’s exactly what your cell does today.</li>
+          <li><strong>Assessment 1 (critique):</strong> you\u2019ll evaluate the state of knowledge of interdisciplinary research in sport and exercise science: how mono-, multi- and interdisciplinary practice are defined, the frameworks behind them, and a flow chart showing how data becomes information a support team can act on. Today you practise all three.</li>
+          <li><strong>Assessment 2 (presentation):</strong> you\u2019ll solve a problem based on one of the case studies by suggesting an intervention from a mono-disciplinary perspective, then show how other disciplines contribute to it. That\u2019s exactly what your cell does today.</li>
         </ul>` },
     ],
   },
