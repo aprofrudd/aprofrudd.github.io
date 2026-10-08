@@ -68,6 +68,8 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+/* Components set their own display, so make the hidden attribute always win. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
