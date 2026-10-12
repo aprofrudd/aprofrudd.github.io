@@ -1,7 +1,7 @@
-import { PAGES, DISC, BOXES, WHEN, PHASES, TEAMWORK, EMAIL, SLOT_MIN, VARS, METHODS, EFFECT, ROLES, LIM, SPECTRUM_OPTS, estimateBox, stationFor, pageHasContent } from './content.js';
-import { FRAMEWORKS, FW_EDGES, FW_POS, SPECTRUM, SPECTRUM_EXAMPLES, SPECTRUM_SOURCE, fw } from './frameworks.js';
-import * as store from './store.js';
-import { esc, LS, localDate, uid, parse, chartSVG, fmtCm, mmss } from './util.js';
+import { PAGES, DISC, BOXES, WHEN, PHASES, TEAMWORK, EMAIL, SLOT_MIN, VARS, METHODS, EFFECT, ROLES, LIM, SPECTRUM_OPTS, PROTO_CATS, PROTO_REST, PROTO_FEEL, estimateBox, stationFor, pageHasContent } from './content.js?v=8';
+import { FRAMEWORKS, FW_EDGES, FW_POS, SPECTRUM, SPECTRUM_EXAMPLES, SPECTRUM_SOURCE, fw } from './frameworks.js?v=8';
+import * as store from './store.js?v=8';
+import { esc, LS, localDate, uid, parse, chartSVG, fmtCm, mmss } from './util.js?v=8';
 
 const params = new URLSearchParams(location.search);
 // ?preview: browse every page without a team. Nothing is saved or shared.
@@ -403,6 +403,11 @@ function blockHTML(b) {
     case 'summary': return region(() => summaryHTML());
     case 'teamlink': return teamLinkHTML();
     case 'teamcard': return region(() => teamCardHTML());
+    case 'protocols': return protocolsBlock(b);
+    case 'protocolCompare': return `<section class="block card"><h3 class="label">Compare your protocols</h3>${region(() => protocolCompareHTML(b))}</section>`;
+    case 'legacy': return pageHasContent({ blocks: b.blocks }, A)
+      ? `<section class="block legacy"><h3 class="label">${esc(b.title)}</h3><p class="hint">Entered before this station was updated. Add it as a protocol above to compare it with others.</p>${b.blocks.map(blockHTML).join('')}</section>`
+      : '';
     case 'feedback': return region(() => feedbackHTML());
     case 'lens': return lensHTML(b);
     case 'frameworkMap': return frameworkMapHTML();
@@ -1156,6 +1161,73 @@ function compareResult() {
   }).join('');
 }
 
+
+// ------------------------------------------------------------------ physiology protocols (Station 2)
+function protocolsBlock(b) {
+  return `<section class="block card protocols">
+    <h3 class="label">Your protocols</h3>
+    <p class="hint">Add as many as you want to test, e.g. two rest intervals for the same exercise. Each one saves for the whole team.</p>
+    ${region(() => protocolsHTML(b))}
+    <div class="add"><input data-add="${b.id}" placeholder="Name a protocol, e.g. Isometric squat, 3 × 5 s" autocomplete="off" enterkeyhint="done"><button class="btn primary" data-addbtn="${b.id}">Add protocol</button></div>
+  </section>`;
+}
+
+function protoField(key, name) { return attrKey(key, name); }
+
+function protocolsHTML(b) {
+  const its = items(b.id);
+  if (!its.length) return `<p class="empty">No protocols yet. Name one below to start.</p>`;
+  return `<ol class="protos">${its.map((i, n) => {
+    const f = (name) => protoField(i.key, name);
+    const val = (name) => esc(A.get(f(name)));
+    const inp = (name, ph, type = 'text') => `<input data-field="${esc(f(name))}" value="${val(name)}" placeholder="${esc(ph)}" ${type === 'number' ? 'type="number" inputmode="decimal" step="0.1"' : 'autocomplete="off"'}>`;
+    const sel = (name, opts, ph) => `<select data-field="${esc(f(name))}"><option value="">${ph}</option>${opts.map((o) => { const id = o.id ?? o, l = o.label ?? o; return `<option value="${esc(id)}" ${A.get(f(name)) === id ? 'selected' : ''}>${esc(l)}</option>`; }).join('')}</select>`;
+    const ath = A.get(f('ath')) || '1';
+    const showAth = (id) => ath === 'both' || ath === id;
+    const pp = (id) => `<div class="pp-row"><span class="pp-name">${esc(athleteName(id))}</span>
+      <label>CMJ before ${inp(`pre${id}`, 'cm', 'number')}</label><label>after ${inp(`post${id}`, 'cm', 'number')}</label></div>`;
+    const feel = A.get(f('feel')) || '';
+    return `<li class="proto">
+      <div class="proto-head"><span class="proto-n">${n + 1}</span><input class="item-text" data-item="${esc(i.key)}" value="${esc(i.text)}" aria-label="Protocol name"><button type="button" class="del" data-del="${esc(i.key)}" aria-label="Remove protocol">×</button></div>
+      <div class="proto-grid">
+        <label class="fieldset"><span class="label">Category</span>${sel('cat', PROTO_CATS, 'Choose…')}</label>
+        <label class="fieldset"><span class="label">Exercise</span>${inp('ex', 'e.g. Back squat, mid-thigh pull')}</label>
+        <label class="fieldset"><span class="label">Intensity / load</span>${inp('load', 'e.g. 85% 1RM, maximal effort')}</label>
+        <label class="fieldset"><span class="label">Volume</span>${inp('vol', 'e.g. 3 × 5 s, 2 × 3 reps')}</label>
+        <label class="fieldset"><span class="label">Rest before jumping</span>${sel('rest', PROTO_REST, 'Choose…')}</label>
+        <label class="fieldset"><span class="label">Athlete</span>${sel('ath', [{ id: '1', label: athleteName('1') }, { id: '2', label: athleteName('2') }, { id: 'both', label: 'Both' }], athleteName('1'))}</label>
+      </div>
+      <label class="fieldset"><span class="label">Why should it work?</span>${inp('why', 'The mechanism, e.g. increased muscle temperature, potentiation')}</label>
+      ${showAth('1') ? pp('1') : ''}${showAth('2') ? pp('2') : ''}
+      <div class="fieldset"><span class="label">How did the athlete feel afterwards?</span>
+        <div class="seg wrap">${PROTO_FEEL.map((o) => `<button type="button" data-rate="${esc(f('feel'))}" data-v="${o.id}" class="${feel === o.id ? 'on' : ''}">${esc(o.label)}</button>`).join('')}</div></div>
+    </li>`;
+  }).join('')}</ol>`;
+}
+
+function protoResults(listId = 'phys_protocols') {
+  const rows = [];
+  for (const i of items(listId)) {
+    const g = (name) => A.get(attrKey(i.key, name)) || '';
+    for (const id of ['1', '2']) {
+      const pre = parseFloat(g(`pre${id}`)), post = parseFloat(g(`post${id}`));
+      if (pre > 0 && post > 0) rows.push({ i, id, pre, post, d: post - pre, cat: PROTO_CATS.find((c) => c.id === g('cat'))?.label || '', rest: g('rest'), feel: PROTO_FEEL.find((x) => x.id === g('feel'))?.label || '' });
+    }
+  }
+  return rows;
+}
+
+function protocolCompareHTML(b) {
+  const rows = protoResults(b.id);
+  if (!rows.length) return `<p class="empty">Add CMJ before and after for a protocol to compare them here.</p>`;
+  const best = Math.max(...rows.map((r) => r.d));
+  return `<div class="table-wrap"><table class="pc"><thead><tr><th>Protocol</th><th>Athlete</th><th>Category</th><th>Rest</th><th>CMJ</th><th>Change</th><th>Felt</th></tr></thead><tbody>
+    ${rows.map((r) => `<tr class="${r.d === best && best > 0 ? 'best-row' : ''}"><td><strong>${esc(r.i.text)}</strong></td><td>${esc(athleteName(r.id))}</td><td>${esc(r.cat)}</td><td>${esc(r.rest)}</td>
+      <td>${fmtCm(r.pre)} → ${fmtCm(r.post)}</td><td class="${r.d > 0 ? 'ok' : r.d < 0 ? 'no' : ''}"><strong>${r.d >= 0 ? '+' : ''}${fmtCm(r.d)} cm</strong> (${r.d >= 0 ? '+' : ''}${fmtCm((r.d / r.pre) * 100)}%)</td><td>${esc(r.feel)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="small muted">Day-to-day variation in CMJ height is often around 1–2 cm. Which changes are bigger than the noise, and would you need more than one jump to be sure?</p>`;
+}
+
 // ------------------------------------------------------------------ summary
 function summaryBlocks() {
   return [
@@ -1236,6 +1308,7 @@ function flowHTML() {
     const pre = A.get(`phys_pre:${id}`), post = A.get(`phys_post:${id}`);
     if (pre && post) measured.push(`${esc(athleteName(id))}: PAPE CMJ ${fmtCm(pre)} → ${fmtCm(post)} cm`);
   });
+  protoResults().forEach((r) => measured.push(`${esc(athleteName(r.id))}: ${esc(r.i.text)} CMJ ${fmtCm(r.pre)} \u2192 ${fmtCm(r.post)} cm`));
   if (A.get('psy_conf_before') && A.get('psy_conf_after')) measured.push(`Confidence ${A.get('psy_conf_before')} → ${A.get('psy_conf_after')}/10`);
   const col = (n, title, body) => `<div class="fc-col"><p class="fc-head"><span>${n}</span>${title}</p>${body || '<p class="empty small">Nothing yet</p>'}</div>`;
   return `<section class="sum-sec"><h2>From data to decisions</h2>
@@ -1286,6 +1359,7 @@ function summaryHTML() {
 
   const prescribe = sec(3, 'Prescribe', `
     ${strategies.length ? `<p>${strategies.length} strateg${strategies.length > 1 ? 'ies' : 'y'}; <strong>${crossStrat}</strong> affect more than one discipline. ${links.length ? `<strong>${links.length}</strong> interactions mapped.` : ''}</p>${pullHTML(items('final_plan').length ? 'final_plan' : 'strategies')}` : ''}
+    ${protoResults().length ? `<h4>Physiology protocols tested</h4><ul>${protoResults().map((r) => `<li>${esc(r.i.text)} (${esc(athleteName(r.id))}): ${r.d >= 0 ? '+' : ''}${fmtCm(r.d)} cm CMJ${r.rest ? `, ${esc(r.rest)} rest` : ''}</li>`).join('')}</ul>` : ''}
     ${['claim1', 'claim2', 'psy_claim', 'fv_claim'].map(claimText).filter(Boolean).map((t) => `<p class="claim-out">${t}</p>`).join('')}`);
 
   const optimise = sec(4, 'Optimise', `

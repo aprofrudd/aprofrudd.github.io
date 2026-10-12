@@ -1,4 +1,4 @@
-import { BOXES } from './content.js';
+import { BOXES } from './content.js?v=8';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 

@@ -554,3 +554,18 @@ table.shift { width: 100%; border-collapse: collapse; font-size: .9rem; margin-b
 .preview-link { margin: 1rem 0 0; font-weight: 600; }
 .save[data-state="preview"] { color: var(--warn); font-weight: 600; }
 .preview-banner .btn { min-height: 36px; font-size: .85rem; padding: .35em .9em; }
+
+/* physiology protocols */
+.checklist { margin-bottom: .5rem; }
+.protos { list-style: none; padding: 0; margin: 0 0 .75rem; display: grid; gap: .9rem; }
+.proto { background: var(--bg-alt); border-radius: 12px; padding: .8rem; border-left: 4px solid var(--phys); }
+.proto .fieldset { margin-bottom: .6rem; }
+.proto-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .6rem; }
+.proto-head .item-text { flex: 1; min-width: 0; font-weight: 600; }
+.proto-n { display: inline-grid; place-items: center; width: 1.8em; height: 1.8em; border-radius: 50%; background: var(--phys); color: #fff; font-weight: 700; font-size: .85rem; flex: none; }
+.proto-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 .7rem; }
+@media (max-width: 700px) { .proto-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 420px) { .proto-grid { grid-template-columns: 1fr; } }
+.proto .pp-row input { width: 6rem; }
+.best-row td { background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.legacy { background: var(--card); border-radius: var(--radius); padding: 1rem 1.1rem; border: 1px dashed var(--border); }

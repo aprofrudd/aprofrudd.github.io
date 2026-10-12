@@ -97,6 +97,23 @@ export const ROLES = [
   { id: 'integrator', label: 'Integrator (checks the disciplines are connecting)' },
 ];
 
+export const PROTO_CATS = [
+  { id: 'dynamic', label: 'Dynamic stretching / warm-up' },
+  { id: 'static', label: 'Static stretching' },
+  { id: 'pnf', label: 'PNF stretching' },
+  { id: 'iso', label: 'Isometric (PAPE)' },
+  { id: 'heavy', label: 'Heavy resistance (PAPE)' },
+  { id: 'plyo', label: 'Plyometric / ballistic (PAPE)' },
+  { id: 'combo', label: 'Combination' },
+  { id: 'other', label: 'Other' },
+];
+export const PROTO_REST = ['Under 1 min', '1\u20133 min', '4\u20136 min', '7\u201310 min', 'Over 10 min'];
+export const PROTO_FEEL = [
+  { id: 'sharper', label: 'Feels sharper' },
+  { id: 'same', label: 'No different' },
+  { id: 'fatigued', label: 'Feels fatigued' },
+];
+
 export const MODEL_URL = 'https://www.bases.org.uk/imgs/9729_bas_bases_tses_winter_2022_online___rw_pg20_21291.pdf';
 export const EMAIL = 'a.ruddock@shu.ac.uk';
 export const SLOT_MIN = 15;
@@ -294,15 +311,28 @@ export const PAGES = [
     phases: ['prescribe'], tag: 'phys',
     blocks: [
       { type: 'note', html: `<p>Using what you know about acute interventions to improve jump performance, <strong>design and test a strategy</strong> with your athlete that would theoretically improve their jump height, e.g. dynamic stretching, isometrics, PNF stretching or another post-activation performance enhancement (PAPE) approach.</p>` },
-      { type: 'choice', id: 'phys_type', label: 'Your strategy', options: [
-        { id: 'dynamic', label: 'Dynamic stretching' }, { id: 'isometric', label: 'Isometric holds' }, { id: 'pnf', label: 'PNF stretching' },
-        { id: 'heavy', label: 'Heavy-load PAPE' }, { id: 'plyo', label: 'Plyometric PAPE' }, { id: 'other', label: 'Something else' },
+      { type: 'note', html: `<div class="callout"><h3>Design checklist</h3>
+        <ul class="checklist">
+          <li><strong>Mode:</strong> stretching, isometric, heavy resistance, plyometric/ballistic, or a combination?</li>
+          <li><strong>Intensity:</strong> how hard? (% 1RM, maximal effort, bodyweight, stretch intensity)</li>
+          <li><strong>Volume:</strong> sets \u00d7 reps or duration. Enough to potentiate without fatiguing?</li>
+          <li><strong>Rest before the jump:</strong> potentiation and fatigue decay at different rates, so timing matters.</li>
+          <li><strong>The individual:</strong> training status, strength and preference all change the response.</li>
+        </ul>
+        <p class="small muted">Evidence pointers: performance after a heavy conditioning activity often peaks several minutes later, and Wilson et al. (2013) found rest of roughly 7\u201310 min worked best, with stronger, trained athletes responding more. Longer static stretches (\u226560 s per muscle) can modestly reduce jump performance, while short holds inside a dynamic warm-up have little effect (Behm et al., 2016). Blazevich & Babault (2019) explain why PAPE is now distinguished from classic PAP.</p></div>` },
+      { type: 'protocols', id: 'phys_protocols' },
+      { type: 'protocolCompare', id: 'phys_protocols' },
+      { type: 'legacy', title: 'Your earlier entry', blocks: [
+        { type: 'choice', id: 'phys_type', label: 'Your strategy', options: [
+          { id: 'dynamic', label: 'Dynamic stretching' }, { id: 'isometric', label: 'Isometric holds' }, { id: 'pnf', label: 'PNF stretching' },
+          { id: 'heavy', label: 'Heavy-load PAPE' }, { id: 'plyo', label: 'Plyometric PAPE' }, { id: 'other', label: 'Something else' },
+        ] },
+        { type: 'columns', blocks: [
+          { type: 'short', id: 'phys_sets', label: 'Sets \u00d7 reps / duration', placeholder: 'e.g. 3 \u00d7 5 s' },
+          { type: 'short', id: 'phys_rest', label: 'Rest before jumping', placeholder: 'e.g. 4 min' },
+        ] },
+        { type: 'prepost', id: 'phys', label: 'CMJ before and after (cm)' },
       ] },
-      { type: 'columns', blocks: [
-        { type: 'short', id: 'phys_sets', label: 'Sets × reps / duration', placeholder: 'e.g. 3 × 5 s' },
-        { type: 'short', id: 'phys_rest', label: 'Rest before jumping', placeholder: 'e.g. 4 min' },
-      ] },
-      { type: 'prepost', id: 'phys', label: 'Test it: CMJ before and after (cm)' },
       { type: 'lens', fw: ['complexity'], text: 'Potentiation and fatigue happen at the same time. Too little and nothing changes; too much or too soon and performance drops. The dose–response is non-linear and differs between athletes.', q: 'If it didn’t work, was the strategy wrong, or the dose or timing?' },
       crossPsy('phys_x_psy', 'What psychological factors might this strategy influence? Could you build in a psychological strategy, e.g. is there something your athlete is finding worrying?'),
       crossBio('phys_x_bio', 'How will this strategy affect biomechanical factors? Are there technical points you could reinforce while doing it, e.g. trunk angle or key phases of the jump?'),
@@ -427,7 +457,8 @@ export function pageHasContent(page, A) {
   const attr = (name) => (k) => k.startsWith('attr:') && k.endsWith(`:${name}`);
   const walk = (b) => {
     switch (b.type) {
-      case 'columns': b.blocks.forEach(walk); break;
+      case 'columns': case 'legacy': b.blocks.forEach(walk); break;
+      case 'protocols': tests.push((k) => k.startsWith(`list:${b.id}:`)); break;
       case 'field': case 'short': case 'choice': case 'rating': tests.push((k) => k === b.id); break;
       case 'list': case 'web': tests.push((k) => k.startsWith(`list:${b.id}:`)); break;
       case 'questions': b.items.forEach((i) => tests.push((k) => k === i.id)); break;
