@@ -1,7 +1,7 @@
 // Turns a team's raw answers into readable spreadsheet rows for the tutor.
 // Walks the same PAGES blocks the student app renders, so new pages are exported automatically.
-import { PAGES, DISC, WHEN, VARS, EFFECT, BOXES, ROLES, PROTO_CATS, PROTO_FEEL } from './content.js?v=8';
-import { FRAMEWORKS, SPECTRUM, SPECTRUM_EXAMPLES } from './frameworks.js?v=8';
+import { PAGES, DISC, WHEN, VARS, EFFECT, BOXES, ROLES, PROTO_CATS, PROTO_FEEL } from './content.js?v=9';
+import { FRAMEWORKS, SPECTRUM, SPECTRUM_EXAMPLES } from './frameworks.js?v=9';
 
 const parse = (v) => { try { return v ? JSON.parse(v) : null; } catch { return null; } };
 const QUAD = { hh: 'High impact, can change today (priority)', hl: 'High impact, can’t change today', lh: 'Lower impact, can change today', ll: 'Lower impact, can’t change today' };
@@ -42,6 +42,13 @@ function blockRows(b, A, push) {
       push('Physiology protocol', i.text, [
         g('cat') && `Category: ${PROTO_CATS.find((c) => c.id === g('cat'))?.label || g('cat')}`,
         g('ex') && `Exercise: ${g('ex')}`, g('load') && `Intensity: ${g('load')}`, g('vol') && `Volume: ${g('vol')}`,
+        (() => {
+          const exs = listItems(A, `pex_${i.key.split(':').pop()}`).map((x) => {
+            const bits = [A.get(`attr:${x.key}:load`), A.get(`attr:${x.key}:vol`)].filter(Boolean).join(', ');
+            return `${x.text}${bits ? ` (${bits})` : ''}`;
+          });
+          return exs.length ? `Exercises: ${exs.join(' \u2192 ')}` : '';
+        })(),
         g('rest') && `Rest: ${g('rest')}`, g('why') && `Why: ${g('why')}`, ...res,
         g('feel') && `Felt: ${PROTO_FEEL.find((x) => x.id === g('feel'))?.label || g('feel')}`,
       ].filter(Boolean).join('; '));

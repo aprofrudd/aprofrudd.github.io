@@ -569,3 +569,16 @@ table.shift { width: 100%; border-collapse: collapse; font-size: .9rem; margin-b
 .proto .pp-row input { width: 6rem; }
 .best-row td { background: color-mix(in srgb, var(--ok) 12%, transparent); }
 .legacy { background: var(--card); border-radius: var(--radius); padding: 1rem 1.1rem; border: 1px dashed var(--border); }
+.ex-list { background: var(--card); border-radius: 10px; padding: .6rem; }
+.ex-rows { list-style: none; padding: 0; margin: 0 0 .5rem; display: grid; gap: .35rem; }
+.ex-row { display: grid; grid-template-columns: auto minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: .35rem; align-items: center; }
+.ex-row input { min-height: 38px; padding: .35em .55em; font-size: .9rem; }
+.ex-name { font-weight: 600; }
+.ex-n { display: inline-grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--phys-bg); color: var(--phys); font-weight: 700; font-size: .78rem; }
+.ex-legacy { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem; margin-bottom: .5rem; font-size: .85rem; }
+@media (max-width: 640px) {
+  .ex-row { grid-template-columns: auto 1fr auto; }
+  .ex-row input:not(.ex-name) { grid-column: 2; }
+  .ex-row .del { grid-column: 3; grid-row: 1; }
+  .ex-legacy { grid-template-columns: 1fr; }
+}

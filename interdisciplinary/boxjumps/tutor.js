@@ -1,8 +1,8 @@
 // Tutor view: rotation clock for the projector + live progress of every team.
-import { PAGES, SLOT_MIN, stationFor, pageHasContent } from './content.js?v=8';
-import * as store from './store.js?v=8';
-import { esc, LS, localDate, mmss, fmtCm, parse } from './util.js?v=8';
-import { answerRows, attemptRows, toCSV, download } from './export.js?v=8';
+import { PAGES, SLOT_MIN, stationFor, pageHasContent } from './content.js?v=9';
+import * as store from './store.js?v=9';
+import { esc, LS, localDate, mmss, fmtCm, parse } from './util.js?v=9';
+import { answerRows, attemptRows, toCSV, download } from './export.js?v=9';
 
 const params = new URLSearchParams(location.search);
 let classCode = params.get('class') || LS.get('ia:tutor-class') || localDate();

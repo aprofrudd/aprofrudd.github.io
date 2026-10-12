@@ -3,7 +3,7 @@
 //   answers  one row per (team, field) so teammates editing different boxes never overwrite each other
 //   attempts jump log rows, keyed by a client-generated id so retries are idempotent
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=8';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=9';
 
 export const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
 

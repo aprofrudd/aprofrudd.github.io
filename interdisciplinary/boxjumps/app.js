@@ -1,7 +1,7 @@
-import { PAGES, DISC, BOXES, WHEN, PHASES, TEAMWORK, EMAIL, SLOT_MIN, VARS, METHODS, EFFECT, ROLES, LIM, SPECTRUM_OPTS, PROTO_CATS, PROTO_REST, PROTO_FEEL, estimateBox, stationFor, pageHasContent } from './content.js?v=8';
-import { FRAMEWORKS, FW_EDGES, FW_POS, SPECTRUM, SPECTRUM_EXAMPLES, SPECTRUM_SOURCE, fw } from './frameworks.js?v=8';
-import * as store from './store.js?v=8';
-import { esc, LS, localDate, uid, parse, chartSVG, fmtCm, mmss } from './util.js?v=8';
+import { PAGES, DISC, BOXES, WHEN, PHASES, TEAMWORK, EMAIL, SLOT_MIN, VARS, METHODS, EFFECT, ROLES, LIM, SPECTRUM_OPTS, PROTO_CATS, PROTO_REST, PROTO_FEEL, estimateBox, stationFor, pageHasContent } from './content.js?v=9';
+import { FRAMEWORKS, FW_EDGES, FW_POS, SPECTRUM, SPECTRUM_EXAMPLES, SPECTRUM_SOURCE, fw } from './frameworks.js?v=9';
+import * as store from './store.js?v=9';
+import { esc, LS, localDate, uid, parse, chartSVG, fmtCm, mmss } from './util.js?v=9';
 
 const params = new URLSearchParams(location.search);
 // ?preview: browse every page without a team. Nothing is saved or shared.
@@ -1174,6 +1174,33 @@ function protocolsBlock(b) {
 
 function protoField(key, name) { return attrKey(key, name); }
 
+// Exercises inside a protocol, in order. Each is its own list item, with intensity and volume as attributes.
+const exListId = (protoKey) => `pex_${protoKey.split(':').pop()}`;
+
+function protoExercisesHTML(proto, f, inp) {
+  const lid = exListId(proto.key);
+  const exs = items(lid);
+  // Protocols created before multi-exercise support stored one exercise directly on the protocol.
+  const legacy = ['ex', 'load', 'vol'].some((n) => A.get(f(n)));
+  const row = (x, n) => `<li class="ex-row"><span class="ex-n">${n + 1}</span>
+      <input class="ex-name" data-item="${esc(x.key)}" value="${esc(x.text)}" aria-label="Exercise">
+      <input data-field="${esc(attrKey(x.key, 'load'))}" value="${esc(A.get(attrKey(x.key, 'load')))}" placeholder="Intensity / load" aria-label="Intensity or load" autocomplete="off">
+      <input data-field="${esc(attrKey(x.key, 'vol'))}" value="${esc(A.get(attrKey(x.key, 'vol')))}" placeholder="Sets \u00d7 reps / duration" aria-label="Volume" autocomplete="off">
+      <button type="button" class="del" data-del="${esc(x.key)}" aria-label="Remove exercise">\u00d7</button></li>`;
+  return `<div class="fieldset ex-list"><span class="label">Exercises, in order</span>
+    ${legacy ? `<div class="ex-legacy"><label>Exercise ${inp('ex', 'Exercise')}</label><label>Intensity ${inp('load', 'Intensity / load')}</label><label>Volume ${inp('vol', 'Volume')}</label></div>` : ''}
+    ${exs.length ? `<ol class="ex-rows">${exs.map(row).join('')}</ol>` : (legacy ? '' : '<p class="empty small">No exercises yet. Add the first one below.</p>')}
+    <div class="add ex-add"><input data-add="${lid}" placeholder="Add an exercise, e.g. Leg swings, walking lunges, pogo jumps" autocomplete="off" enterkeyhint="done"><button type="button" class="btn" data-addbtn="${lid}">Add exercise</button></div>
+  </div>`;
+}
+
+function protoExerciseSummary(protoKey) {
+  return items(exListId(protoKey)).map((x) => {
+    const bits = [A.get(attrKey(x.key, 'load')), A.get(attrKey(x.key, 'vol'))].filter(Boolean).join(', ');
+    return `${x.text}${bits ? ` (${bits})` : ''}`;
+  });
+}
+
 function protocolsHTML(b) {
   const its = items(b.id);
   if (!its.length) return `<p class="empty">No protocols yet. Name one below to start.</p>`;
@@ -1191,12 +1218,10 @@ function protocolsHTML(b) {
       <div class="proto-head"><span class="proto-n">${n + 1}</span><input class="item-text" data-item="${esc(i.key)}" value="${esc(i.text)}" aria-label="Protocol name"><button type="button" class="del" data-del="${esc(i.key)}" aria-label="Remove protocol">×</button></div>
       <div class="proto-grid">
         <label class="fieldset"><span class="label">Category</span>${sel('cat', PROTO_CATS, 'Choose…')}</label>
-        <label class="fieldset"><span class="label">Exercise</span>${inp('ex', 'e.g. Back squat, mid-thigh pull')}</label>
-        <label class="fieldset"><span class="label">Intensity / load</span>${inp('load', 'e.g. 85% 1RM, maximal effort')}</label>
-        <label class="fieldset"><span class="label">Volume</span>${inp('vol', 'e.g. 3 × 5 s, 2 × 3 reps')}</label>
         <label class="fieldset"><span class="label">Rest before jumping</span>${sel('rest', PROTO_REST, 'Choose…')}</label>
         <label class="fieldset"><span class="label">Athlete</span>${sel('ath', [{ id: '1', label: athleteName('1') }, { id: '2', label: athleteName('2') }, { id: 'both', label: 'Both' }], athleteName('1'))}</label>
       </div>
+      ${protoExercisesHTML(i, f, inp)}
       <label class="fieldset"><span class="label">Why should it work?</span>${inp('why', 'The mechanism, e.g. increased muscle temperature, potentiation')}</label>
       ${showAth('1') ? pp('1') : ''}${showAth('2') ? pp('2') : ''}
       <div class="fieldset"><span class="label">How did the athlete feel afterwards?</span>
@@ -1222,7 +1247,7 @@ function protocolCompareHTML(b) {
   if (!rows.length) return `<p class="empty">Add CMJ before and after for a protocol to compare them here.</p>`;
   const best = Math.max(...rows.map((r) => r.d));
   return `<div class="table-wrap"><table class="pc"><thead><tr><th>Protocol</th><th>Athlete</th><th>Category</th><th>Rest</th><th>CMJ</th><th>Change</th><th>Felt</th></tr></thead><tbody>
-    ${rows.map((r) => `<tr class="${r.d === best && best > 0 ? 'best-row' : ''}"><td><strong>${esc(r.i.text)}</strong></td><td>${esc(athleteName(r.id))}</td><td>${esc(r.cat)}</td><td>${esc(r.rest)}</td>
+    ${rows.map((r) => `<tr class="${r.d === best && best > 0 ? 'best-row' : ''}"><td><strong>${esc(r.i.text)}</strong>${protoExerciseSummary(r.i.key).length ? `<br><span class="small muted">${protoExerciseSummary(r.i.key).map(esc).join(' \u2192 ')}</span>` : ''}</td><td>${esc(athleteName(r.id))}</td><td>${esc(r.cat)}</td><td>${esc(r.rest)}</td>
       <td>${fmtCm(r.pre)} → ${fmtCm(r.post)}</td><td class="${r.d > 0 ? 'ok' : r.d < 0 ? 'no' : ''}"><strong>${r.d >= 0 ? '+' : ''}${fmtCm(r.d)} cm</strong> (${r.d >= 0 ? '+' : ''}${fmtCm((r.d / r.pre) * 100)}%)</td><td>${esc(r.feel)}</td></tr>`).join('')}
     </tbody></table></div>
     <p class="small muted">Day-to-day variation in CMJ height is often around 1–2 cm. Which changes are bigger than the noise, and would you need more than one jump to be sure?</p>`;
@@ -1499,8 +1524,10 @@ function addItem(listId) {
   const fixed = block?.disc && block.disc !== 'choose' ? block.disc : '';
   setAnswer(`list:${listId}:${uid()}`, JSON.stringify({ text, d: fixed, star: false, also: [], when: '', t: Date.now() }));
   input.value = '';
-  refreshDynamic(input.closest('.list-block')?.querySelector('[data-dyn]'));
-  input.focus();
+  const dyn = input.closest('.list-block')?.querySelector('[data-dyn]') || input.closest('[data-dyn]');
+  refreshDynamic(dyn);
+  // The add box may have been re-rendered; put the cursor back so several items can be typed in a row.
+  document.querySelector(`[data-add="${listId}"]`)?.focus();
 }
 
 function findBlock(listId) {
