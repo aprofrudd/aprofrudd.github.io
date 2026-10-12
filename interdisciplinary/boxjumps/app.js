@@ -4,6 +4,8 @@ import * as store from './store.js';
 import { esc, LS, localDate, uid, parse, chartSVG, fmtCm, mmss } from './util.js';
 
 const params = new URLSearchParams(location.search);
+// ?preview: browse every page without a team. Nothing is saved or shared.
+const PREVIEW = params.has('preview');
 const app = document.getElementById('app');
 
 // ------------------------------------------------------------------ state
@@ -20,6 +22,7 @@ const DEVICE = LS.get('ia:device') || (() => { const d = uid(); LS.set('ia:devic
 
 // ------------------------------------------------------------------ boot
 async function boot() {
+  if (PREVIEW) return enterPreview();
   const saved = LS.get('ia:team');
   const cls = params.get('class');
   const tid = params.get('team');
@@ -52,6 +55,7 @@ async function renderJoin(classCode) {
           <button class="btn primary">Create team</button>
         </form>
         <p class="muted small">Use first names or initials only. Nothing here needs personal details.</p>
+        <p class="preview-link"><a href="?preview&amp;class=${encodeURIComponent(classCode)}">Just looking? Preview the session without joining \u2192</a></p>
         <p id="joinerr" class="error" hidden></p>
       </div>
     </div>`;
@@ -144,8 +148,19 @@ function remoteAttempt(row) {
 // ------------------------------------------------------------------ saving
 let flushTimer, retryTimer, flushing = false;
 
+function enterPreview() {
+  team = { id: 'preview', name: 'Preview', class_code: params.get('class') || LS.get('ia:class') || localDate() };
+  renderShell();
+  setSave('preview');
+  document.getElementById('menucopy').hidden = true;
+  pollRotation();
+  setInterval(pollRotation, 30000);
+  setInterval(tick, 1000);
+}
+
 function setAnswer(field, value) {
   A.set(field, value);
+  if (PREVIEW) return;
   const now = Date.now();
   sentAt[field] = now;
   pendingA[field] = { value, updated_at: new Date(now).toISOString() };
@@ -155,6 +170,7 @@ function setAnswer(field, value) {
 
 function setAttempt(row) {
   T.set(row.id, row);
+  if (PREVIEW) return;
   pendingT[row.id] = row;
   persistPending();
   scheduleFlush(50);
@@ -201,12 +217,12 @@ function setSave(state) {
   const el = document.getElementById('save');
   if (!el) return;
   el.dataset.state = state;
-  el.textContent = { saving: 'Saving…', saved: '✓ Saved', offline: 'Offline · kept on this device, will sync' }[state] || '';
+  el.textContent = { preview: 'Preview · not saved', saving: 'Saving…', saved: '✓ Saved', offline: 'Offline · kept on this device, will sync' }[state] || '';
 }
 
 let cacheTimer;
 function writeCacheSoon() { clearTimeout(cacheTimer); cacheTimer = setTimeout(writeCache, 1500); }
-function writeCache() { if (team) LS.set(`ia:cache:${team.id}`, { a: [...A], t: [...T.values()] }); }
+function writeCache() { if (team && !PREVIEW) LS.set(`ia:cache:${team.id}`, { a: [...A], t: [...T.values()] }); }
 
 // ------------------------------------------------------------------ rotation clock
 async function pollRotation() {
@@ -311,6 +327,7 @@ function renderPage() {
   const main = document.getElementById('main');
   main.innerHTML = `
     <article class="page page-${page.id} ${page.tag ? 'tag-' + page.tag : ''}">
+      ${PREVIEW ? `<p class="preview-banner"><span>Preview \u00b7 nothing you enter is saved</span><button type="button" class="btn small-btn" data-switchteam>Join a team</button></p>` : ''}
       <p class="eyebrow">${esc(page.group)}${page.mins ? ` · <span class="mins">${page.mins} min</span>` : ''}</p>
       <h1>${esc(page.title)}</h1>
       ${page.phases.length ? `<div class="phases" aria-label="Support model phases">${PHASES.map((p) => `<span class="phase ${page.phases.includes(p.id) ? 'on' : ''}">${p.label}</span>`).join('')}</div>` : ''}
@@ -661,6 +678,12 @@ function feedbackHTML() {
 }
 
 function teamCardHTML() {
+  if (PREVIEW) return `<section class="block card teamcard">
+    <p class="eyebrow">Preview</p>
+    <p class="teamcard-name">You\u2019re previewing the session</p>
+    <p class="small muted">Look around every page. Nothing you enter here is saved or shared with anyone.</p>
+    <div class="teamcard-actions"><button type="button" class="btn primary" data-switchteam>Join or create a team</button></div>
+  </section>`;
   return `<section class="block card teamcard">
     <p class="eyebrow">Your team</p>
     <p class="teamcard-name">${esc(team.name)}</p>
@@ -682,6 +705,7 @@ function teamLink() {
 }
 
 function teamLinkHTML() {
+  if (PREVIEW) return `<section class="block card teamlink"><h3 class="label">Your team link</h3><p class="hint">When you join a team, its shareable link appears here.</p></section>`;
   return `<section class="block card teamlink">
     <h3 class="label">Your team link</h3>
     <p class="hint">Opens straight into <strong>${esc(team.name)}</strong>. Share it in your team chat, and use it to come back later for the screencast.</p>
