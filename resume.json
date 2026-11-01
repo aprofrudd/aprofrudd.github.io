@@ -183,6 +183,12 @@
       "url": "https://doi.org/10.65650/vffb-se9t"
     },
     {
+      "name": "Designing interdisciplinary sports science curricula to enhance applied learning and integration",
+      "publisher": "Journal of Scholarship of Teaching and Learning Enquiry",
+      "releaseDate": "2026",
+      "url": "https://doi.org/10.7190/jostle.v1i1.629"
+    },
+    {
       "name": "Effects of a 5-Day Back Squat Overreaching Protocol on Strength Performance, Perceived Recovery and Wellness Responses: A Pilot Trial",
       "publisher": "Journal of Functional Morphology and Kinesiology",
       "releaseDate": "2025-01-01",
@@ -422,6 +428,6 @@
   "meta": {
     "canonical": "https://alanruddock.com/resume.json",
     "version": "v1.0.0",
-    "lastModified": "2026-10-01"
+    "lastModified": "2026-11-01"
   }
 }
