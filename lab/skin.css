@@ -16,8 +16,8 @@
    Tokens a room skin can use (set on the skinned drawer):
      --sk-wall / --sk-wall-hi / --sk-wall-lo   the painted wall at night
      --sk-panel, --sk-dado, --sk-skirt, --sk-floor   lower wall and floor
-     --sk-cream      sign-writing on the wall (headings), 8:1 on --sk-wall
-     --sk-cream-dim  secondary text on the wall, 4.9:1 on --sk-wall
+     --sk-cream      sign-writing on the wall (headings), 6:1+ on the lightest wall
+     --sk-cream-dim  secondary text on the wall, 5:1 on the lightest wall
      --sk-amber      LED amber; --sk-amber-ink printed legends on black
      --sk-lamp       warm lamp light; --sk-cool corridor light
      --sk-shadow     cast shadow (down-left, light from the upper right)
@@ -35,7 +35,7 @@
     --sk-floor: #2b3240;
     --sk-floor-lo: #222834;
     --sk-cream: #f1ead9;
-    --sk-cream-dim: #d4cdbd;
+    --sk-cream-dim: #ded8ca;
     --sk-amber: #ffb347;
     --sk-amber-ink: #e3a65a;
     --sk-lamp: 255 196 120;
@@ -43,6 +43,7 @@
     --sk-shadow: -12px 18px 30px rgb(6 9 20 / 0.5), -3px 5px 8px rgb(6 9 20 / 0.35);
     --sk-focus: #ffd58a;
     --sk-focus-ink: #6b2f00;
+    --sk-edge: 30px;
     --sk-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
     --sk-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
@@ -59,8 +60,8 @@
         linear-gradient(var(--sk-wall-lo), var(--sk-wall) 30%, var(--sk-wall-hi) 75%, var(--sk-wall));
     background-color: var(--sk-wall);
     /* a soft edge into the scene instead of a hard panel and drop shadow */
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 36px);
-    mask-image: linear-gradient(to right, transparent 0, #000 36px);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, rgb(0 0 0 / 0.35) 10px, rgb(0 0 0 / 0.8) 20px, #000 30px);
+    mask-image: linear-gradient(to right, transparent 0, rgb(0 0 0 / 0.35) 10px, rgb(0 0 0 / 0.8) 20px, #000 30px);
     scrollbar-color: #6a6f7c transparent;
 }
 
@@ -76,19 +77,31 @@
     border-radius: 3px;
 }
 
+/* The room name takes focus only so screen readers land on it (lab.js);
+   it is not a control, so it keeps lab.css's outline: none. */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-name:focus-visible {
+    outline: none;
+}
+/* The chip row scrolls sideways, which clips anything drawn outside a chip. */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-chips a:focus-visible {
+    outline-offset: -4px;
+    border-color: var(--sk-focus);
+    color: var(--sk-focus);
+}
+
 /* Every section sits straight on the wall: no white or grey bands. */
 .lab-live:not(.lab-linear) .lab-drawer[data-skin] .section,
 .lab-live:not(.lab-linear) .lab-drawer[data-skin] .section-alt {
     background: transparent;
 }
-.lab-live:not(.lab-linear) .lab-drawer[data-skin] .container {
-    padding-left: 2.75rem;
-    padding-right: 2.25rem;
+/* Keep everything clear of the soft left edge (the masked strip). */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room {
+    padding-left: var(--sk-edge);
 }
 
 /* ---- the sticky bar: a dark rail along the top of the wall ---------------- */
 .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-drawer-bar {
-    padding: 0.65rem 1.25rem 0.65rem 2.75rem;
+    padding: 0.65rem 1.25rem 0.65rem calc(var(--sk-edge) + 1.5rem);
     background:
         linear-gradient(rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 40%),
         rgb(29 32 40 / 0.86);
@@ -116,7 +129,7 @@
 /* "Back to the lab" is the room's exit sign (#13813f in the scene). */
 .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-close {
     border-radius: 5px;
-    background: linear-gradient(#17924a, #117a3c);
+    background: linear-gradient(#127a3d, #0e6a34);
     color: #f4fff7;
     font-family: var(--sk-sans);
     font-weight: 700;
@@ -126,7 +139,7 @@
     box-shadow: 0 0 16px rgb(108 240 138 / 0.28), inset 0 1px 0 rgb(255 255 255 / 0.2);
 }
 .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-close:hover {
-    background: linear-gradient(#1aa553, #138743);
+    background: linear-gradient(#0f6a35, #0b5a2c);
 }
 
 /* ---- room header: a screwed-on door plate and an in-session lamp -------- */
@@ -227,11 +240,9 @@
         -webkit-mask-image: none;
         mask-image: none;
     }
-    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .container {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] { --sk-edge: 0px; }
     .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-drawer-bar { padding-left: 1.25rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-head-in { align-items: flex-start; }
 }
 @media (max-width: 760px) {
     .lab-live:not(.lab-linear) .lab-drawer[data-skin] .container {

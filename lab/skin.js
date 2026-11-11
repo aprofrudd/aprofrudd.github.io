@@ -53,19 +53,22 @@
             // "Associate Professor ... | Sheffield Hallam University, UK"
             var parts = (title ? title.textContent : '').split('|');
             var card = deco(el('div', 'lab-skin-idcard'));
-            card.setAttribute('data-name', name.textContent.trim());
-            card.setAttribute('data-role', (parts[0] || '').trim());
-            card.setAttribute('data-org', (parts[1] || '').trim());
+            var nm = el('span', 'lab-skin-idname');
+            nm.setAttribute('data-text', name.textContent.trim());
+            var role = el('span', 'lab-skin-idrole');
+            role.setAttribute('data-text', (parts[0] || '').trim());
+            var org = el('span', 'lab-skin-idorg');
+            org.setAttribute('data-text', (parts[1] || '').trim());
 
             var img = el('img', 'lab-skin-idphoto');
             img.alt = '';
             img.decoding = 'async';
-            img.loading = 'lazy';
             img.src = photo.currentSrc || photo.src;
             card.appendChild(el('span', 'lab-skin-idband'));
             card.appendChild(img);
-            card.appendChild(el('span', 'lab-skin-idname'));
-            card.appendChild(el('span', 'lab-skin-idrole'));
+            card.appendChild(nm);
+            card.appendChild(role);
+            card.appendChild(org);
             card.appendChild(el('span', 'lab-skin-idbar'));
             about.insertBefore(card, about.firstChild);
         }

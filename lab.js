@@ -388,6 +388,8 @@
         isOpen = on && !linear;
         root.classList.toggle('lab-open', isOpen);
         show(current);
+        // The stage changes size with the drawer; let the scene re-measure.
+        try { window.dispatchEvent(new Event('resize')); } catch (e) { /* old browsers */ }
         camera();
         if (isOpen && window.LabExhibits) {
             try { window.LabExhibits.enter(byKey(current).el); } catch (e) { /* decoration only */ }
