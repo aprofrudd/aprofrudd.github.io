@@ -158,4 +158,13 @@ Both generated files carry their queries and fetch date in the header, so any nu
 
 `index.html` is a single hand-written 2,000-line page with inline JSON-LD blocks and runtime `fetch()` calls to the OpenAlex API for live publication metrics. Three files describe the same person for different audiences and **drift apart unless updated together**: `index.html` (humans + JSON-LD), `resume.json` (JSON Resume schema, linked via `<link rel="alternate">` and not read by the page), and `llms.txt` (AI crawlers). A change to roles, metrics or projects belongs in all three.
 
+### The lab layout (`lab.js`, `lab.css`)
+
+The homepage is presented as a physiology lab: a floor plan of seven rooms, one room open at a time, each room "in session" with a different sport, plus an Ergometer Bay holding a Wingate test on a BBC Micro that prints to a dot matrix printer (WebAudio sound, synthesised, no audio files).
+
+- **It is progressive enhancement, built entirely by `lab.js` at run time.** `index.html` is still the plain linear list of `<section>`s, which is what crawlers and no-JS visitors get. Do not move lab markup into `index.html`. A new section only needs adding to `ROOMS` and `LABELS` in `lab.js`; one that is not listed falls into the last room rather than vanishing.
+- **Closed rooms use `hidden="until-found"`**, so find-in-page still reaches them (`beforematch` opens the room). Do not add a `display` rule to `.lab-room`; it would defeat the attribute. Every `#section` link is routed through `go()`, which opens the right room first. "Open every door" restores the single long page.
+- **Every sport and fact line in `ROOMS` restates something already on the page.** Keep it that way: the room headers must not make a claim the CV does not.
+- **Wingate timing uses `setInterval`/`Date.now()`, never `requestAnimationFrame`**, so a backgrounded tab still finishes the test and the printout. Keys (Z, X, Space) are claimed only while a test is running. The watts are Monark arithmetic on tap cadence and the page says plainly that it is not a calibrated test; the demo trace is simulated and labelled as such on screen and on the printout.
+
 The comment block at the top of `index.html` is a manual off-site checklist (LinkedIn, ORCID, Scholar). It is a to-do list for the user, not instructions for you.
