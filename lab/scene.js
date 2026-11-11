@@ -30,6 +30,11 @@
         { key: 'desk', name: 'Front Desk', x0: 3990, x1: 4520 }
     ];
     var FOCUS_Y0 = 130, FOCUS_Y1 = 1185;
+    // Tight art bounds [x0, y0, x1, y1] for hotspots whose click box is much taller or wider
+    // than the object. Used for hover rings, the reading rim and close-up framing only.
+    var FIT = {};
+    // Close-up scale cap (see focusOn).
+    var CLOSE_MAX = 1.5, CLOSE_FILL = 0.55;
     var uid = 0;
 
     // ------------------------------------------------------------------
@@ -70,14 +75,14 @@
         function hole(x, y, w, h, rx) { holes.push(R(x, y, w, h, '#000', rx ? 'rx="' + rx + '"' : '')); }
         function shadow(cx, cy, rx, ry, op) { return E(cx, cy, rx, ry, U('shadow'), op ? 'opacity="' + op + '"' : ''); }
         function hot(id, label, aria, box, inner) {
-            hots.push({ id: id, label: label, box: box });
+            hots.push({ id: id, label: label, box: box, fit: FIT[id] || box, aria: aria });
             return '<a href="#' + id + '" class="lab-sc-hot" data-hot="' + id + '" aria-label="' + aria + '">' +
                 R(box[0], box[1], box[2] - box[0], box[3] - box[1], '#000', 'fill-opacity="0"') + inner + '</a>';
         }
         function toy(name, aria, box, inner) {
             toys.push({ name: name, box: box });
             return '<g class="lab-sc-toy lab-sc-toy-' + name + '" role="button" tabindex="0" data-toy="' + name + '" aria-label="' + aria + '">' +
-                R(box[0], box[1], box[2] - box[0], box[3] - box[1], '#000', 'fill-opacity="0"') + inner + '</g>';
+                R(box[0], box[1], box[2] - box[0], box[3] - box[1], '#000', 'fill-opacity="0" class="lab-sc-toyhit"') + inner + '</g>';
         }
         function scribble(x, y, len, col, r, w) {
             var d = '', cx = x;
@@ -850,7 +855,7 @@
         });
         var rings = '';
         d.hots.forEach(function (h) {
-            var b = h.box;
+            var b = h.fit;
             rings += '<g class="lab-sc-ring" data-ring="' + h.id + '"><rect class="lab-sc-ringglow" x="' + (b[0] - 8) + '" y="' + (b[1] - 8) + '" width="' + (b[2] - b[0] + 16) + '" height="' + (b[3] - b[1] + 16) + '" rx="18"/>' +
                 '<rect class="lab-sc-ringline" x="' + (b[0] - 8) + '" y="' + (b[1] - 8) + '" width="' + (b[2] - b[0] + 16) + '" height="' + (b[3] - b[1] + 16) + '" rx="18"/></g>';
         });
@@ -863,11 +868,18 @@
         root.className = 'lab-sc' + (reduced ? ' lab-sc-reduced' : '');
         root.innerHTML =
             '<svg class="lab-sc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + SW + ' ' + SH + '" role="group" aria-label="Illustrated physiology lab after hours. Objects link to sections of the page.">' +
-            '<defs>' + d.defs + maskOn + maskOff + '</defs>' +
+            '<defs>' + d.defs + maskOn + maskOff +
+            '<radialGradient id="' + pre + 'rdDim" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="#05070f" stop-opacity="0"/><stop offset=".55" stop-color="#05070f" stop-opacity="0"/><stop offset="1" stop-color="#05070f" stop-opacity="1"/></radialGradient>' +
+            '<radialGradient id="' + pre + 'rdWarm" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="#ffd58a" stop-opacity=".2"/><stop offset=".7" stop-color="#ffd58a" stop-opacity=".08"/><stop offset="1" stop-color="#ffd58a" stop-opacity="0"/></radialGradient>' +
+            '</defs>' +
             '<g class="lab-sc-art">' + d.art + '</g>' +
             '<rect class="lab-sc-dark lab-sc-dark-on" ' + BIG + ' mask="url(#' + pre + 'mOn)" aria-hidden="true"/>' +
             '<rect class="lab-sc-dark lab-sc-dark-off" ' + BIG + ' mask="url(#' + pre + 'mOff)" aria-hidden="true"/>' +
             '<g class="lab-sc-glow" aria-hidden="true">' + d.glow + '</g>' +
+            '<g class="lab-sc-reading" aria-hidden="true">' +
+                '<rect class="lab-sc-rdim" ' + BIG + ' fill="' + U('rdDim') + '"/>' +
+                '<ellipse class="lab-sc-rwarm" fill="' + U('rdWarm') + '"/>' +
+                '<rect class="lab-sc-rhalo" rx="16"/><rect class="lab-sc-rrim" rx="12"/></g>' +
             '<g class="lab-sc-ui">' + ui + '<g class="lab-sc-rings" aria-hidden="true">' + rings + '</g><g class="lab-sc-tags" aria-hidden="true"></g></g>' +
             '</svg>' +
             '<div class="lab-sc-hint" aria-hidden="true"><span class="lab-sc-hint-arrows">← →</span> Drag to look around</div>';
@@ -887,7 +899,7 @@
 
         // ---------------- camera ----------------
         var cam = { s: 1, tx: 0, ty: 0 }, base = 0;
-        var mode = { focus: null, inset: null }, panning = false, panCx = 1790;
+        var mode = { focus: null, inset: null, obj: null }, panning = false, panCx = 1790;
         var anim = null, momentum = null;
         function dims() { return { W: root.clientWidth || 1, H: root.clientHeight || 1 }; }
         function applyCam() { svg.style.transform = 'translate(' + cam.tx + 'px,' + cam.ty + 'px) scale(' + (cam.s / base) + ')'; }
@@ -898,6 +910,32 @@
             svg.style.setProperty('--lab-sc-k', String(1 / base));
             applyCam();
             refreshTag();
+            fitToyHits();
+        }
+        // Toy tap targets: at least 44 CSS px at the current scale (they are about 33px when the
+        // room is panned on a phone). The invisible hit rect grows around the toy, but never past
+        // half the distance to the nearest neighbouring toy, so adjacent toys do not steal taps.
+        var toyHits = null;
+        function fitToyHits() {
+            if (!toyHits) toyHits = qa('.lab-sc-toy').map(function (el) {
+                return { rect: el.querySelector('.lab-sc-toyhit'), box: toyBox[el.getAttribute('data-toy')] };
+            });
+            var need = 44 / cam.s;
+            toyHits.forEach(function (t) {
+                var b = t.box, w = b[2] - b[0], h = b[3] - b[1], cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
+                var halfW = Math.max(w / 2, need / 2), halfH = Math.max(h / 2, need / 2);
+                toyHits.forEach(function (o) {
+                    if (o === t) return;
+                    var ob = o.box, ox = (ob[0] + ob[2]) / 2, oy = (ob[1] + ob[3]) / 2;
+                    if (Math.abs(oy - cy) < (h + (ob[3] - ob[1])) / 2 + need && Math.abs(ox - cx) < (w + (ob[2] - ob[0])) / 2 + need) {
+                        var dx = Math.abs(ox - cx), dy = Math.abs(oy - cy);
+                        if (dx >= dy) halfW = Math.min(halfW, Math.max(w / 2, dx / 2)); else halfH = Math.min(halfH, Math.max(h / 2, dy / 2));
+                    }
+                });
+                if (!t.rect) return;
+                t.rect.setAttribute('x', cx - halfW); t.rect.setAttribute('y', cy - halfH);
+                t.rect.setAttribute('width', halfW * 2); t.rect.setAttribute('height', halfH * 2);
+            });
         }
         function overviewTarget() {
             var dm = dims(), fs = Math.min(dm.W / SW, dm.H / SH);
@@ -914,6 +952,29 @@
             var aw = Math.max(140, dm.W - (inset.right || 0)), ah = Math.max(140, dm.H - (inset.bottom || 0));
             var s = Math.min(aw / (z.x1 - z.x0), ah / (FOCUS_Y1 - FOCUS_Y0));
             return { s: s, tx: aw / 2 - (z.x0 + z.x1) / 2 * s, ty: ah / 2 - (FOCUS_Y0 + FOCUS_Y1) / 2 * s };
+        }
+        // Close-up of one hotspot: the tight box fills CLOSE_FILL of the visible area (the
+        // container minus the panel inset) along whichever axis limits first, capped at
+        // CLOSE_MAX so the art never looks coarse. The camera never leaves the room; the one
+        // exception is that the object itself is always kept inside the visible area.
+        function objectTarget(id, inset) {
+            var h = hotById[id], b = h.fit, dm = dims();
+            inset = inset || {};
+            var aw = Math.max(140, dm.W - (inset.right || 0)), ah = Math.max(140, dm.H - (inset.bottom || 0));
+            var bw = b[2] - b[0], bh = b[3] - b[1];
+            var s = Math.min(CLOSE_FILL * aw / bw, CLOSE_FILL * ah / bh, CLOSE_MAX);
+            s = Math.max(s, dm.W / SW, dm.H / SH);
+            var cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, m = 14;
+            var tx = aw / 2 - cx * s, ty = ah / 2 - cy * s;
+            // edges of the room first
+            tx = Math.min(0, Math.max(dm.W - SW * s, tx));
+            ty = Math.min(0, Math.max(dm.H - SH * s, ty));
+            // then make sure the object is still inside the visible area
+            var lo = m - b[0] * s, hi = aw - m - b[2] * s;           // tx range that keeps the box in view
+            if (lo <= hi) tx = Math.min(hi, Math.max(lo, tx));
+            lo = m - b[1] * s; hi = ah - m - b[3] * s;
+            if (lo <= hi) ty = Math.min(hi, Math.max(lo, ty));
+            return { s: s, tx: tx, ty: ty };
         }
         function zoneBy(key) { for (var i = 0; i < ZONES.length; i++) if (ZONES[i].key === key) return ZONES[i]; return null; }
         function ease(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
@@ -942,7 +1003,7 @@
             anim = requestAnimationFrame(step);
         }
         function settle(dur) {
-            var t = mode.focus ? zoneTarget(mode.focus, mode.inset) : overviewTarget();
+            var t = mode.obj ? objectTarget(mode.obj, mode.inset) : mode.focus ? zoneTarget(mode.focus, mode.inset) : overviewTarget();
             if (!mode.focus) root.classList.toggle('lab-sc-panmode', panning);
             else root.classList.remove('lab-sc-panmode');
             flyTo(t, dur);
@@ -1031,6 +1092,11 @@
 
         // ---------------- hover rings and tags ----------------
         var hotById = {}, curTag = null;
+        function zoneOfBox(b) {
+            var cx = (b[0] + b[2]) / 2;
+            for (var i = 0; i < ZONES.length; i++) if (cx >= ZONES[i].x0 && cx < ZONES[i].x1) return ZONES[i].key;
+            return ZONES[ZONES.length - 1].key;
+        }
         d.hots.forEach(function (h) { hotById[h.id] = h; });
         function ringEl(key) { return q('[data-ring="' + key + '"]'); }
         function showRing(key, on) { var r = ringEl(key); if (r) r.classList.toggle('is-on', on); }
@@ -1044,7 +1110,7 @@
         function refreshTag() {
             tagsG.textContent = '';
             if (!curTag || !base) return;
-            var h = hotById[curTag], k = 1 / base, b = h.box;
+            var h = hotById[curTag], k = 1 / base, b = h.fit;
             var cx = (b[0] + b[2]) / 2, y = b[1] - 14 * k;
             var dm = dims();
             // keep the tag on screen
@@ -1074,6 +1140,10 @@
             a.addEventListener('mouseenter', on);
             a.addEventListener('mouseleave', off);
             a.addEventListener('focus', function () { on(); ensureVisible(hotById[id].box); });
+            a.addEventListener('click', function () {
+                if (typeof opts.onPick !== 'function') return;
+                try { opts.onPick({ id: id, zone: zoneOfBox(hotById[id].box) }); } catch (e) { /* ignore */ }
+            });
             a.addEventListener('blur', off);
         });
         function ensureVisible(b) {
@@ -1307,11 +1377,45 @@
         onResize();
         update();
 
-        var marked = null;
+        var marked = null, reading = null;
+        var objects = d.hots.map(function (h) {
+            return { id: h.id, zone: zoneOfBox(h.box), label: h.aria, x: (h.box[0] + h.box[2]) / 2 };
+        }).sort(function (a, b) { return a.x - b.x; }).map(function (o) { return { id: o.id, zone: o.zone, label: o.label }; });
+        var rdim = q('.lab-sc-rdim'), rwarm = q('.lab-sc-rwarm'), rhalo = q('.lab-sc-rhalo'), rrim = q('.lab-sc-rrim'), rgroup = q('.lab-sc-reading');
+        var dimGrad = document.getElementById(pre + 'rdDim'), warmGrad = document.getElementById(pre + 'rdWarm');
+        function markObject(id) {
+            if (id && !hotById[id]) id = null;
+            reading = id || null;
+            rgroup.classList.toggle('is-on', !!reading);
+            qa('.lab-sc-hot').forEach(function (a) { a.classList.toggle('is-reading', a.getAttribute('data-hot') === reading); });
+            if (!reading) return;
+            var b = hotById[reading].fit, cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, w = b[2] - b[0], h = b[3] - b[1];
+            // dimmer: clear over the object, soft falloff to the edge of an ellipse, flat dim beyond
+            var rx = Math.max(w * 0.9, 260), ry = Math.max(h * 0.9, 260);
+            dimGrad.setAttribute('gradientTransform', 'translate(' + cx + ' ' + cy + ') scale(' + rx + ' ' + ry + ')');
+            warmGrad.setAttribute('gradientTransform', 'translate(' + cx + ' ' + cy + ') scale(' + (w * 0.75) + ' ' + (h * 0.75) + ')');
+            rwarm.setAttribute('cx', cx); rwarm.setAttribute('cy', cy); rwarm.setAttribute('rx', w * 0.75); rwarm.setAttribute('ry', h * 0.75);
+            [[rhalo, 10], [rrim, 5]].forEach(function (p) {
+                p[0].setAttribute('x', b[0] - p[1]); p[0].setAttribute('y', b[1] - p[1]);
+                p[0].setAttribute('width', w + 2 * p[1]); p[0].setAttribute('height', h + 2 * p[1]);
+            });
+        }
         return {
             zones: ZONES.map(function (z) { return z.key; }),
+            objects: objects,
+            markObject: markObject,
+            focusOn: function (id, inset) {
+                if (!id || !hotById[id]) return false;
+                mode.focus = zoneOfBox(hotById[id].box);
+                mode.obj = id;
+                mode.inset = inset || null;
+                hideTag();
+                settle(600);
+                return true;
+            },
             focus: function (key, inset) {
                 if (key && !zoneBy(key)) key = null;
+                mode.obj = null;
                 mode.focus = key || null;
                 mode.inset = inset || null;
                 hideTag();

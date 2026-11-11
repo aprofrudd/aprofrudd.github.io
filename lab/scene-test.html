@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>scene test</title>
+<link rel="stylesheet" href="scene.css">
+<style>
+body{margin:0;font:12px sans-serif;background:#222;color:#eee;overflow-x:hidden}
+#stage{position:relative;height:58vh;width:100%}
+#panel{position:absolute;top:0;right:0;bottom:0;width:0;background:rgba(255,255,255,.12);border-left:2px dashed #f55;pointer-events:none}
+#bar{padding:6px;display:flex;flex-wrap:wrap;gap:4px}
+button{font:11px sans-serif;padding:3px 6px}
+</style></head><body>
+<div id="stage"><div id="panel"></div></div>
+<div id="bar"></div>
+<script src="scene.js"></script>
+<script>
+var q = new URLSearchParams(location.search);
+var inset = { right: +(q.get('r')||0), bottom: +(q.get('b')||0) };
+var stage = document.getElementById('stage'), panel = document.getElementById('panel');
+panel.style.width = inset.right + 'px'; if (inset.bottom) { panel.style.top='auto'; panel.style.width='100%'; panel.style.height=inset.bottom+'px'; }
+var picks = [];
+var sc = window.sc = LabScene.mount(stage, { reduced: q.get('reduced') === '1', onPick: function (p) { picks.push(p); console.log('pick', JSON.stringify(p)); } });
+var bar = document.getElementById('bar');
+function btn(t, f) { var b = document.createElement('button'); b.textContent = t; b.onclick = f; bar.appendChild(b); }
+btn('whole room', function () { sc.focus(null); });
+sc.zones.forEach(function (z) { btn('zone ' + z, function () { sc.focus(z, inset); }); });
+btn('mark null', function () { sc.markObject(null); });
+sc.objects.forEach(function (o) {
+  btn('go ' + o.id, function () { sc.focusOn(o.id, inset); });
+  btn('mark ' + o.id, function () { sc.markObject(o.id); });
+});
+</script></body></html>
