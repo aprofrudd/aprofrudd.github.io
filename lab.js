@@ -1,6 +1,8 @@
-/* The lab: turns the linear homepage into a living floor plan (an animated
-   top-down lab whose rooms open as a drawer), and adds the Wingate bay (a BBC
-   Micro and a dot matrix printer).
+/* The lab: turns the linear homepage into a room you can walk around. The
+   illustration is lab/scene.js, the sounds lab/sfx.js, the content entrance
+   effects lab/exhibits.js; this file groups the sections into rooms, runs
+   the drawer and the routing, and holds the Wingate bay (a BBC Micro and a
+   dot matrix printer).
 
    Progressive enhancement only. index.html stays a plain linear page of
    <section>s: with this script missing or failing, that is exactly what
@@ -194,396 +196,93 @@
     });
 
     // ------------------------------------------------------------------
-    // The living lab: an animated top-down plan. Every room is a link.
+    // The lab, after hours: one illustrated room (lab/scene.js). The kit in
+    // it links to sections; the camera walks to a bay when its room opens.
     // ------------------------------------------------------------------
-    var NS = 'http://www.w3.org/2000/svg';
-    function S(tag, attrs, parent, text) {
-        var n = document.createElementNS(NS, tag);
-        for (var k in attrs) { if (attrs[k] != null) n.setAttribute(k, attrs[k]); }
-        if (text != null) n.textContent = text;
-        if (parent) parent.appendChild(n);
-        return n;
-    }
-
-    // Every room is drawn in the same 300 x 260 cell (the lab is two cells
-    // wide), so the phone layout only has to move cells, not redraw them.
-    var CW = 300, CH = 260, COR = 64;
-    var LAYOUTS = {
-        wide: { w: 1200, h: CH * 2 + COR, cor: CH,
-            at: { reception: [0, 0], lab: [300, 0], ergo: [900, 0],
-                  office: [0, CH + COR], print: [300, CH + COR], seminar: [600, CH + COR], desk: [900, CH + COR] } },
-        tall: { w: 600, h: CH * 4 + COR, cor: CH * 2,
-            at: { reception: [0, 0], ergo: [300, 0], lab: [0, CH],
-                  office: [0, CH * 2 + COR], print: [300, CH * 2 + COR],
-                  seminar: [0, CH * 3 + COR], desk: [300, CH * 3 + COR] } }
-    };
-
-    var plan = document.createElement('nav');
-    plan.id = 'lab-plan';
-    plan.className = 'lab-plan';
-    plan.setAttribute('aria-label', 'Lab floor plan');
-    plan.innerHTML =
-        '<div class="lab-plan-in">' +
-            '<div class="lab-plan-title">' +
-                '<p class="lab-plan-kicker"><i></i>The lab, live</p>' +
-                '<p class="lab-plan-hint">Hover a room to wake it up. Click to go in.</p>' +
-                '<button type="button" class="lab-all-toggle" id="lab-all" aria-pressed="false">Read as one page</button>' +
-            '</div>' +
-            '<div class="lab-scene"></div>' +
-        '</div>';
-    main.insertBefore(plan, article);
-
-    var svg = S('svg', { 'class': 'lab-svg', role: 'group', 'aria-label': 'Seven rooms off a corridor' }, plan.querySelector('.lab-scene'));
-    var corridor = S('g', { 'class': 'lab-corridor' }, svg);
-    var corFloor = S('rect', { 'class': 'lab-cor-floor', height: COR }, corridor);
-    var ecgLine = S('polyline', { 'class': 'lab-ecg' }, corridor);
-    var hrText = S('text', { 'class': 'lab-hr', x: 18, y: 26 }, corridor, 'HR 062');
-    var youG = S('g', { 'class': 'lab-you' }, corridor);
-    S('circle', { r: 13, 'class': 'lab-you-ring' }, youG);
-    S('circle', { r: 6, 'class': 'lab-you-dot' }, youG);
-    S('text', { y: -12, 'text-anchor': 'middle', 'class': 'lab-you-label' }, youG, 'YOU');
-
-    function tri(d, range) {            // bounce between 0 and range
-        var m = d % (range * 2);
-        if (m < 0) m += range * 2;
-        return m > range ? range * 2 - m : m;
-    }
-    function ease(f) { return f * f * (3 - 2 * f); }
-    // One heartbeat, u in 0..1: P wave, QRS spike, T wave.
-    function ecg(u) {
-        function g(c, w, a) { var d = (u - c) / w; return a * Math.exp(-d * d); }
-        return g(0.18, 0.03, 0.12) + g(0.345, 0.012, -0.18) + g(0.37, 0.012, 1) +
-               g(0.4, 0.014, -0.3) + g(0.6, 0.05, 0.22);
-    }
-    function dot(parent, cls, r) { return S('circle', { 'class': cls, r: r || 5.5 }, parent); }
-    function place(n, x, y) { n.setAttribute('cx', x.toFixed(1)); n.setAttribute('cy', y.toFixed(1)); }
-
-    // Each builder draws the room's fixtures into g and returns the function
-    // that moves them; p is the room's own clock in seconds.
-    var BUILD = {
-        reception: function (g) {
-            [0, 12, 24, 36].forEach(function (i) {
-                S('rect', { x: 30 + i, y: 84 + i, width: 240 - 2 * i, height: 150 - 2 * i, rx: 75 - i, 'class': 'lab-line' }, g);
-            });
-            S('path', { d: 'M190 198v36', 'class': 'lab-line' }, g);
-            var lanes = [6, 18, 30].map(function (i, n) {
-                var path = S('rect', { x: 30 + i, y: 84 + i, width: 240 - 2 * i, height: 150 - 2 * i, rx: 75 - i, fill: 'none' }, g);
-                return { path: path, len: path.getTotalLength(), v: 66 - n * 5, off: n * 140,
-                         el: dot(g, n === 1 ? 'lab-b' : 'lab-a') };
-            });
-            return function (p) {
-                lanes.forEach(function (l) {
-                    var s = l.len - ((p * l.v + l.off) % l.len);
-                    var pt = l.path.getPointAtLength(s);
-                    place(l.el, pt.x, pt.y);
-                });
-            };
-        },
-
-        lab: function (g) {
-            // the ring
-            S('rect', { x: 36, y: 76, width: 168, height: 168, 'class': 'lab-line' }, g);
-            S('rect', { x: 46, y: 86, width: 148, height: 148, 'class': 'lab-line' }, g);
-            S('rect', { x: 51, y: 91, width: 138, height: 138, 'class': 'lab-line lab-faint' }, g);
-            S('path', { d: 'M41 81h11v11H41zM188 81h11v11h-11zM41 228h11v11H41zM188 228h11v11h-11z', 'class': 'lab-solid' }, g);
-            var boxers = [0, 1].map(function (i) {
-                return { body: dot(g, i ? 'lab-b' : 'lab-a', 9), l: dot(g, 'lab-ball', 4.2), r: dot(g, 'lab-ball', 4.2) };
-            });
-            // treadmill
-            S('rect', { x: 250, y: 116, width: 150, height: 78, rx: 8, 'class': 'lab-line lab-fillable' }, g);
-            S('rect', { x: 276, y: 126, width: 112, height: 58, 'class': 'lab-belt' }, g);
-            S('path', { d: 'M262 124v62', 'class': 'lab-line lab-thick' }, g);
-            var stripes = [];
-            for (var i = 0; i < 8; i++) stripes.push(S('path', { 'class': 'lab-line lab-faint' }, g));
-            var feet = [dot(g, 'lab-a', 3.6), dot(g, 'lab-a', 3.6)];
-            var runner = dot(g, 'lab-a', 8);
-            S('text', { x: 250, y: 214, 'class': 'lab-tiny' }, g, 'TREADMILL');
-            // metabolic cart: a hose from the runner to a monitor
-            S('path', { d: 'M318 146C340 96 400 84 436 110', 'class': 'lab-line lab-dash' }, g);
-            S('rect', { x: 430, y: 84, width: 146, height: 104, rx: 8, 'class': 'lab-screen' }, g);
-            var trace = S('polyline', { 'class': 'lab-trace' }, g);
-            var breath = S('polyline', { 'class': 'lab-trace lab-trace-2' }, g);
-            var read = S('text', { x: 440, y: 180, 'class': 'lab-screen-text' }, g, '');
-            S('text', { x: 430, y: 208, 'class': 'lab-tiny' }, g, 'GAS ANALYSIS');
-            return function (p, speed) {
-                var a = p * 0.55, cx = 120 + 14 * Math.sin(p * 0.31), cy = 160 + 12 * Math.cos(p * 0.23);
-                var d = 25 + 5 * Math.sin(p * 1.7);
-                boxers.forEach(function (b, i) {
-                    var dir = a + (i ? Math.PI : 0);
-                    var x = cx + Math.cos(dir) * d, y = cy + Math.sin(dir) * d;
-                    place(b.body, x, y);
-                    var face = dir + Math.PI;
-                    [b.l, b.r].forEach(function (glove, k) {
-                        var jab = Math.pow(Math.max(0, Math.sin(p * 5.5 + i * 1.9 + k * Math.PI)), 6);
-                        var reach = 12 + 11 * jab, ang = face + (k ? 0.55 : -0.55) * (1 - jab * 0.8);
-                        place(glove, x + Math.cos(ang) * reach, y + Math.sin(ang) * reach);
-                    });
-                });
-                var off = (p * 70) % 14;
-                stripes.forEach(function (s, i) {
-                    var x = 388 - ((i * 14 + off) % 112);
-                    s.setAttribute('d', 'M' + x.toFixed(1) + ' 128v54');
-                });
-                var stride = Math.sin(p * 9);
-                place(runner, 322 + 1.5 * Math.sin(p * 18), 155);
-                place(feet[0], 322 + 13 * stride, 149);
-                place(feet[1], 322 - 13 * stride, 161);
-                var pts = '', pts2 = '';
-                for (var x = 0; x <= 126; x += 3) {
-                    var u = (p * 1.5 + x / 46) % 1;
-                    pts += (440 + x) + ',' + (132 - ecg(u) * 30).toFixed(1) + ' ';
-                    pts2 += (440 + x) + ',' + (156 + Math.sin(p * 2.4 + x / 13) * 7).toFixed(1) + ' ';
-                }
-                trace.setAttribute('points', pts);
-                breath.setAttribute('points', pts2);
-                read.textContent = 'HR ' + Math.round(128 + 44 * Math.min(1, (speed - 1) / 1.4) + 3 * Math.sin(p)) +
-                    '  RER 0.' + Math.round(88 + 8 * Math.sin(p * 0.2));
-            };
-        },
-
-        ergo: function (g) {
-            S('path', { d: 'M40 236h170', 'class': 'lab-line lab-thick' }, g);
-            S('path', { d: 'M150 196L168 122M156 118h26M150 196L88 190M88 190L112 118M100 114h26M88 190L62 236M150 196L176 236', 'class': 'lab-line' }, g);
-            S('circle', { cx: 88, cy: 190, r: 38, 'class': 'lab-line lab-thick' }, g);
-            S('circle', { cx: 88, cy: 190, r: 31, 'class': 'lab-line lab-faint' }, g);
-            var spokes = S('path', { 'class': 'lab-line' }, g);
-            S('circle', { cx: 150, cy: 196, r: 11, 'class': 'lab-line lab-fillable' }, g);
-            var crank = S('path', { 'class': 'lab-line lab-thick' }, g);
-            var pedals = [dot(g, 'lab-a', 5), dot(g, 'lab-a', 5)];
-            // the Micro and its printer
-            var paper = S('rect', { x: 226, y: 200, width: 44, height: 0, 'class': 'lab-paper' }, g);
-            S('rect', { x: 216, y: 206, width: 64, height: 26, rx: 4, 'class': 'lab-case' }, g);
-            S('rect', { x: 206, y: 82, width: 84, height: 70, rx: 7, 'class': 'lab-case' }, g);
-            S('rect', { x: 213, y: 89, width: 70, height: 50, rx: 4, 'class': 'lab-screen' }, g);
-            var bars = [];
-            for (var i = 0; i < 12; i++) bars.push(S('rect', { x: 218 + i * 5, width: 4, 'class': 'lab-bar' }, g));
-            return function (p) {
-                var a = p * 5, d = '';
-                for (var k = 0; k < 4; k++) {
-                    var s = a * 1.6 + k * Math.PI / 2;
-                    d += 'M88 190L' + (88 + Math.cos(s) * 31).toFixed(1) + ' ' + (190 + Math.sin(s) * 31).toFixed(1);
-                }
-                spokes.setAttribute('d', d);
-                var px = Math.cos(a) * 21, py = Math.sin(a) * 21;
-                crank.setAttribute('d', 'M' + (150 - px).toFixed(1) + ' ' + (196 - py).toFixed(1) +
-                    'L' + (150 + px).toFixed(1) + ' ' + (196 + py).toFixed(1));
-                place(pedals[0], 150 + px, 196 + py);
-                place(pedals[1], 150 - px, 196 - py);
-                // a test every eight seconds: bars fill, then the paper feeds
-                var t = p % 8, n = Math.min(12, Math.floor(t * 2.4));
-                bars.forEach(function (b, i) {
-                    var h = i < n ? 40 * (i < 2 ? 0.8 + 0.1 * i : 1 - (i - 2) * 0.055) : 0;
-                    b.setAttribute('y', (135 - h).toFixed(1));
-                    b.setAttribute('height', h.toFixed(1));
-                });
-                var feed = t < 5 ? 0 : Math.min(1, (t - 5) / 2.2) * 34;
-                paper.setAttribute('y', (206 - feed).toFixed(1));
-                paper.setAttribute('height', feed.toFixed(1));
-            };
-        },
-
-        office: function (g) {
-            S('rect', { x: 92, y: 78, width: 116, height: 166, 'class': 'lab-line' }, g);
-            S('path', { d: 'M92 172h116M150 172v72M92 196h24v-24M208 196h-24v-24', 'class': 'lab-line' }, g);
-            S('path', { d: 'M92 86h116', 'class': 'lab-line lab-faint' }, g);
-            var players = [{ el: dot(g, 'lab-a', 7), x: 130, y: 200 }, { el: dot(g, 'lab-b', 7), x: 170, y: 215 }];
-            var ball = dot(g, 'lab-ball', 3.2);
-            var last = 0;
-            return function (p) {
-                var bx = 98 + tri(p * 83, 104), by = 84 + tri(p * 131, 154);
-                place(ball, bx, by);
-                var k = 1 - Math.exp(-Math.abs(p - last) * 3.2);
-                last = p;
-                var targets = [[bx * 0.7 + 45, Math.max(by + 8, 160)], [255 - bx * 0.7, 206]];
-                players.forEach(function (pl, i) {
-                    pl.x += (targets[i][0] - pl.x) * k;
-                    pl.y += (targets[i][1] - pl.y) * k;
-                    place(pl.el, pl.x, pl.y);
-                });
-            };
-        },
-
-        print: function (g) {
-            S('rect', { x: 30, y: 84, width: 240, height: 150, 'class': 'lab-line' }, g);
-            S('path', { d: 'M150 84v150M30 122h36v74H30M270 122h-36v74h36M30 142h14v34H30M270 142h-14v34h14', 'class': 'lab-line' }, g);
-            S('circle', { cx: 150, cy: 159, r: 22, 'class': 'lab-line' }, g);
-            var base = [[92, 120], [128, 196], [196, 136], [222, 190], [112, 158], [176, 176], [70, 180], [238, 150]];
-            var team = [0, 0, 0, 0, 1, 1, 1, 1];
-            var men = base.map(function (b, i) { return { el: dot(g, team[i] ? 'lab-b' : 'lab-a', 6), x: b[0], y: b[1] }; });
-            var ball = dot(g, 'lab-ball', 3.6);
-            var order = [0, 2, 3, 1];
-            return function (p) {
-                men.forEach(function (m, i) {
-                    m.x = base[i][0] + 16 * Math.cos(p * (0.5 + i * 0.07) + i * 2.1);
-                    m.y = base[i][1] + 12 * Math.sin(p * (0.62 + i * 0.05) + i);
-                    place(m.el, m.x, m.y);
-                });
-                var t = p / 1.15, i = Math.floor(t) % 4, f = ease(Math.min(1, (t % 1) * 1.5));
-                var from = men[order[i]], to = men[order[(i + 1) % 4]];
-                place(ball, from.x + (to.x - from.x) * f + 6, from.y + (to.y - from.y) * f + 6);
-            };
-        },
-
-        seminar: function (g) {
-            var d = 'M18 226C92 236 76 118 150 130S214 238 284 96';
-            S('path', { d: d, 'class': 'lab-road' }, g);
-            var road = S('path', { d: d, 'class': 'lab-line lab-dash lab-faint' }, g);
-            S('path', { d: 'M268 76v30M268 76l-14 6 14 6', 'class': 'lab-line' }, g);
-            var len = road.getTotalLength();
-            var pack = [0, 16, 27, 52, 94].map(function (off, i) {
-                return { off: off, el: dot(g, i % 2 ? 'lab-b' : 'lab-a', 5.5), w: i };
-            });
-            return function (p) {
-                pack.forEach(function (r) {
-                    var s = (p * 34 + len - r.off + 5 * Math.sin(p * 0.9 + r.w)) % len;
-                    var pt = road.getPointAtLength(s < 0 ? s + len : s);
-                    place(r.el, pt.x, pt.y + (r.w % 2 ? 4 : -4));
-                });
-            };
-        },
-
-        desk: function (g) {
-            S('rect', { x: 34, y: 90, width: 232, height: 140, 'class': 'lab-line lab-dash lab-faint' }, g);
-            S('rect', { x: 70, y: 150, width: 160, height: 26, rx: 5, 'class': 'lab-line lab-fillable' }, g);
-            var rings = [0, 1, 2].map(function () { return S('circle', { cx: 150, cy: 138, 'class': 'lab-ring' }, g); });
-            S('circle', { cx: 150, cy: 138, r: 7, 'class': 'lab-solid' }, g);
-            var host = dot(g, 'lab-a', 8);
-            var q = S('text', { x: 150, y: 124, 'text-anchor': 'middle', 'class': 'lab-q' }, g, '?');
-            return function (p) {
-                rings.forEach(function (r, i) {
-                    var f = ((p * 0.45 + i / 3) % 1);
-                    r.setAttribute('r', (7 + f * 44).toFixed(1));
-                    r.setAttribute('opacity', (0.5 * (1 - f)).toFixed(2));
-                });
-                place(host, 150 + 26 * Math.sin(p * 0.5), 200);
-                q.setAttribute('y', (112 + 3 * Math.sin(p * 2)).toFixed(1));
-            };
-        }
-    };
-
-    ROOMS.forEach(function (room) {
-        var wide = room.key === 'lab' ? CW * 2 : CW;
-        room.cellW = wide;
-        var a = S('a', { href: '#room-' + room.key, 'class': 'lab-cell lab-cell-' + room.key,
-            'aria-label': room.name + ': ' + room.sections.map(function (id) { return LABELS[id] || id; }).join(', ') }, svg);
-        room.cell = a;
-        S('rect', { width: wide, height: CH, 'class': 'lab-floor' }, a);
-        room.door = S('g', { 'class': 'lab-door-gap' }, a);
-        S('text', { x: 18, y: 34, 'class': 'lab-cell-name' }, a, room.name);
-        S('text', { x: 18, y: 54, 'class': 'lab-cell-sport' }, a, room.num + ' · ' + room.sport);
-        var arrow = S('text', { x: wide - 18, y: 34, 'text-anchor': 'end', 'class': 'lab-cell-enter' }, a, 'Enter →');
-        arrow.setAttribute('aria-hidden', 'true');
-        var fx = S('g', { 'class': 'lab-fx', 'aria-hidden': 'true' }, a);
-        room.clock = Math.random() * 20;
-        room.speed = 1;
-        try { room.tick = BUILD[room.key](fx); } catch (e) { room.tick = null; }
-    });
-    svg.appendChild(corridor);      // above the floors, so the walls stay crisp
-
-    var layout = null;
-    var samples = [];
-    var narrow = window.matchMedia('(max-width: 760px)');
-
-    function applyLayout() {
-        layout = narrow.matches ? LAYOUTS.tall : LAYOUTS.wide;
-        svg.setAttribute('viewBox', '-3 -3 ' + (layout.w + 6) + ' ' + (layout.h + 6));
-        corridor.setAttribute('transform', 'translate(0 ' + layout.cor + ')');
-        corFloor.setAttribute('width', layout.w);
-        samples = [];
-        ROOMS.forEach(function (room) {
-            var at = layout.at[room.key];
-            room.cell.setAttribute('transform', 'translate(' + at[0] + ' ' + at[1] + ')');
-            // A door only where the room actually meets the corridor.
-            var above = at[1] + CH === layout.cor, below = at[1] === layout.cor + COR;
-            room.door.innerHTML = '';
-            room.doorX = null;
-            if (above || below) {
-                var x1 = room.cellW - 84, x2 = room.cellW - 40, y = above ? CH : 0, s = above ? -1 : 1;
-                S('path', { d: 'M' + x1 + ' ' + y + 'H' + x2, 'class': 'lab-door-cut' }, room.door);
-                S('path', { d: 'M' + x2 + ' ' + y + 'v' + (s * 44) + 'A44 44 0 0 ' + (above ? 0 : 1) + ' ' + x1 + ' ' + y, 'class': 'lab-door-leaf' }, room.door);
-                room.doorX = at[0] + (x1 + x2) / 2;
-            }
-        });
-        you.x = you.to = layout.w / 2;
-    }
-
-    var you = { x: 600, to: 600 };
-    var hovered = null;
-    var hr = 62, beat = 0;
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var sfx = window.LabSfx || null;
 
-    function setHover(key) {
-        hovered = key;
-        ROOMS.forEach(function (room) { room.cell.classList.toggle('is-hot', room.key === key); });
-        var room = key && byKey(key);
-        if (room && room.doorX != null) you.to = room.doorX;
-    }
     function byKey(key) {
         for (var i = 0; i < ROOMS.length; i++) if (ROOMS[i].key === key) return ROOMS[i];
         return null;
     }
 
-    ROOMS.forEach(function (room) {
-        room.cell.addEventListener('pointerenter', function (e) { if (e.pointerType !== 'touch') setHover(room.key); });
-        room.cell.addEventListener('pointerleave', function () { if (hovered === room.key) setHover(null); });
-        room.cell.addEventListener('focus', function () { setHover(room.key); });
-        room.cell.addEventListener('blur', function () { if (hovered === room.key) setHover(null); });
-    });
-    // In the corridor the visitor follows the pointer.
-    svg.addEventListener('pointermove', function (e) {
-        if (hovered || e.pointerType === 'touch') return;
-        var box = svg.getBoundingClientRect();
-        you.to = Math.max(20, Math.min(layout.w - 20, (e.clientX - box.left) / box.width * (layout.w + 6) - 3));
-    });
+    var plan = document.createElement('nav');
+    plan.id = 'lab-plan';
+    plan.className = 'lab-plan';
+    plan.setAttribute('aria-label', 'The lab');
+    plan.tabIndex = -1;
+    plan.innerHTML =
+        '<div class="lab-stage" id="lab-stage"></div>' +
+        '<div class="lab-plan-bar">' +
+            '<p class="lab-plan-kicker"><i></i>The lab, after hours</p>' +
+            '<p class="lab-plan-hint">Click the kit to read the CV. Try the lamp, the bag and the bell.</p>' +
+            (sfx ? '<button type="button" class="lab-pill" id="lab-sound" aria-pressed="true">Sound: on</button>' : '') +
+            '<button type="button" class="lab-pill lab-all-toggle" id="lab-all" aria-pressed="false">Read as one page</button>' +
+        '</div>';
+    main.insertBefore(plan, article);
+    var stage = plan.querySelector('#lab-stage');
 
-    function frame(dt) {
-        ROOMS.forEach(function (room) {
-            var want = room.key === hovered ? 2.6 : 1;
-            room.speed += (want - room.speed) * (1 - Math.exp(-dt * 5));
-            room.clock += dt * room.speed;
-            if (room.tick) room.tick(room.clock, room.speed);
-        });
-        // The visitor's pulse climbs as they reach for a door.
-        var target = hovered ? (hovered === 'ergo' ? 176 : 148) : 62;
-        hr += (target - hr) * (1 - Math.exp(-dt * 1.6));
-        hrText.textContent = 'HR ' + ('00' + Math.round(hr)).slice(-3);
-        var n = Math.max(1, Math.round(dt * 40));
-        var need = Math.ceil(layout.w / 3) + 1;
-        for (var i = 0; i < n; i++) {
-            beat += (dt / n) * hr / 60;
-            samples.push(ecg(beat % 1));
+    var scene = null;
+    var touchedScene = false;
+    try {
+        if (window.LabScene) {
+            scene = window.LabScene.mount(stage, {
+                reduced: reduced,
+                sfx: function (name) { if (sfx) sfx.play(name); }
+            });
+            scene.play(true);
         }
-        while (samples.length < need) samples.unshift(0);
-        if (samples.length > need) samples.splice(0, samples.length - need);
-        var pts = '';
-        for (var j = 0; j < samples.length; j++) pts += (j * 3) + ',' + (50 - samples[j] * 26).toFixed(1) + ' ';
-        ecgLine.setAttribute('points', pts);
-        you.x += (you.to - you.x) * (1 - Math.exp(-dt * 6));
-        youG.setAttribute('transform', 'translate(' + you.x.toFixed(1) + ' 30)');
+    } catch (e) { scene = null; }
+    if (!scene) {
+        // The illustration did not load: the rooms are still one click away.
+        stage.className = 'lab-stage lab-stage-plain';
+        stage.innerHTML = ROOMS.map(function (room) {
+            return '<a href="#room-' + room.key + '"><span>' + room.num + '</span>' + esc(room.name) + '</a>';
+        }).join('');
     }
 
-    var running = false, lastT = 0;
-    function loop(t) {
-        if (!running) return;
-        var dt = Math.min(0.05, (t - lastT) / 1000 || 0.016);
-        lastT = t;
-        frame(dt);
-        window.requestAnimationFrame(loop);
+    // Rain is part of the room, but only once the visitor has touched it:
+    // nobody should get audio from a CV they have only looked at.
+    stage.addEventListener('pointerdown', function () {
+        if (touchedScene) return;
+        touchedScene = true;
+        if (sfx && sfx.isEnabled()) sfx.ambient(true);
+    });
+    var soundBtnLab = document.getElementById('lab-sound');
+    function syncLabSound() {
+        if (!soundBtnLab) return;
+        var on = sfx.isEnabled();
+        soundBtnLab.setAttribute('aria-pressed', String(on));
+        soundBtnLab.textContent = 'Sound: ' + (on ? 'on' : 'off');
     }
-    // Decoration only, so requestAnimationFrame is right here: it stops in a
-    // hidden tab, which is what is wanted. (The Wingate test must not.)
-    function play(on) {
-        if (reduced) return;
-        if (on && !running) { running = true; lastT = 0; window.requestAnimationFrame(loop); }
-        if (!on) running = false;
+    if (soundBtnLab) {
+        soundBtnLab.addEventListener('click', function () {
+            var on = !sfx.isEnabled();
+            sfx.setEnabled(on);
+            if (on) { sfx.play('click'); if (touchedScene) sfx.ambient(true); }
+            else sfx.ambient(false);
+            syncLabSound();
+        });
+        syncLabSound();
     }
 
-    applyLayout();
-    if (narrow.addEventListener) narrow.addEventListener('change', applyLayout);
-    else if (narrow.addListener) narrow.addListener(applyLayout);
-    // One settled frame always, so reduced motion gets a full still drawing.
-    for (var warm = 0; warm < 140; warm++) frame(0.05);
-    play(true);
+    // How much of the stage the open drawer covers, so the camera can
+    // centre the bay in what is left. Null when the drawer takes the screen.
+    function inset() {
+        var s = stage.getBoundingClientRect(), d = article.getBoundingClientRect();
+        var width = d.width, left = window.innerWidth - width;
+        if (width > window.innerWidth * 0.8) return null;
+        return { right: Math.max(0, s.right - left), bottom: 0 };
+    }
+    function camera() {
+        if (!scene) return;
+        var cover = isOpen ? inset() : null;
+        scene.focus(isOpen && cover ? current : null, cover || { right: 0, bottom: 0 });
+        scene.mark(isOpen || linear ? current : null);
+    }
+    window.addEventListener('resize', function () { if (isOpen) camera(); });
+
 
     // ------------------------------------------------------------------
     // The drawer: a room's content slides in over the plan
@@ -595,9 +294,6 @@
         '<button type="button" class="lab-close" aria-label="Close the room and go back to the lab">Back to the lab <span aria-hidden="true">×</span></button>';
     article.insertBefore(bar, article.firstChild);
     var chips = bar.querySelector('.lab-chips');
-    var scrim = document.createElement('div');
-    scrim.className = 'lab-scrim';
-    main.appendChild(scrim);
     document.documentElement.classList.add('lab-live');
 
     // The top nav lists rooms instead of sixteen sections.
@@ -650,9 +346,6 @@
                 room.el.setAttribute('hidden', 'until-found');
             }
             var mark = here && (isOpen || linear);
-            room.cell.classList.toggle('is-here', mark);
-            if (mark) room.cell.setAttribute('aria-current', 'location');
-            else room.cell.removeAttribute('aria-current');
             if (room.navLink) room.navLink.classList.toggle('is-current', mark);
         });
         var room = byKey(key);
@@ -665,17 +358,18 @@
     function setOpen(on) {
         isOpen = on && !linear;
         root.classList.toggle('lab-open', isOpen);
-        play(!isOpen);
         show(current);
+        camera();
+        if (isOpen && window.LabExhibits) {
+            try { window.LabExhibits.enter(byKey(current).el); } catch (e) { /* decoration only */ }
+        }
     }
 
     function closeDrawer() {
         if (!isOpen) return;
         setOpen(false);
         try { history.pushState(null, '', location.pathname + location.search); } catch (e) { /* sandboxed */ }
-        var room = byKey(current);
-        if (room) room.cell.focus({ preventScroll: true });
-        setHover(null);
+        plan.focus({ preventScroll: true });
     }
 
     ROOMS.forEach(function (room) {
@@ -724,7 +418,6 @@
     });
 
     bar.querySelector('.lab-close').addEventListener('click', closeDrawer);
-    scrim.addEventListener('click', closeDrawer);
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && isOpen && !wingateBusy()) closeDrawer();
     });
@@ -739,7 +432,7 @@
         allToggle.textContent = linear ? 'Back to the live lab' : 'Read as one page';
         root.classList.toggle('lab-linear', linear);
         setOpen(false);
-        if (linear) { play(true); markByScroll(); }
+        if (linear) markByScroll();
     });
 
     // As one long page, "you are here" follows the scroll position.

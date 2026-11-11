@@ -158,16 +158,30 @@ Both generated files carry their queries and fetch date in the header, so any nu
 
 `index.html` is a single hand-written 2,000-line page with inline JSON-LD blocks and runtime `fetch()` calls to the OpenAlex API for live publication metrics. Three files describe the same person for different audiences and **drift apart unless updated together**: `index.html` (humans + JSON-LD), `resume.json` (JSON Resume schema, linked via `<link rel="alternate">` and not read by the page), and `llms.txt` (AI crawlers). A change to roles, metrics or projects belongs in all three.
 
-### The lab layout (`lab.js`, `lab.css`)
+### The lab layout (`lab.js`, `lab.css`, `lab/`)
 
-The homepage is presented as a living physiology lab: a compact name plate, then an animated top-down floor plan of seven rooms off a corridor. Each room hosts a sport (runners lapping a track, boxers in a ring, a treadmill and gas-analysis monitor, a squash rally, a football passing drill, a road-running pack) and wakes up on hover; a heart-rate trace runs down the corridor and climbs as the visitor approaches a door. Clicking a room slides its sections in as a drawer. The Ergometer Bay holds a Wingate test on a BBC Micro that prints to a dot matrix printer (WebAudio sound, synthesised, no audio files).
+The homepage is "the lab, after hours": a compact name plate, then one wide illustrated room seen front-on in the evening (door, treadmill and gas cart, heavy bag, ergometer with a BBC Micro and dot matrix printer, desk and lamp, rainy window, shelves, seminar corner, front desk). The kit is the navigation: each object links to a CV section, and clicking one flies the camera to that bay and slides the room's sections in as a drawer beside it. Eleven props are toys that answer a click with a small motion and a sound (lamp, wall switch, treadmill, heavy bag, bell, mug and so on). The idea is borrowed from felixrieseberg.com (one coherent place, content in objects, a plain-version switch); none of its code or art is.
 
-- **It is progressive enhancement, built entirely by `lab.js` at run time.** `index.html` is still the plain linear list of `<section>`s, which is what crawlers and no-JS visitors get. Do not move lab markup into `index.html`. A new section only needs adding to `ROOMS` and `LABELS` in `lab.js`; one that is not listed falls into the last room rather than vanishing.
+```
+lab.js            rooms, drawer, routing, the Wingate test. Classic script, loaded last.
+lab.css           name plate, stage, drawer, room headers, Wingate bay
+lab/scene.js      window.LabScene: the illustration, camera, toys, idle motion (hand-built SVG)
+lab/scene.css     its styles; everything prefixed lab-sc-, palette scoped to .lab-sc
+lab/sfx.js        window.LabSfx: synthesised WebAudio effects and a quiet rain bed. No audio files.
+lab/exhibits.js   window.LabExhibits: entrance effects for section content (count-ups, staggered lists)
+lab/exhibits.css  its styles; everything prefixed lab-ex-
+```
+
+- **It is progressive enhancement, built at run time.** `index.html` is still the plain linear list of `<section>`s, which is what crawlers and no-JS visitors get. Do not move lab markup into `index.html`. Each `lab/` module is optional: `lab.js` checks for the global and carries on without it (no scene gives a plain row of room links).
+- **A new section needs three things:** an entry in `ROOMS` and `LABELS` in `lab.js`, and an object in `lab/scene.js` whose `<a href="#id">` points at it. A section missing from `ROOMS` falls into the last room rather than vanishing; one with no object is still reachable from the drawer chips and the nav.
 - **Three states, all classes on `<html>`:** `lab-live` (set once by the script), `lab-open` (drawer showing), `lab-linear` ("Read as one page": the drawer becomes normal flow and every room is shown). The drawer is the existing `<article>`, not a copy.
-- **Closed rooms use `hidden="until-found"`**, so find-in-page still reaches them (`beforematch` opens the drawer). Do not add a `display` rule to `.lab-room`; it would defeat the attribute. Every `#section` link is routed through `go()`, which opens the right room first.
-- **The scene is one SVG; every room is drawn in the same 300 x 260 cell** (the lab is two wide) by a builder in `BUILD` that returns its own tick function. `LAYOUTS` only moves cells, so the phone plan (two columns) needs no redrawing. A room gets a door only where it actually touches the corridor in the current layout.
-- **Two clocks on purpose.** The scene runs on `requestAnimationFrame` because it is decoration and should stop in a hidden tab (it also pauses while the drawer is open, and with reduced motion it draws one settled frame). The Wingate test runs on `setInterval`/`Date.now()` so a backgrounded tab still finishes the test and the printout. Do not merge them.
-- **Every sport and fact line in `ROOMS` restates something already on the page.** Keep it that way: the room headers must not make a claim the CV does not. The readouts in the scene (HR, RER) are set dressing, not data.
+- **Closed rooms use `hidden="until-found"`**, so find-in-page still reaches them (`beforematch` opens the drawer). Do not add a `display` rule to `.lab-room`. Every `#section` link, including the ones inside the scene, is routed through `go()` by one document click handler.
+- **Scene contract:** `LabScene.mount(el, {sfx, reduced})` returns `focus(zoneKey|null, {right, bottom})`, `mark(zoneKey|null)`, `play(bool)` and `zones`. Zone keys are the room keys in `ROOMS`. Below about 1220px wide the whole room does not fit and the scene pans by drag instead.
+- **The scoreboard in the scene hardcodes 38 / 15 / 7** (papers, title fights, funded projects). It is a fourth place those figures live, after `index.html`, `resume.json` and `llms.txt`; update it with them.
+- **Sound never starts on its own.** `LabSfx` creates its AudioContext only after a gesture; the rain bed starts only once the visitor has touched the scene, and the "Sound" pill stops everything. The Wingate printer has its own separate toggle.
+- **Two clocks on purpose.** The scene and effects use `requestAnimationFrame`/CSS because they are decoration and should stop in a hidden tab. The Wingate test uses `setInterval`/`Date.now()` so a backgrounded tab still finishes the test and the printout. Do not merge them.
+- **Every sport and fact line in `ROOMS` restates something already on the page.** The readouts in the scene (temperature, treadmill speed, lactate) are set dressing, not data.
 - Wingate keys (Z, X, Space) are claimed only while a test is running, and Escape cancels the test before it closes the drawer. The watts are Monark arithmetic on tap cadence and the page says plainly that it is not a calibrated test; the demo trace is simulated and labelled as such on screen and on the printout.
+- `LabExhibits.enter(el)` must never leave content hidden: effects are CSS animations from a class, with a safety timeout that clears them, and counted numbers always end on their original text.
 
 The comment block at the top of `index.html` is a manual off-site checklist (LinkedIn, ORCID, Scholar). It is a to-do list for the user, not instructions for you.
