@@ -336,6 +336,8 @@
 
     function show(key) {
         current = key;
+        // Room skins (lab/skin-*.css) style the drawer by the room it holds.
+        article.setAttribute('data-current', key);
         ROOMS.forEach(function (room) {
             var here = room.key === key;
             if (linear || here) {
