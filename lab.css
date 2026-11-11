@@ -25,9 +25,43 @@
 .nav-menu.lab-nav { gap: 1.5rem; }
 .nav-menu.lab-nav a { font-size: 0.9rem; }
 
-/* ---- floor plan ---------------------------------------------------------- */
+/* ---- live mode: the hero shrinks to a name plate so the lab is on screen -- */
+.lab-live .hero {
+    min-height: 0;
+    padding: calc(var(--lab-nav-h, 71px) + 1.75rem) 1.5rem 1.5rem;
+    text-align: left;
+    justify-content: center;
+}
+.lab-live .hero-content {
+    width: min(1280px, 100%);
+    max-width: none;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 1.75rem;
+    align-items: center;
+}
+.lab-live .hero-image { grid-row: 1 / span 6; margin: 0; }
+.lab-live .profile-image { width: 124px; height: 124px; }
+.lab-live .hero-content > :not(.hero-image):not(.hero-cta) { grid-column: 2; }
+.lab-live .hero h1 { font-size: 2.4rem; margin-bottom: 0.1rem; }
+.lab-live .hero-subtitle { font-size: 0.95rem; margin-bottom: 0.35rem; }
+.lab-live .hero-positioning { font-size: 1.05rem; margin: 0 0 0.2rem; max-width: none; }
+.lab-live .hero-title { font-size: 1rem; margin-bottom: 0.2rem; }
+.lab-live .hero-tagline { font-size: 0.9rem; margin: 0 0 0.2rem; max-width: none; }
+.lab-live .hero-metrics { margin-bottom: 0 !important; font-size: 0.85rem !important; }
+.lab-live .hero-cta {
+    grid-column: 3;
+    grid-row: 1 / span 6;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    text-align: center;
+}
+.lab-live .hero-cta .btn { padding-top: 0.6rem; padding-bottom: 0.6rem; }
+
+/* ---- the living lab -------------------------------------------------------- */
 .lab-plan {
-    padding: 3rem 0 3.5rem;
+    padding: 1.25rem 1.5rem 2.5rem;
     background-color: var(--background-alt);
     /* graph paper */
     background-image:
@@ -37,213 +71,39 @@
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
 }
+.lab-plan-in { width: min(1280px, 100%); margin: 0 auto; }
+/* Keep the whole plan on the first screen: it is 2.05 times as wide as it is
+   tall, so a short window narrows it rather than pushing rooms below the fold. */
+@media (min-width: 761px) {
+    .lab-plan-in { width: min(1280px, 100%, max(720px, calc((100vh - 24rem) * 2.05))); }
+}
 
 .lab-plan-title {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 0.9rem;
     font-family: var(--lab-mono);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-size: 0.75rem;
 }
-.lab-plan-kicker { font-weight: 700; color: var(--text-primary); }
-.lab-plan-hint { color: var(--text-secondary); }
-
-/* The grid's own background shows through the gaps: those are the walls. */
-.lab-plan-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-areas:
-        "reception lab     lab     ergo"
-        "corridor  corridor corridor corridor"
-        "office    print   seminar desk";
-    gap: 3px;
-    padding: 3px;
-    background: var(--lab-wall);
-    box-shadow: var(--shadow-lg);
-}
-
-.lab-tile-reception { grid-area: reception; }
-.lab-tile-lab       { grid-area: lab; }
-.lab-tile-ergo      { grid-area: ergo; }
-.lab-tile-office    { grid-area: office; }
-.lab-tile-print     { grid-area: print; }
-.lab-tile-seminar   { grid-area: seminar; }
-.lab-tile-desk      { grid-area: desk; }
-
-.lab-tile {
-    position: relative;
+.lab-plan-kicker {
     display: flex;
-    flex-direction: column;
-    min-height: 11.5rem;
-    padding: 1rem 1rem 1.1rem;
-    background: var(--background);
-    color: var(--text-primary);
-    transition: background-color 0.2s ease;
-}
-
-.lab-tile-num {
-    font-family: var(--lab-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: var(--text-light);
-}
-
-.lab-tile-name {
-    margin-top: 0.15rem;
-    font-size: 1.15rem;
-    font-weight: 600;
-    line-height: 1.25;
-    color: var(--text-primary);
-}
-/* The whole room is the door: the name's hit area covers the tile. The
-   section links inside sit above it. */
-.lab-tile-name::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-}
-.lab-tile-name:focus-visible { outline: none; }
-.lab-tile-name:focus-visible::after {
-    outline: 3px solid var(--primary-color);
-    outline-offset: -5px;
-}
-
-.lab-tile-sport {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.lab-tile-inside {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.15rem 0.7rem;
-    margin-top: auto;
-    padding-top: 1.75rem;
-    font-size: 0.8rem;
-}
-.lab-tile-inside a {
-    color: var(--text-secondary);
-    text-decoration: underline;
-    text-decoration-color: var(--border-color);
-    text-underline-offset: 3px;
-}
-.lab-tile-inside a:hover { color: var(--primary-color); text-decoration-color: currentColor; }
-
-.lab-tile > .lab-art {
-    position: absolute;
-    top: 0.9rem;
-    right: 0.9rem;
-    width: 4.75rem;
-    height: auto;
-    color: var(--text-light);
-    transition: color 0.2s ease;
-    pointer-events: none;
-}
-.lab-tile-lab > .lab-art { width: 5.5rem; }
-
-.lab-tile:hover { background: #fbfdff; }
-.lab-tile:hover > .lab-art { color: var(--primary-color); }
-.lab-tile:hover .lab-tile-name { color: var(--primary-color); }
-
-.lab-tile-here {
-    position: absolute;
-    left: 1rem;
-    bottom: 3.1rem;
-    display: none;
     align-items: center;
-    gap: 0.4rem;
-    font-family: var(--lab-mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--primary-color);
-    pointer-events: none;
+    gap: 0.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
 }
-.lab-tile-here::before {
-    content: '';
+.lab-plan-kicker i {
     width: 0.55rem;
     height: 0.55rem;
     border-radius: 50%;
-    background: var(--primary-color);
-    animation: lab-pulse 1.6s ease-out infinite;
+    background: #e5352b;
+    animation: lab-live-dot 1.4s ease-in-out infinite;
 }
-@keyframes lab-pulse {
-    0%   { box-shadow: 0 0 0 0 rgb(0 113 227 / 0.5); }
-    100% { box-shadow: 0 0 0 0.6rem rgb(0 113 227 / 0); }
-}
-
-.lab-tile.is-here { background: #eef6ff; }
-.lab-tile.is-here > .lab-art { color: var(--primary-color); }
-.lab-tile.is-here .lab-tile-here { display: flex; }
-
-/* The Ergometer Bay's corner shows the Micro's screen, not a court. */
-.lab-tile-crt {
-    position: absolute;
-    top: 0.9rem;
-    right: 0.9rem;
-    padding: 0.35rem 0.5rem;
-    border-radius: 4px;
-    background: #0a0a0a;
-    color: #fff;
-    font-family: var(--lab-mono);
-    font-size: 0.6rem;
-    font-weight: 700;
-    line-height: 1.3;
-    pointer-events: none;
-}
-.lab-tile-crt b { animation: lab-blink 1s steps(1) infinite; }
-@keyframes lab-blink { 50% { opacity: 0; } }
-.lab-tile-ergo .lab-tile-num { margin-top: 2rem; }
-
-/* Doors: a gap in the wall on the corridor side, and the leaf's swing. */
-.lab-tile::before {
-    content: '';
-    position: absolute;
-    right: 1.25rem;
-    width: 2.25rem;
-    height: 2.25rem;
-    border: 1.5px solid var(--border-color);
-    pointer-events: none;
-}
-.lab-tile-reception::before,
-.lab-tile-lab::before,
-.lab-tile-ergo::before {
-    bottom: 0;
-    border-width: 1.5px 0 0 1.5px;
-    border-top-left-radius: 100%;
-    box-shadow: 0 3px 0 var(--background-alt);
-}
-.lab-tile-office::before,
-.lab-tile-print::before,
-.lab-tile-seminar::before,
-.lab-tile-desk::before {
-    top: 0;
-    border-width: 0 0 1.5px 1.5px;
-    border-bottom-left-radius: 100%;
-    box-shadow: 0 -3px 0 var(--background-alt);
-}
-.lab-tile.is-here::before { border-color: var(--primary-color); }
-
-.lab-corridor {
-    grid-area: corridor;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.55rem 1rem;
-    background: var(--background-alt);
-    font-family: var(--lab-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--text-light);
-}
+@keyframes lab-live-dot { 50% { opacity: 0.25; } }
+.lab-plan-hint { color: var(--text-secondary); margin-right: auto; }
 
 .lab-all-toggle {
     font: inherit;
@@ -256,12 +116,188 @@
     color: var(--text-primary);
     cursor: pointer;
     transition: var(--transition);
+    white-space: nowrap;
 }
 .lab-all-toggle:hover,
 .lab-all-toggle[aria-pressed="true"] {
     background: var(--lab-wall);
     color: var(--background);
 }
+
+.lab-scene { box-shadow: var(--shadow-lg); background: var(--background); }
+.lab-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* rooms */
+.lab-cell { cursor: pointer; outline: none; }
+.lab-floor {
+    fill: var(--background);
+    stroke: var(--lab-wall);
+    stroke-width: 4;
+    transition: fill 0.25s ease;
+}
+.lab-cell.is-hot .lab-floor { fill: #eef6ff; }
+.lab-cell.is-here .lab-floor { fill: #e3f0ff; }
+.lab-cell:focus-visible .lab-floor { stroke: var(--primary-color); stroke-width: 6; }
+.lab-cell-name { font-size: 23px; font-weight: 600; fill: var(--text-primary); transition: fill 0.2s ease; }
+.lab-cell-sport {
+    font-family: var(--lab-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    fill: var(--text-secondary);
+}
+.lab-cell-enter {
+    font-family: var(--lab-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    fill: var(--primary-color);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.lab-cell.is-hot .lab-cell-name { fill: var(--primary-color); }
+.lab-cell.is-hot .lab-cell-enter,
+.lab-cell:focus-visible .lab-cell-enter { opacity: 1; }
+
+/* fixtures and people. Lines sharpen and colour when the room wakes. */
+.lab-fx { pointer-events: none; }
+.lab-line { fill: none; stroke: #b9b9c0; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.25s ease; }
+.lab-line.lab-thick { stroke-width: 3.4; }
+.lab-line.lab-faint { opacity: 0.55; }
+.lab-line.lab-dash { stroke-dasharray: 6 6; }
+.lab-line.lab-fillable { fill: var(--background); }
+.lab-solid { fill: #b9b9c0; transition: fill 0.25s ease; }
+.lab-belt { fill: var(--background-alt); }
+.lab-road { fill: none; stroke: var(--background-alt); stroke-width: 20; stroke-linecap: round; }
+.lab-cell.is-hot .lab-line, .lab-cell.is-here .lab-line { stroke: var(--text-primary); }
+.lab-cell.is-hot .lab-solid, .lab-cell.is-here .lab-solid { fill: var(--text-primary); }
+.lab-cell.is-hot .lab-road { stroke: #d5e6fa; }
+.lab-a { fill: var(--primary-color); }
+.lab-b { fill: var(--secondary-color); }
+.lab-ball { fill: var(--collab-applied, #c2410c); }
+.lab-ring { fill: none; stroke: var(--primary-color); stroke-width: 1.6; }
+.lab-q { font-size: 20px; font-weight: 700; fill: var(--text-light); }
+.lab-tiny { font-family: var(--lab-mono); font-size: 9.5px; letter-spacing: 0.14em; fill: var(--text-light); }
+.lab-screen { fill: #0a0a0a; }
+.lab-case { fill: #ddd5c0; stroke: #b9b09a; stroke-width: 1; }
+.lab-paper { fill: #fdfcf7; stroke: #cfcabd; stroke-width: 1; }
+.lab-bar { fill: #3dff5a; }
+.lab-trace { fill: none; stroke: #3dff5a; stroke-width: 1.8; stroke-linejoin: round; }
+.lab-trace-2 { stroke: #37e6ff; stroke-width: 1.4; }
+.lab-screen-text { font-family: var(--lab-mono); font-size: 10.5px; font-weight: 700; fill: #ffe900; }
+
+/* doors: a gap in the wall, and the leaf's swing */
+.lab-door-cut { stroke: var(--background-alt); stroke-width: 6; }
+.lab-door-leaf { fill: none; stroke: #b9b9c0; stroke-width: 1.6; }
+.lab-cell.is-hot .lab-door-leaf { stroke: var(--primary-color); }
+
+/* corridor */
+.lab-corridor { pointer-events: none; }
+.lab-cor-floor { fill: var(--background-alt); stroke: var(--lab-wall); stroke-width: 4; }
+.lab-ecg { fill: none; stroke: #e5352b; stroke-width: 1.6; stroke-linejoin: round; opacity: 0.8; }
+.lab-hr { font-family: var(--lab-mono); font-size: 13px; font-weight: 700; letter-spacing: 0.1em; fill: #e5352b; }
+.lab-you-dot { fill: var(--primary-color); stroke: #fff; stroke-width: 2; }
+.lab-you-ring { fill: rgb(0 113 227 / 0.16); }
+.lab-you-label { font-family: var(--lab-mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em; fill: var(--primary-color); }
+
+/* ---- the drawer ----------------------------------------------------------- */
+.lab-drawer-bar { display: none; }
+.lab-scrim { display: none; }
+
+.lab-live:not(.lab-linear) .lab-drawer {
+    position: fixed;
+    z-index: 900;
+    top: var(--lab-nav-h, 71px);
+    right: 0;
+    bottom: 0;
+    width: min(1040px, 100%);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-top: 4.5rem;
+    background: var(--background);
+    box-shadow: -18px 0 50px rgb(0 0 0 / 0.22);
+    transform: translateX(105%);
+    transition: transform 0.42s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lab-live.lab-open:not(.lab-linear) .lab-drawer { transform: none; }
+.lab-live.lab-open:not(.lab-linear) { overflow: hidden; }
+
+.lab-live:not(.lab-linear) .lab-scrim {
+    display: block;
+    position: fixed;
+    z-index: 890;
+    inset: 0;
+    background: rgb(29 29 31 / 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.lab-live.lab-open:not(.lab-linear) .lab-scrim { opacity: 1; pointer-events: auto; }
+
+.lab-live:not(.lab-linear) .lab-drawer-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.7rem 1.5rem;
+    background: rgb(255 255 255 / 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+}
+.lab-chips {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-right: auto;
+}
+.lab-chips-room {
+    flex: none;
+    font-family: var(--lab-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-right: 0.4rem;
+}
+.lab-chips a {
+    flex: none;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+.lab-chips a:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.lab-close {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.4rem 0.6rem 0.4rem 0.9rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--secondary-color);
+    color: #fff;
+    cursor: pointer;
+}
+.lab-close span { font-size: 1.2rem; line-height: 1; }
+.lab-close:hover { background: var(--primary-color); }
 
 /* ---- a room -------------------------------------------------------------- */
 .lab-room-head {
@@ -572,31 +608,12 @@
     box-shadow: 0 0 6px #3dff5a;
 }
 
-/* Bottom-row doors open at the top right, where the drawing would sit. */
-@media (min-width: 861px) {
-    .lab-tile-office > .lab-art,
-    .lab-tile-print > .lab-art,
-    .lab-tile-seminar > .lab-art,
-    .lab-tile-desk > .lab-art { top: 3.6rem; }
-}
-
 /* ---- small screens ------------------------------------------------------- */
-@media (max-width: 860px) {
-    .lab-plan-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-areas:
-            "reception ergo"
-            "lab       lab"
-            "corridor  corridor"
-            "office    print"
-            "seminar   desk";
-    }
-    .lab-tile { min-height: 9.5rem; padding: 0.85rem; }
-    .lab-tile::before { display: none; }
-    .lab-tile > .lab-art { width: 3.4rem; top: 0.75rem; right: 0.75rem; }
-    .lab-tile-here { position: static; margin-top: 0.4rem; }
-    .lab-tile-inside { padding-top: 0.9rem; }
+@media (max-width: 900px) {
+    .lab-live .hero-content { grid-template-columns: auto minmax(0, 1fr); }
+    .lab-live .hero-cta { grid-column: 1 / -1; grid-row: auto; flex-direction: row; margin-top: 1rem; }
     .lab-plan-hint { display: none; }
+    .lab-plan-kicker { margin-right: auto; }
 
     .lab-room-head-in { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
     .lab-room-name { font-size: 2rem; }
@@ -605,22 +622,42 @@
     .lab-wg-bench { grid-template-columns: minmax(0, 1fr); }
 }
 
+@media (max-width: 760px) {
+    .lab-live .hero { padding-left: 1rem; padding-right: 1rem; }
+    .lab-live .hero-content { column-gap: 1rem; }
+    .lab-live .profile-image { width: 76px; height: 76px; border-width: 3px; }
+    .lab-live .hero-image { grid-row: 1 / span 2; align-self: start; }
+    .lab-live .hero h1 { font-size: 1.7rem; }
+    .lab-live .hero-content > p { grid-column: 1 / -1 !important; }
+    .lab-live .hero-content > .hero-subtitle { grid-column: 2 !important; }
+    .lab-live .hero-positioning { margin-top: 0.75rem; }
+    .lab-plan { padding: 1rem 0.75rem 2rem; }
+    /* the phone plan is drawn at half the width, so its type is doubled up */
+    .lab-cell-name { font-size: 27px; }
+    .lab-cell-sport { font-size: 15px; }
+    .lab-hr { font-size: 16px; }
+    .lab-live:not(.lab-linear) .lab-drawer-bar { padding: 0.6rem 0.9rem; }
+    .lab-close { padding: 0.4rem 0.7rem; }
+    .lab-close { font-size: 0; gap: 0; }
+    .lab-close span { font-size: 1.3rem; }
+}
+
 @media (max-width: 480px) {
-    .lab-tile-name { font-size: 1rem; }
-    .lab-tile-crt { font-size: 0.5rem; }
-    .lab-corridor { letter-spacing: 0.15em; padding: 0.5rem 0.6rem; }
+    .lab-live .hero-cta { flex-direction: row; flex-wrap: nowrap; gap: 0.4rem; }
+    .lab-live .hero-cta .btn { width: auto; flex: 1; padding: 0.55rem 0.3rem; font-size: 0.8rem; }
     .lab-wg-sheet { margin: 0 0.5rem; padding: 0 1.4rem; }
     .lab-wg-monitor { padding: 0.7rem 0.7rem 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .lab-tile-here::before,
-    .lab-tile-crt b,
+    .lab-plan-kicker i,
     .lab-wg-screen .t-cursor,
     .lab-room:not([hidden]) > .section,
     .lab-room:not([hidden]) > .lab-room-head { animation: none; }
+    .lab-live:not(.lab-linear) .lab-drawer { transition: none; }
 }
 
 @media print {
-    .lab-plan, .lab-room-foot, .lab-wingate { display: none; }
+    .lab-plan, .lab-room-foot, .lab-wingate, .lab-drawer-bar, .lab-scrim { display: none; }
+    .lab-live .lab-drawer { position: static !important; transform: none !important; width: auto !important; }
 }
