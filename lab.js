@@ -347,6 +347,25 @@
     // Tabbing into the drawer while it is off screen brings it on.
     article.addEventListener('focusin', function () { if (!isOpen && !linear) setOpen(true); });
 
+    // A room's skin, fonts and decorations change heights just after it
+    // opens, which leaves a deep link a little off its target. Re-align
+    // twice, unless the reader has already started scrolling.
+    var settleToken = 0;
+    function settle(el) {
+        var mine = ++settleToken;
+        function cancel() { settleToken++; }
+        article.addEventListener('wheel', cancel, { passive: true, once: true });
+        article.addEventListener('touchmove', cancel, { passive: true, once: true });
+        [350, 1100].forEach(function (ms) {
+            setTimeout(function () {
+                if (mine !== settleToken || !isOpen || linear) return;
+                var pad = parseFloat(getComputedStyle(article).scrollPaddingTop) || 0;
+                var off = el.getBoundingClientRect().top - article.getBoundingClientRect().top - pad;
+                if (Math.abs(off) > 4) article.scrollTop += off;
+            }, ms);
+        });
+    }
+
     // Open whichever room holds #id and scroll to it. False when the id is
     // not something the lab owns, so the browser handles the link itself.
     function go(id, focus) {
@@ -364,7 +383,10 @@
         setOpen(true);
         if (linear) el.scrollIntoView();
         else if (el === wrap) article.scrollTop = 0;
-        else el.scrollIntoView({ block: 'start' });
+        else {
+            el.scrollIntoView({ block: 'start' });
+            settle(el);
+        }
         if (focus && el === wrap) {
             var name = wrap.querySelector('.lab-room-name');
             if (name) name.focus({ preventScroll: true });

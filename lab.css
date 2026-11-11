@@ -125,6 +125,7 @@
     right: 0;
     bottom: 0;
     width: min(900px, 62vw);
+    overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     scroll-padding-top: 4.5rem;
