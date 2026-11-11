@@ -142,7 +142,7 @@
     background: linear-gradient(#0f6a35, #0b5a2c);
 }
 
-/* ---- room header: a screwed-on door plate and an in-session lamp -------- */
+/* ---- room header: a screwed-on door plate -------- */
 .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-head {
     background: transparent;
     color: var(--sk-cream);
@@ -183,28 +183,6 @@
     /* engraved: a dark cut above, a lit edge below */
     text-shadow: 0 -1px 0 rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.1);
 }
-.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-sport .lab-art {
-    color: var(--sk-amber-ink);
-    opacity: 0.85;
-}
-.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-sport-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    color: var(--sk-amber-ink);
-}
-/* the lit "in session" lamp beside the label */
-.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-sport-label::before {
-    content: '';
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--sk-amber);
-    box-shadow: 0 0 8px 2px rgb(255 179 71 / 0.55);
-}
-.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-sport strong { color: var(--sk-cream); }
-.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-fact { color: var(--sk-cream-dim); }
-
 /* ---- room footer: the floor, with the next doors as signs ---------------- */
 .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-foot {
     border-top: 0;

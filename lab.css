@@ -8,19 +8,6 @@
     --lab-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
 
-/* ---- line drawings of the playing areas -------------------------------- */
-.lab-art {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.6;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-}
-.lab-art .lab-art-faint { opacity: 0.45; }
-.lab-art .lab-art-fill { fill: currentColor; stroke: none; }
-.lab-art .lab-art-dash { stroke-dasharray: 5 5; }
-.lab-art .lab-art-road { stroke-width: 12; opacity: 0.18; }
-
 /* ---- nav: seven rooms instead of sixteen sections ------------------------ */
 .nav-menu.lab-nav { gap: 1.5rem; }
 .nav-menu.lab-nav a { font-size: 0.9rem; }
@@ -231,32 +218,6 @@
     letter-spacing: -0.01em;
     outline: none;
 }
-.lab-room-sport {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    max-width: 26rem;
-}
-.lab-room-sport .lab-art {
-    flex: none;
-    width: 8.5rem;
-    color: var(--primary-light);
-}
-.lab-room-sport p {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.35;
-}
-.lab-room-sport-label {
-    font-family: var(--lab-mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-light);
-}
-.lab-room-sport strong { font-size: 1.15rem; font-weight: 600; }
-.lab-room-fact { font-size: 0.85rem; color: var(--border-color); }
-
 /* Rooms open with a short fade so a change of room reads as a change. */
 .lab-room:not([hidden]) > .section,
 .lab-room:not([hidden]) > .lab-room-head {
@@ -547,7 +508,6 @@
 
     .lab-room-head-in { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
     .lab-room-name { font-size: 2rem; }
-    .lab-room-sport .lab-art { width: 6rem; }
 
     .lab-wg-bench { grid-template-columns: minmax(0, 1fr); }
 }

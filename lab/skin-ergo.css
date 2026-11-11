@@ -1,0 +1,4 @@
+/* lab/skin-ergo.css: this room's content drawn as the objects it lives in.
+   Scope every rule under
+   .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"]
+   inside @media screen. Shared shell and tokens: lab/skin.css. */

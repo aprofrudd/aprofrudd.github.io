@@ -19,31 +19,16 @@
     if (!main || !article) return;
 
     // ------------------------------------------------------------------
-    // Rooms. Every sport and every fact line is already stated elsewhere
-    // on the page; a room must not claim anything the CV does not.
+    // Rooms: which sections live in which bay of the lab.
     // ------------------------------------------------------------------
     var ROOMS = [
-        { key: 'reception', name: 'Reception', sections: ['at-a-glance', 'about', 'now'],
-          sport: 'Athletics', art: 'track',
-          fact: 'England Athletics coach, from youth to senior age groups.' },
-        { key: 'lab', name: 'Performance Lab', sections: ['applied-projects', 'capability', 'collaboration', 'software'],
-          sport: 'Boxing', art: 'ring',
-          fact: 'Conditioning across 15 world title fights.' },
-        { key: 'ergo', name: 'Ergometer Bay', sections: ['wingate'],
-          sport: 'Cycling', art: 'velodrome',
-          fact: 'Thirty seconds, flat out, on a BBC Micro.' },
-        { key: 'office', name: 'Office', sections: ['experience', 'education', 'skills'],
-          sport: 'Squash', art: 'squash',
-          fact: 'Hydration and fluid balance with England Squash.' },
-        { key: 'print', name: 'Print Room', sections: ['publications', 'grants'],
-          sport: 'Football', art: 'pitch',
-          fact: 'A funded doctoral programme inside Aston Villa FC.' },
-        { key: 'seminar', name: 'Seminar Room', sections: ['phds', 'talks', 'media'],
-          sport: 'Road running', art: 'road',
-          fact: 'Expert commentary for Runner’s World.' },
-        { key: 'desk', name: 'Front Desk', sections: ['available', 'faq', 'contact'],
-          sport: 'Your sport', art: 'blank',
-          fact: 'Bring the problem. The lab is open.' }
+        { key: 'reception', name: 'Reception', sections: ['at-a-glance', 'about', 'now'] },
+        { key: 'lab', name: 'Performance Lab', sections: ['applied-projects', 'capability', 'collaboration', 'software'] },
+        { key: 'ergo', name: 'Ergometer Bay', sections: ['wingate'] },
+        { key: 'office', name: 'Office', sections: ['experience', 'education', 'skills'] },
+        { key: 'print', name: 'Print Room', sections: ['publications', 'grants'] },
+        { key: 'seminar', name: 'Seminar Room', sections: ['phds', 'talks', 'media'] },
+        { key: 'desk', name: 'Front Desk', sections: ['available', 'faq', 'contact'] }
     ];
 
     var LABELS = {
@@ -59,47 +44,6 @@
 
     function esc(s) {
         return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    // Top-down line drawings of each playing area, in the same hand as the
-    // floor plan. Decorative: always aria-hidden, the sport is named in text.
-    function art(kind) {
-        var a = '<svg class="lab-art" viewBox="0 0 200 120" aria-hidden="true" focusable="false">';
-        if (kind === 'track') {
-            a += '<rect x="8" y="12" width="184" height="96" rx="48"/>' +
-                 '<rect x="18" y="22" width="164" height="76" rx="38"/>' +
-                 '<rect x="28" y="32" width="144" height="56" rx="28"/>' +
-                 '<rect x="38" y="42" width="124" height="36" rx="18"/>' +
-                 '<path d="M132 78V108M96 78v10M88 88v10M80 98v10"/>';
-        } else if (kind === 'ring') {
-            a += '<rect x="46" y="6" width="108" height="108"/>' +
-                 '<rect x="56" y="16" width="88" height="88"/>' +
-                 '<rect x="60" y="20" width="80" height="80" class="lab-art-faint"/>' +
-                 '<rect x="64" y="24" width="72" height="72" class="lab-art-faint"/>' +
-                 '<path d="M52 12h10v10H52zM138 12h10v10h-10zM52 98h10v10H52zM138 98h10v10h-10z" class="lab-art-fill"/>';
-        } else if (kind === 'velodrome') {
-            a += '<rect x="8" y="14" width="184" height="92" rx="46"/>' +
-                 '<rect x="20" y="26" width="160" height="68" rx="34" class="lab-art-dash"/>' +
-                 '<rect x="34" y="40" width="132" height="40" rx="20"/>' +
-                 '<path d="M100 14v26M100 80v26"/>';
-        } else if (kind === 'squash') {
-            a += '<rect x="62" y="6" width="76" height="108"/>' +
-                 '<path d="M62 66h76M100 66v48M62 84h18V66M138 84h-18V66"/>' +
-                 '<path d="M62 12h76" class="lab-art-faint"/>';
-        } else if (kind === 'pitch') {
-            a += '<rect x="8" y="10" width="184" height="100"/>' +
-                 '<path d="M100 10v100M8 34h30v52H8M192 34h-30v52h30M8 48h12v24H8M192 48h-12v24h12"/>' +
-                 '<circle cx="100" cy="60" r="17"/>' +
-                 '<circle cx="100" cy="60" r="1.5" class="lab-art-fill"/>';
-        } else if (kind === 'road') {
-            a += '<path d="M6 100C52 104 44 34 92 44S134 104 194 22" class="lab-art-road"/>' +
-                 '<path d="M6 100C52 104 44 34 92 44S134 104 194 22" class="lab-art-dash"/>' +
-                 '<path d="M184 8v22M184 8l-12 5 12 5" />';
-        } else {
-            a += '<rect x="20" y="14" width="160" height="92" class="lab-art-dash"/>' +
-                 '<path d="M90 50c0-14 22-14 22 0 0 9-11 9-11 20M101 80v2"/>';
-        }
-        return a + '</svg>';
     }
 
     // ------------------------------------------------------------------
@@ -154,12 +98,6 @@
                 '<div class="lab-room-plate">' +
                     '<p class="lab-room-num">Room ' + room.num + '</p>' +
                     '<h2 class="lab-room-name" tabindex="-1">' + esc(room.name) + '</h2>' +
-                '</div>' +
-                '<div class="lab-room-sport">' +
-                    art(room.art) +
-                    '<p><span class="lab-room-sport-label">In session</span>' +
-                    '<strong>' + esc(room.sport) + '</strong>' +
-                    '<span class="lab-room-fact">' + esc(room.fact) + '</span></p>' +
                 '</div>' +
             '</div>';
         wrap.appendChild(head);

@@ -25,7 +25,8 @@
     'use strict';
 
     // room key -> skin name. The shell (lab/skin.css) is shared by every skin.
-    var SKINS = { reception: 'night' };
+    var SKINS = { reception: 'night', lab: 'night', ergo: 'night', office: 'night',
+                  print: 'night', seminar: 'night', desk: 'night' };
 
     function el(tag, cls) {
         var e = document.createElement(tag);
@@ -109,6 +110,15 @@
 
     window.LabSkin = {
         skins: SKINS,
-        refresh: sync
+        refresh: sync,
+        // A room's own file (lab/skin-<key>.js) registers its decorative
+        // extras here, so rooms do not have to share this file.
+        decor: function (key, builder) {
+            DECOR[key] = builder;
+            built[key] = false;
+            sync();
+        },
+        el: el,
+        deco: deco
     };
 })();
