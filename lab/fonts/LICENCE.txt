@@ -1,0 +1,9 @@
+Vendored fonts
+==============
+
+caveat-latin-wght.woff2
+  Font:    Caveat, variable (weights 400-700), Latin subset. Not modified.
+  Use:     the handwriting on the Reception whiteboard (lab/skin-reception.css).
+  Source:  npm @fontsource-variable/caveat 5.3.0, from github.com/googlefonts/caveat
+  Licence: SIL Open Font License 1.1. Copyright 2014 The Caveat Project Authors.
+           Full text in OFL-Caveat.txt beside this file.

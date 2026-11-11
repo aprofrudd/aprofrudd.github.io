@@ -278,9 +278,36 @@
     function camera() {
         if (!scene) return;
         var cover = isOpen ? inset() : null;
-        scene.focus(isOpen && cover ? current : null, cover || { right: 0, bottom: 0 });
         scene.mark(isOpen || linear ? current : null);
+        // Walk up to the object being read; fall back to the whole bay.
+        var close = isOpen && cover && reading && scene.focusOn && scene.focusOn(reading, cover);
+        if (!close) scene.focus(isOpen && cover ? current : null, cover || { right: 0, bottom: 0 });
+        if (scene.markObject) scene.markObject(isOpen && cover ? reading : null);
     }
+
+    // Which section of the open room is being read: the one under a line a
+    // third of the way down the drawer. The camera follows it.
+    var reading = null;
+    var trackPending = false;
+    function trackReading() {
+        trackPending = false;
+        if (!isOpen || linear) return;
+        var room = byKey(current);
+        var box = article.getBoundingClientRect();
+        var probe = box.top + box.height * 0.35;
+        var found = null;
+        room.sections.forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && el.getBoundingClientRect().top <= probe) found = id;
+        });
+        found = found || room.sections[0];
+        if (found !== reading) { reading = found; camera(); }
+    }
+    article.addEventListener('scroll', function () {
+        if (trackPending) return;
+        trackPending = true;
+        setTimeout(trackReading, 140);
+    }, { passive: true });
     window.addEventListener('resize', function () { if (isOpen) camera(); });
 
 
@@ -392,6 +419,8 @@
         var wrap = el && el.closest('.lab-room');
         if (!wrap) return false;
         current = wrap.getAttribute('data-room');
+        var sec = el === wrap ? null : el.closest('section');
+        reading = sec ? sec.id : byKey(current).sections[0];
         setOpen(true);
         if (linear) el.scrollIntoView();
         else if (el === wrap) article.scrollTop = 0;

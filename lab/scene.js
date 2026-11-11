@@ -32,7 +32,13 @@
     var FOCUS_Y0 = 130, FOCUS_Y1 = 1185;
     // Tight art bounds [x0, y0, x1, y1] for hotspots whose click box is much taller or wider
     // than the object. Used for hover rings, the reading rim and close-up framing only.
-    var FIT = {};
+    var FIT = {
+        now: { frame: [494, 388, 722, 900], parts: [[494, 388, 722, 1030]] },
+        talks: { frame: [3338, 120, 3634, 468], parts: [[3338, 120, 3634, 468], [3542, 668, 3676, 1010]] },
+        media: { frame: [3814, 188, 3986, 362], parts: [[3814, 188, 3986, 362], [3810, 548, 3946, 1014]] },
+        capability: { frame: [1048, 556, 1236, 1024], parts: [[1014, 236, 1210, 462], [1048, 556, 1236, 1026]] },
+        publications: { frame: [2788, 212, 3022, 1008], parts: [[2788, 212, 3022, 1008], [3026, 776, 3212, 1026]] }
+    };
     // Close-up scale cap (see focusOn).
     var CLOSE_MAX = 1.5, CLOSE_FILL = 0.55;
     var uid = 0;
@@ -75,7 +81,7 @@
         function hole(x, y, w, h, rx) { holes.push(R(x, y, w, h, '#000', rx ? 'rx="' + rx + '"' : '')); }
         function shadow(cx, cy, rx, ry, op) { return E(cx, cy, rx, ry, U('shadow'), op ? 'opacity="' + op + '"' : ''); }
         function hot(id, label, aria, box, inner) {
-            hots.push({ id: id, label: label, box: box, fit: FIT[id] || box, aria: aria });
+            hots.push({ id: id, label: label, box: box, fit: (FIT[id] || {}).frame || box, parts: (FIT[id] || {}).parts || [box], aria: aria });
             return '<a href="#' + id + '" class="lab-sc-hot" data-hot="' + id + '" aria-label="' + aria + '">' +
                 R(box[0], box[1], box[2] - box[0], box[3] - box[1], '#000', 'fill-opacity="0"') + inner + '</a>';
         }
@@ -855,9 +861,12 @@
         });
         var rings = '';
         d.hots.forEach(function (h) {
-            var b = h.fit;
-            rings += '<g class="lab-sc-ring" data-ring="' + h.id + '"><rect class="lab-sc-ringglow" x="' + (b[0] - 8) + '" y="' + (b[1] - 8) + '" width="' + (b[2] - b[0] + 16) + '" height="' + (b[3] - b[1] + 16) + '" rx="18"/>' +
-                '<rect class="lab-sc-ringline" x="' + (b[0] - 8) + '" y="' + (b[1] - 8) + '" width="' + (b[2] - b[0] + 16) + '" height="' + (b[3] - b[1] + 16) + '" rx="18"/></g>';
+            rings += '<g class="lab-sc-ring" data-ring="' + h.id + '">';
+            h.parts.forEach(function (b) {
+                rings += '<rect class="lab-sc-ringglow" x="' + (b[0] - 8) + '" y="' + (b[1] - 8) + '" width="' + (b[2] - b[0] + 16) + '" height="' + (b[3] - b[1] + 16) + '" rx="18"/>' +
+                    '<rect class="lab-sc-ringline" x="' + (b[0] - 8) + '" y="' + (b[1] - 8) + '" width="' + (b[2] - b[0] + 16) + '" height="' + (b[3] - b[1] + 16) + '" rx="18"/>';
+            });
+            rings += '</g>';
         });
         d.toys.forEach(function (t) {
             var b = t.box;
@@ -879,7 +888,7 @@
             '<g class="lab-sc-reading" aria-hidden="true">' +
                 '<rect class="lab-sc-rdim" ' + BIG + ' fill="' + U('rdDim') + '"/>' +
                 '<ellipse class="lab-sc-rwarm" fill="' + U('rdWarm') + '"/>' +
-                '<rect class="lab-sc-rhalo" rx="16"/><rect class="lab-sc-rrim" rx="12"/></g>' +
+                '<g class="lab-sc-rparts"></g></g>' +
             '<g class="lab-sc-ui">' + ui + '<g class="lab-sc-rings" aria-hidden="true">' + rings + '</g><g class="lab-sc-tags" aria-hidden="true"></g></g>' +
             '</svg>' +
             '<div class="lab-sc-hint" aria-hidden="true"><span class="lab-sc-hint-arrows">← →</span> Drag to look around</div>';
@@ -922,19 +931,25 @@
             });
             var need = 44 / cam.s;
             toyHits.forEach(function (t) {
-                var b = t.box, w = b[2] - b[0], h = b[3] - b[1], cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
-                var halfW = Math.max(w / 2, need / 2), halfH = Math.max(h / 2, need / 2);
+                var b = t.box, w = b[2] - b[0], h = b[3] - b[1];
+                var addX = Math.max(0, need - w), addY = Math.max(0, need - h);
+                var lim = [Infinity, Infinity, Infinity, Infinity];          // left, top, right, bottom
                 toyHits.forEach(function (o) {
                     if (o === t) return;
-                    var ob = o.box, ox = (ob[0] + ob[2]) / 2, oy = (ob[1] + ob[3]) / 2;
-                    if (Math.abs(oy - cy) < (h + (ob[3] - ob[1])) / 2 + need && Math.abs(ox - cx) < (w + (ob[2] - ob[0])) / 2 + need) {
-                        var dx = Math.abs(ox - cx), dy = Math.abs(oy - cy);
-                        if (dx >= dy) halfW = Math.min(halfW, Math.max(w / 2, dx / 2)); else halfH = Math.min(halfH, Math.max(h / 2, dy / 2));
-                    }
+                    var ob = o.box;
+                    if (ob[0] <= b[0] && ob[2] >= b[2] && ob[1] <= b[1] && ob[3] >= b[3]) return;   // t sits on top of o
+                    var oy = ob[1] < b[3] + addY && ob[3] > b[1] - addY, ox = ob[0] < b[2] + addX && ob[2] > b[0] - addX;
+                    if (oy && ob[2] <= b[0]) lim[0] = Math.min(lim[0], (b[0] - ob[2]) / 2);
+                    if (oy && ob[0] >= b[2]) lim[2] = Math.min(lim[2], (ob[0] - b[2]) / 2);
+                    if (ox && ob[3] <= b[1]) lim[1] = Math.min(lim[1], (b[1] - ob[3]) / 2);
+                    if (ox && ob[1] >= b[3]) lim[3] = Math.min(lim[3], (ob[1] - b[3]) / 2);
                 });
+                // grow evenly, but never past halfway to a neighbouring toy; a capped side hands its share to the other
+                var l = Math.min(addX / 2, lim[0]), r = Math.min(addX - l, lim[2]); l = Math.min(addX - r, lim[0]);
+                var tp = Math.min(addY / 2, lim[1]), bt = Math.min(addY - tp, lim[3]); tp = Math.min(addY - bt, lim[1]);
                 if (!t.rect) return;
-                t.rect.setAttribute('x', cx - halfW); t.rect.setAttribute('y', cy - halfH);
-                t.rect.setAttribute('width', halfW * 2); t.rect.setAttribute('height', halfH * 2);
+                t.rect.setAttribute('x', b[0] - l); t.rect.setAttribute('y', b[1] - tp);
+                t.rect.setAttribute('width', w + l + r); t.rect.setAttribute('height', h + tp + bt);
             });
         }
         function overviewTarget() {
@@ -1381,7 +1396,7 @@
         var objects = d.hots.map(function (h) {
             return { id: h.id, zone: zoneOfBox(h.box), label: h.aria, x: (h.box[0] + h.box[2]) / 2 };
         }).sort(function (a, b) { return a.x - b.x; }).map(function (o) { return { id: o.id, zone: o.zone, label: o.label }; });
-        var rdim = q('.lab-sc-rdim'), rwarm = q('.lab-sc-rwarm'), rhalo = q('.lab-sc-rhalo'), rrim = q('.lab-sc-rrim'), rgroup = q('.lab-sc-reading');
+        var rdim = q('.lab-sc-rdim'), rwarm = q('.lab-sc-rwarm'), rparts = q('.lab-sc-rparts'), rgroup = q('.lab-sc-reading');
         var dimGrad = document.getElementById(pre + 'rdDim'), warmGrad = document.getElementById(pre + 'rdWarm');
         function markObject(id) {
             if (id && !hotById[id]) id = null;
@@ -1395,9 +1410,11 @@
             dimGrad.setAttribute('gradientTransform', 'translate(' + cx + ' ' + cy + ') scale(' + rx + ' ' + ry + ')');
             warmGrad.setAttribute('gradientTransform', 'translate(' + cx + ' ' + cy + ') scale(' + (w * 0.75) + ' ' + (h * 0.75) + ')');
             rwarm.setAttribute('cx', cx); rwarm.setAttribute('cy', cy); rwarm.setAttribute('rx', w * 0.75); rwarm.setAttribute('ry', h * 0.75);
-            [[rhalo, 10], [rrim, 5]].forEach(function (p) {
-                p[0].setAttribute('x', b[0] - p[1]); p[0].setAttribute('y', b[1] - p[1]);
-                p[0].setAttribute('width', w + 2 * p[1]); p[0].setAttribute('height', h + 2 * p[1]);
+            rparts.textContent = '';
+            hotById[reading].parts.forEach(function (pb) {
+                [['lab-sc-rhalo', 10, 16], ['lab-sc-rrim', 5, 12]].forEach(function (p) {
+                    mk('rect', { 'class': p[0], x: pb[0] - p[1], y: pb[1] - p[1], width: pb[2] - pb[0] + 2 * p[1], height: pb[3] - pb[1] + 2 * p[1], rx: p[2] }, rparts);
+                });
             });
         }
         return {

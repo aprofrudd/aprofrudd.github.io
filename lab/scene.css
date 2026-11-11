@@ -198,11 +198,10 @@
 
 /* ---------- reading state: the object the visitor is reading about ---------- */
 .lab-sc-reading { pointer-events: none; }
-.lab-sc-reading > * { opacity: 0; transition: opacity .5s ease; pointer-events: none; }
-.lab-sc-reading.is-on .lab-sc-rdim { opacity: .5; }
+.lab-sc-reading > *, .lab-sc-rparts > * { opacity: 0; transition: opacity .5s ease; pointer-events: none; }
+.lab-sc-reading.is-on .lab-sc-rdim { opacity: .42; }
 .lab-sc-reading.is-on .lab-sc-rwarm { opacity: 1; }
-.lab-sc-reading.is-on .lab-sc-rhalo { opacity: 1; }
-.lab-sc-reading.is-on .lab-sc-rrim { opacity: 1; }
+.lab-sc-reading.is-on .lab-sc-rparts, .lab-sc-reading.is-on .lab-sc-rparts > * { opacity: 1; }
 .lab-sc-reading.is-on .lab-sc-rwarm { animation: lab-sc-breathe 4.2s ease-in-out infinite; }
 @keyframes lab-sc-breathe { 0%, 100% { transform: none; } 50% { transform: none; opacity: .72; } }
 .lab-sc-rhalo { fill: none; stroke: #ffd58a; stroke-opacity: .22; stroke-width: calc(14px * var(--lab-sc-k)); }

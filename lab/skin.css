@@ -1,0 +1,248 @@
+/* lab/skin.css: the room shell. When a room has a skin, lab/skin.js puts
+   data-skin on the drawer and the drawer stops being a white web page and
+   becomes the lab wall at night, continuous with the illustration beside it
+   (colours taken from lab/scene.js: the wall gradient #a39f97 -> #c3bdb0 and
+   the lower panel #959d97 under the night overlay #0b1430 at .6, the dado
+   rail, the skirting and the floor).
+
+   Light, as in the scene: the desk lamp is off to the right (warm, from the
+   upper right, so objects cast shadows down and to the left); the corridor
+   door is far off to the left (a faint cool spill on that side).
+
+   Everything here is scoped to .lab-live:not(.lab-linear) .lab-drawer[data-skin]
+   and to screens only, so "Read as one page", print and unskinned rooms keep
+   the plain page. A room's own objects live in lab/skin-<room>.css.
+
+   Tokens a room skin can use (set on the skinned drawer):
+     --sk-wall / --sk-wall-hi / --sk-wall-lo   the painted wall at night
+     --sk-panel, --sk-dado, --sk-skirt, --sk-floor   lower wall and floor
+     --sk-cream      sign-writing on the wall (headings), 8:1 on --sk-wall
+     --sk-cream-dim  secondary text on the wall, 4.9:1 on --sk-wall
+     --sk-amber      LED amber; --sk-amber-ink printed legends on black
+     --sk-lamp       warm lamp light; --sk-cool corridor light
+     --sk-shadow     cast shadow (down-left, light from the upper right)
+     --sk-focus      focus ring on dark surfaces; --sk-focus-ink on paper */
+
+@media screen {
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] {
+    --sk-wall: #4b4f5c;
+    --sk-wall-hi: #545866;
+    --sk-wall-lo: #42464f;
+    --sk-panel: #3f4955;
+    --sk-dado: #5e626c;
+    --sk-skirt: #1d2437;
+    --sk-floor: #2b3240;
+    --sk-floor-lo: #222834;
+    --sk-cream: #f1ead9;
+    --sk-cream-dim: #d4cdbd;
+    --sk-amber: #ffb347;
+    --sk-amber-ink: #e3a65a;
+    --sk-lamp: 255 196 120;
+    --sk-cool: 143 190 255;
+    --sk-shadow: -12px 18px 30px rgb(6 9 20 / 0.5), -3px 5px 8px rgb(6 9 20 / 0.35);
+    --sk-focus: #ffd58a;
+    --sk-focus-ink: #6b2f00;
+    --sk-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --sk-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+    color: var(--sk-cream);
+    color-scheme: dark;
+    box-shadow: none;
+    /* The wall, fixed behind the scrolling content (background-attachment
+       scroll on a scroll container stays put). Lamp glow upper right,
+       corridor spill on the left, panel seams every 320 scene units. */
+    background:
+        radial-gradient(75% 55% at 100% 0%, rgb(var(--sk-lamp) / 0.17), rgb(var(--sk-lamp) / 0) 70%),
+        radial-gradient(55% 60% at 0% 40%, rgb(var(--sk-cool) / 0.06), rgb(var(--sk-cool) / 0) 70%),
+        radial-gradient(130% 90% at 60% 50%, transparent 55%, rgb(6 8 16 / 0.32) 100%),
+        linear-gradient(var(--sk-wall-lo), var(--sk-wall) 30%, var(--sk-wall-hi) 75%, var(--sk-wall));
+    background-color: var(--sk-wall);
+    /* a soft edge into the scene instead of a hard panel and drop shadow */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 36px);
+    mask-image: linear-gradient(to right, transparent 0, #000 36px);
+    scrollbar-color: #6a6f7c transparent;
+}
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] ::selection {
+    background: rgb(255 179 71 / 0.45);
+    color: inherit;
+}
+
+/* Focus: amber ring on the wall; objects with light surfaces switch to ink. */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] :focus-visible {
+    outline: 2px solid var(--sk-focus);
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+
+/* Every section sits straight on the wall: no white or grey bands. */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .section,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .section-alt {
+    background: transparent;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .container {
+    padding-left: 2.75rem;
+    padding-right: 2.25rem;
+}
+
+/* ---- the sticky bar: a dark rail along the top of the wall ---------------- */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-drawer-bar {
+    padding: 0.65rem 1.25rem 0.65rem 2.75rem;
+    background:
+        linear-gradient(rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 40%),
+        rgb(29 32 40 / 0.86);
+    border-bottom: 1px solid rgb(0 0 0 / 0.45);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.05), 0 8px 18px -10px rgb(0 0 0 / 0.6);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-chips-room {
+    color: var(--sk-amber-ink);
+    font-weight: 700;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-chips a {
+    border-color: rgb(241 234 217 / 0.28);
+    background: rgb(255 255 255 / 0.03);
+    color: var(--sk-cream);
+    font-family: var(--sk-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 4px;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-chips a:hover {
+    border-color: var(--sk-amber);
+    color: var(--sk-amber);
+}
+/* "Back to the lab" is the room's exit sign (#13813f in the scene). */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-close {
+    border-radius: 5px;
+    background: linear-gradient(#17924a, #117a3c);
+    color: #f4fff7;
+    font-family: var(--sk-sans);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    box-shadow: 0 0 16px rgb(108 240 138 / 0.28), inset 0 1px 0 rgb(255 255 255 / 0.2);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-close:hover {
+    background: linear-gradient(#1aa553, #138743);
+}
+
+/* ---- room header: a screwed-on door plate and an in-session lamp -------- */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-head {
+    background: transparent;
+    color: var(--sk-cream);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-head-in {
+    padding-top: 2.25rem;
+    padding-bottom: 1rem;
+    align-items: center;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-plate {
+    position: relative;
+    padding: 0.85rem 1.6rem 0.95rem;
+    border-radius: 4px;
+    background:
+        /* four screws */
+        radial-gradient(circle at 10px 10px, #9aa1aa 0 2px, #3a3f48 2.5px, transparent 3.5px),
+        radial-gradient(circle at calc(100% - 10px) 10px, #9aa1aa 0 2px, #3a3f48 2.5px, transparent 3.5px),
+        radial-gradient(circle at 10px calc(100% - 10px), #9aa1aa 0 2px, #3a3f48 2.5px, transparent 3.5px),
+        radial-gradient(circle at calc(100% - 10px) calc(100% - 10px), #9aa1aa 0 2px, #3a3f48 2.5px, transparent 3.5px),
+        /* lamp catching the top-right corner of the plate */
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.16), transparent 45%),
+        linear-gradient(#2a303b, #20252e);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        inset 0 -1px 0 rgb(0 0 0 / 0.5),
+        var(--sk-shadow);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-num {
+    color: var(--sk-amber-ink);
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-name {
+    font-size: 2.1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--sk-cream);
+    /* engraved: a dark cut above, a lit edge below */
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.1);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-sport .lab-art {
+    color: var(--sk-amber-ink);
+    opacity: 0.85;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-sport-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--sk-amber-ink);
+}
+/* the lit "in session" lamp beside the label */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-sport-label::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--sk-amber);
+    box-shadow: 0 0 8px 2px rgb(255 179 71 / 0.55);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-sport strong { color: var(--sk-cream); }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-fact { color: var(--sk-cream-dim); }
+
+/* ---- room footer: the floor, with the next doors as signs ---------------- */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-foot {
+    border-top: 0;
+    background:
+        linear-gradient(rgb(0 0 0 / 0.25), rgb(0 0 0 / 0) 14px),
+        linear-gradient(var(--sk-floor), var(--sk-floor-lo));
+    min-height: 7rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-door {
+    padding: 0.55rem 0.9rem;
+    border-radius: 4px;
+    background: linear-gradient(#2a303b, #20252e);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 6px 14px rgb(0 0 0 / 0.35);
+    color: var(--sk-cream);
+    justify-self: start;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-door-next { justify-self: end; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-door-plan {
+    justify-self: center;
+    background: transparent;
+    box-shadow: none;
+    color: var(--sk-cream-dim);
+    text-decoration: underline;
+    text-decoration-color: rgb(212 205 189 / 0.4);
+    text-underline-offset: 4px;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-door span { color: var(--sk-amber-ink); }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-door:hover { color: var(--sk-amber); }
+
+/* ---- phone: the drawer is the whole screen, so no soft edge -------------- */
+@media (max-width: 900px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] {
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-drawer-bar { padding-left: 1.25rem; }
+}
+@media (max-width: 760px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .container {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-drawer-bar { padding: 0.55rem 0.9rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-close { font-size: 0; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-name { font-size: 1.7rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-room-foot-in { grid-template-columns: 1fr 1fr; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin] .lab-door-plan { grid-column: 1 / -1; grid-row: 2; }
+}
+
+} /* @media screen */
