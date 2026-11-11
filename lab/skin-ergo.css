@@ -1,4 +1,433 @@
-/* lab/skin-ergo.css: this room's content drawn as the objects it lives in.
-   Scope every rule under
-   .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"]
-   inside @media screen. Shared shell and tokens: lab/skin.css. */
+/* lab/skin-ergo.css: the Ergometer Bay, on the night wall.
+     #wingate  a steel lab bench standing on the floor: the BBC Micro and the
+               dot matrix printer on its top, the buttons and a typed help
+               card on its front panel, the caveat as a laminated notice
+               taped below them; the title is an engraved bench label and
+               the intro a typed card taped to the wall above.
+
+   The Micro, its screen and the printout are lab.css's objects and keep
+   their own look; only the casing's light and shadow change here. The
+   Wingate's behaviour (lab.js) is untouched: this file only lays the same
+   elements out. .lab-wg-bench and .lab-wg-micro become display: contents so
+   their children can sit on and under one bench top; DOM and tab order are
+   unchanged.
+
+   Every rule is scoped to the live, skinned drawer while it holds the
+   Ergometer Bay, and to screens. Light: the lamp up and to the right (warm,
+   shadows down-left), the corridor faint and cool on the left, and the
+   monitor's own green glow on the wall. */
+
+@media screen {
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] {
+    --eg-paper: #f1e9d6;
+    --eg-paper-hi: #f8f2e3;
+    --eg-paper-lo: #e6dcc5;
+    --eg-ink: #2a2620;
+    --eg-serif: 'Iowan Old Style', 'Charter', 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
+    --eg-paper-shadow: -7px 10px 14px rgb(6 9 20 / 0.42), -1px 2px 3px rgb(6 9 20 / 0.32);
+    --eg-tape: linear-gradient(rgb(250 246 230 / 0.6), rgb(236 230 208 / 0.52));
+}
+
+/* -- the floor under the bench: dado rail, lower panel, skirting, floor -- */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate {
+    --eg-legs: 5.25rem;
+    position: relative;
+    container: eg / inline-size;
+    padding: 2rem 0 2.2rem !important;
+    background:
+        linear-gradient(rgb(0 0 0 / 0.3), rgb(0 0 0 / 0) 12px) left bottom / 100% 2.6rem no-repeat,
+        linear-gradient(var(--sk-floor), var(--sk-floor)) left bottom / 100% 2.6rem no-repeat,
+        linear-gradient(#3a4052 0 2px, var(--sk-skirt) 2px) left bottom 2.6rem / 100% 1.3rem no-repeat,
+        linear-gradient(var(--sk-panel), #3b4450) left bottom 3.9rem / 100% calc(var(--eg-legs) - 0.6rem) no-repeat,
+        linear-gradient(#6a6e78, var(--sk-dado) 40%, #474b55) left bottom calc(var(--eg-legs) + 3.3rem) / 100% 9px no-repeat,
+        transparent;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-room-foot {
+    background: linear-gradient(var(--sk-floor), var(--sk-floor-lo));
+    min-height: 0;
+}
+
+/* -- one grid for the whole bay -- */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate > .container {
+    max-width: min(54rem, calc(100% - 3rem));
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas:
+        "title title"
+        "intro intro"
+        "mon   prn"
+        "keys  prn"
+        "top   top"
+        "ctl   help"
+        "note  note"
+        "legs  legs";
+    column-gap: 2rem;
+    row-gap: 0;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-bench,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-micro {
+    display: contents;
+}
+
+/* the bench label: engraved red laminate, screwed to the wall */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate .section-title {
+    grid-area: title;
+    justify-self: center;
+    position: relative;
+    max-width: 100%;
+    margin: 0 0 1.6rem;
+    padding: 0.55rem 2.2rem 0.5rem;
+    border-radius: 3px;
+    background:
+        radial-gradient(circle at 11px 50%, #f2d9cf 0 1.5px, #5e1912 2px 3px, transparent 3.5px),
+        radial-gradient(circle at calc(100% - 11px) 50%, #f2d9cf 0 1.5px, #5e1912 2px 3px, transparent 3.5px),
+        linear-gradient(225deg, rgb(255 210 170 / 0.22), transparent 45%),
+        linear-gradient(#a9342a, #8b261f);
+    color: #fbefe8;
+    font-family: var(--sk-sans);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-align: center;
+    /* engraved through to the white core */
+    text-shadow: 0 -1px 0 rgb(60 10 5 / 0.65);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -1px 0 rgb(0 0 0 / 0.35), var(--sk-shadow);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate .section-title::before,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate .section-title::after { content: none; }
+
+/* the intro: a typed card taped to the wall above the bench */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-intro {
+    grid-area: intro;
+    justify-self: center;
+    position: relative;
+    max-width: 37rem;
+    margin: 0 0 2.4rem;
+    padding: 1.35rem 1.6rem 1.25rem;
+    background: linear-gradient(200deg, var(--eg-paper-hi) 0%, var(--eg-paper) 45%, var(--eg-paper-lo) 100%);
+    color: var(--eg-ink);
+    font-family: var(--eg-serif);
+    font-size: 1.04rem;
+    line-height: 1.6;
+    text-align: left;
+    box-shadow: var(--eg-paper-shadow);
+    rotate: -0.25deg;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-intro::before,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-intro::after {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: -12px;
+    width: 72px;
+    height: 22px;
+    border-radius: 1px;
+    background: var(--eg-tape);
+    box-shadow: 0 1px 2px rgb(20 10 2 / 0.18);
+    rotate: -24deg;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-intro::after {
+    left: auto;
+    right: -12px;
+    rotate: 24deg;
+}
+
+/* -- on the bench top: the Micro and the printer -- */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-monitor {
+    grid-area: mon;
+    align-self: end;
+    background:
+        linear-gradient(225deg, rgb(255 214 160 / 0.22), transparent 40%),
+        linear-gradient(#ded6c2, #c9bfa6);
+    box-shadow:
+        inset 0 -6px 0 rgb(0 0 0 / 0.08),
+        inset 0 1px 0 rgb(255 255 255 / 0.5),
+        var(--sk-shadow),
+        0 0 90px 24px rgb(61 255 90 / 0.08);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-keys {
+    grid-area: keys;
+    margin: 0 1.25rem;
+    box-shadow: -6px 6px 8px rgb(6 9 20 / 0.4);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-printer {
+    grid-area: prn;
+    align-self: end;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-platen {
+    background:
+        linear-gradient(225deg, rgb(255 214 160 / 0.2), transparent 40%),
+        linear-gradient(#ded6c2, #c6bca2);
+    box-shadow: inset 0 5px 0 #2b2b2b, inset 0 -5px 0 rgb(0 0 0 / 0.08), var(--sk-shadow);
+    border-radius: 6px 6px 3px 3px;
+}
+
+/* the bench top (the bench's ::before, a grid item of the bay) */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-bench::before {
+    content: '';
+    grid-area: top;
+    height: 20px;
+    margin: 0 -1.1rem;
+    border-radius: 3px;
+    background:
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.28), transparent 35%),
+        linear-gradient(#959ca8, #737a86 35%, #555b66 80%, #3d424b);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 8px 12px -2px rgb(6 9 20 / 0.5);
+}
+
+/* the front panel under it, holding the controls, the help card and the notice */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate > .container::before {
+    content: '';
+    grid-column: 1 / -1;
+    grid-row: ctl / note;
+    margin: 0 -0.55rem;
+    background:
+        radial-gradient(circle at 14px 14px, #a9b0b9 0 2px, #2a2f37 2.5px 3.2px, transparent 3.8px),
+        radial-gradient(circle at calc(100% - 14px) 14px, #a9b0b9 0 2px, #2a2f37 2.5px 3.2px, transparent 3.8px),
+        radial-gradient(circle at 14px calc(100% - 14px), #a9b0b9 0 2px, #2a2f37 2.5px 3.2px, transparent 3.8px),
+        radial-gradient(circle at calc(100% - 14px) calc(100% - 14px), #a9b0b9 0 2px, #2a2f37 2.5px 3.2px, transparent 3.8px),
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.12), transparent 40%),
+        linear-gradient(rgb(0 0 0 / 0.35), rgb(0 0 0 / 0) 10px),
+        linear-gradient(#363c47, #2c313a);
+    box-shadow: var(--sk-shadow);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-controls,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-help,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-note {
+    position: relative;
+    z-index: 1;
+}
+
+/* legs, a foot rail and castors, standing on the floor */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-bench::after {
+    content: '';
+    grid-area: legs;
+    height: var(--eg-legs);
+    margin: 0 -0.2rem;
+    pointer-events: none;
+    background:
+        radial-gradient(circle, #15171b 0 6px, #3a3e45 6.5px 7.5px, transparent 8px) 1% 100% / 18px 18px no-repeat,
+        radial-gradient(circle, #15171b 0 6px, #3a3e45 6.5px 7.5px, transparent 8px) 99% 100% / 18px 18px no-repeat,
+        linear-gradient(#5a616c, #3a3f48) 0 calc(100% - 26px) / 100% 8px no-repeat,
+        linear-gradient(90deg, #3b414b, #6b727d 45%, #3b414b) 0.35% 0 / 12px calc(100% - 14px) no-repeat,
+        linear-gradient(90deg, #3b414b, #6b727d 45%, #3b414b) 99.65% 0 / 12px calc(100% - 14px) no-repeat;
+    filter: drop-shadow(-6px 6px 6px rgb(6 9 20 / 0.45));
+}
+
+/* -- the controls: BBC keycaps, the red one to start -- */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-controls {
+    grid-area: ctl;
+    align-self: start;
+    margin: 1.35rem 0 0 1.4rem;
+    gap: 0.65rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-btn {
+    padding: 0.7rem 1.05rem 0.75rem;
+    border: 0;
+    border-radius: 5px;
+    background:
+        linear-gradient(225deg, rgb(255 230 190 / 0.35), transparent 50%),
+        linear-gradient(#efe9da, #d8cfb8);
+    color: #23211c;
+    font-family: var(--sk-sans);
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.7),
+        inset 0 -3px 0 rgb(0 0 0 / 0.16),
+        0 3px 0 #776f5d,
+        -4px 7px 9px rgb(6 9 20 / 0.5);
+    transition: background-color 0.15s ease, translate 0.08s ease, box-shadow 0.08s ease;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-btn:hover {
+    background:
+        linear-gradient(225deg, rgb(255 230 190 / 0.45), transparent 50%),
+        linear-gradient(#f6f1e4, #e0d8c3);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-btn:active {
+    translate: 0 2px;
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.6),
+        inset 0 -2px 0 rgb(0 0 0 / 0.16),
+        0 1px 0 #776f5d,
+        -2px 4px 5px rgb(6 9 20 / 0.45);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-btn-main {
+    background:
+        linear-gradient(225deg, rgb(255 200 160 / 0.25), transparent 50%),
+        linear-gradient(#bd3f1e, #9e3218);
+    color: #fff6ee;
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.25),
+        inset 0 -3px 0 rgb(0 0 0 / 0.2),
+        0 3px 0 #5f1d0c,
+        -4px 7px 9px rgb(6 9 20 / 0.5);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-btn-main:hover {
+    background:
+        linear-gradient(225deg, rgb(255 200 160 / 0.3), transparent 50%),
+        linear-gradient(#a8361a, #8c2b14);
+}
+/* while the test runs the start key becomes the pedal (lab.js adds is-pedal) */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-btn-main.is-pedal {
+    padding: 1.6rem 1rem;
+    background: linear-gradient(#d9451f, #b93614);
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-btn-main.is-pedal:active {
+    transform: scale(0.985);
+    background: #b93614;
+}
+
+/* the help: a small typed card taped to the panel beside the keys */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-help {
+    grid-area: help;
+    align-self: start;
+    margin: 1.35rem 1.4rem 0 0;
+    padding: 0.85rem 1.05rem 0.8rem;
+    background: linear-gradient(200deg, var(--eg-paper-hi) 0%, var(--eg-paper) 50%, var(--eg-paper-lo) 100%);
+    color: var(--eg-ink);
+    font-family: var(--eg-serif);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    box-shadow: -5px 7px 10px rgb(6 9 20 / 0.45), -1px 2px 3px rgb(6 9 20 / 0.3);
+    rotate: 0.3deg;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-help::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 64px;
+    height: 20px;
+    margin-left: -32px;
+    border-radius: 1px;
+    background: var(--eg-tape);
+    box-shadow: 0 1px 2px rgb(20 10 2 / 0.18);
+    rotate: -3deg;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-help kbd {
+    min-width: 1.7em;
+    padding: 0.05em 0.4em 0.1em;
+    border: 0;
+    border-radius: 3px;
+    background: linear-gradient(#f4efe3, #d9d0ba);
+    color: #23211c;
+    font-family: var(--sk-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.15), 0 1.5px 0 #8a826e;
+}
+
+/* the caveat: a laminated notice, taped to the panel */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-note {
+    grid-area: note;
+    justify-self: center;
+    max-width: 37rem;
+    margin: 1.6rem 1.4rem 1.5rem;
+    padding: 1.45rem 1.45rem 1rem;
+    border-radius: 5px;
+    background:
+        repeating-linear-gradient(-45deg, #f0c419 0 9px, #1f1f22 9px 18px) top / 100% 8px no-repeat,
+        linear-gradient(118deg, transparent 22%, rgb(255 255 255 / 0.3) 28%, rgb(255 255 255 / 0) 36%),
+        linear-gradient(200deg, var(--eg-paper-hi) 0%, var(--eg-paper) 50%, var(--eg-paper-lo) 100%);
+    color: var(--eg-ink);
+    font-family: var(--eg-serif);
+    font-size: 0.97rem;
+    line-height: 1.55;
+    text-align: left;
+    box-shadow:
+        inset 0 0 0 1px rgb(255 255 255 / 0.5),
+        -5px 7px 10px rgb(6 9 20 / 0.45),
+        -1px 2px 3px rgb(6 9 20 / 0.3);
+    rotate: -0.2deg;
+}
+
+/* -- arrival: the label goes up, the cards are taped on, the screen glows -- */
+@keyframes eg-pin {
+    0%   { opacity: 0; translate: 5px -14px; scale: 1.02; }
+    60%  { opacity: 1; }
+    100% { opacity: 1; translate: 0 0; scale: 1; }
+}
+@keyframes eg-glow {
+    0%   { box-shadow: inset 0 -6px 0 rgb(0 0 0 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.5), var(--sk-shadow), 0 0 40px 0 rgb(61 255 90 / 0); }
+    35%  { box-shadow: inset 0 -6px 0 rgb(0 0 0 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.5), var(--sk-shadow), 0 0 100px 30px rgb(61 255 90 / 0.16); }
+    100% { box-shadow: inset 0 -6px 0 rgb(0 0 0 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.5), var(--sk-shadow), 0 0 90px 24px rgb(61 255 90 / 0.08); }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate.lab-ex-play .section-title {
+    animation: eg-pin 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) 0.05s both;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate.lab-ex-play .lab-wg-intro {
+    animation: eg-pin 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) 0.25s both;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate.lab-ex-play .lab-wg-monitor {
+    animation: eg-glow 1.1s ease-out 0.3s both;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate.lab-ex-play .lab-wg-help {
+    animation: eg-pin 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) 0.6s both;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate.lab-ex-play .lab-wg-note {
+    animation: eg-pin 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) 0.8s both;
+}
+
+/* ============================ SMALLER DRAWERS ============================ */
+
+@container eg (max-width: 680px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate > .container {
+        max-width: calc(100% - 1.5rem);
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "title"
+            "intro"
+            "mon"
+            "keys"
+            "top"
+            "ctl"
+            "help"
+            "note"
+            "prn"
+            "legs";
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate .section-title { font-size: 0.82rem; letter-spacing: 0.16em; padding: 0.5rem 1.8rem 0.45rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-intro { padding: 1.2rem 1.05rem 1.1rem; font-size: 1rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-intro::before { left: -5px; width: 60px; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-intro::after { right: -5px; width: 60px; }
+    /* the printer on the trolley's lower shelf, where the paper has room */
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-printer { margin: 1.2rem 0.9rem 16px; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate > .container::after {
+        content: '';
+        grid-column: 1;
+        grid-row: prn;
+        margin: 0 -0.2rem;
+        background:
+            linear-gradient(225deg, rgb(var(--sk-lamp) / 0.25), transparent 35%) 0 100% / 100% 16px no-repeat,
+            linear-gradient(#858c98, #5b616c 60%, #40454e) 0 100% / 100% 16px no-repeat,
+            linear-gradient(90deg, #3b414b, #6b727d 45%, #3b414b) 0 0 / 12px 100% no-repeat,
+            linear-gradient(90deg, #3b414b, #6b727d 45%, #3b414b) 100% 0 / 12px 100% no-repeat,
+            linear-gradient(rgb(0 0 0 / 0.3), rgb(0 0 0 / 0.1) 30px, rgb(0 0 0 / 0.12)) 12px 0 / calc(100% - 24px) 100% no-repeat;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-printer { position: relative; z-index: 1; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-bench::before { margin: 0 -0.5rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] #wingate > .container::before { margin: 0 -0.25rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-controls { margin: 1.2rem 1rem 0; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-help { margin: 1.3rem 1rem 0; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-note { margin: 1.5rem 1rem 1.3rem; padding: 1.35rem 1.05rem 0.95rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] *,
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] *::before,
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] *::after {
+        animation: none !important;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="ergo"] .lab-wg-btn { transition: none; }
+}
+
+} /* @media screen */

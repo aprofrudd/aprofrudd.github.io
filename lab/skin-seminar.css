@@ -1,4 +1,834 @@
-/* lab/skin-seminar.css: this room's content drawn as the objects it lives in.
-   Scope every rule under
-   .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"]
-   inside @media screen. Shared shell and tokens: lab/skin.css. */
+/* lab/skin-seminar.css: the Seminar Room, read off the wall.
+     #phds    the low bookshelf of bound theses: each candidate is a
+              cloth-bound thesis lying spine-out on its own shelf, gold-blocked
+     #talks   the pull-down projector screen: each talk a projected slide
+     #media   the wall TV: outlets as a channel bar, highlights as news
+              lower-thirds, the ON AIR sign lit above, the boom mic beside
+
+   Restyles the existing DOM only. The extras (mortarboard, projector, ON AIR
+   sign, boom mic, ...) are built by lab/skin-seminar.js: aria-hidden, hidden
+   unless shown here, no text nodes of their own (letters are drawn by CSS
+   from data attributes). Every rule is scoped to the live, skinned drawer
+   while it holds the Seminar Room, and to screens; print and "Read as one
+   page" never see any of it.
+
+   Light as in lab/skin.css: lamp warm from the upper right (highlights top
+   right, shadows cast down-left), corridor cool and faint from the left.
+
+   Arrival gestures hang off .lab-ex-play (added and always removed again by
+   lab/exhibits.js) with fill-mode both, all landing inside 2.1s. */
+
+@media screen {
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] {
+    --sm-wood-1: #8f6542;
+    --sm-wood-2: #6a4529;
+    --sm-wood-3: #4a2f1c;
+    --sm-back: #231a13;
+    --sm-gold: #f4e3ab;
+    --sm-gold-2: #e6cd8c;
+    --sm-gold-line: 216 184 106;
+    --sm-paper: #f1e9d6;
+    --sm-ink: #2a2620;
+    --sm-navy: #1f2a44;
+    --sm-serif: 'Iowan Old Style', 'Charter', 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
+    --sm-brass-1: #e2c477;
+    --sm-brass-2: #b88f3d;
+    --sm-brass-3: #9a762c;
+}
+
+/* the section titles belong to their objects: no blue underline, no ECG blip */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] :is(#phds, #talks, #media) .section-title::before,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] :is(#phds, #talks, #media) .section-title::after { content: none; }
+
+/* ============================ BOOKSHELF ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds { padding: 6.5rem 0 3.5rem; position: relative; }
+
+/* the carcass: stained softwood, lit from the top right */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds > .container {
+    position: relative;
+    max-width: min(56rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 1.15rem 15px 15px;
+    border-radius: 3px;
+    background:
+        linear-gradient(225deg, rgb(255 205 140 / 0.20), transparent 45%),
+        linear-gradient(45deg, rgb(25 14 4 / 0.3), transparent 55%),
+        repeating-linear-gradient(0deg, rgb(40 20 6 / 0.16) 0 1px, transparent 1px 5px, rgb(255 214 160 / 0.07) 5px 6px, transparent 6px 11px),
+        linear-gradient(var(--sm-wood-1), var(--sm-wood-2) 55%, var(--sm-wood-3));
+    box-shadow:
+        inset 0 1px 0 rgb(255 225 180 / 0.35),
+        inset 0 0 0 1px rgb(0 0 0 / 0.3),
+        var(--sk-shadow);
+}
+/* the crown moulding, a lip along the top */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds > .container::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    right: -8px;
+    top: -10px;
+    height: 12px;
+    border-radius: 2px;
+    background: linear-gradient(#a37650, #7a5232 60%, #583823);
+    box-shadow: inset 0 1px 0 rgb(255 230 190 / 0.4), -6px 5px 8px rgb(6 9 20 / 0.4);
+}
+/* the plinth, a skirting under the carcass */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds > .container::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: 100%;
+    height: 12px;
+    background: linear-gradient(#3d2716, #2a1a0e);
+    box-shadow: -8px 8px 12px rgb(6 9 20 / 0.45);
+}
+
+/* the title: a brass plate screwed to the crown */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds .section-title {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 0 1.05rem 0.4rem;
+    padding: 0.5rem 1.7rem 0.46rem;
+    border-radius: 2px;
+    text-align: left;
+    font-family: var(--sk-sans);
+    font-size: 0.88rem;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #1c1305;
+    text-shadow: 0 1px 0 rgb(255 240 190 / 0.6);
+    background:
+        radial-gradient(circle at 9px 50%, #f6e4a8 0 1.6px, #7a5a1e 2.2px, transparent 3.2px),
+        radial-gradient(circle at calc(100% - 9px) 50%, #f6e4a8 0 1.6px, #7a5a1e 2.2px, transparent 3.2px),
+        linear-gradient(118deg, transparent 20%, rgb(255 248 220 / 0.5) 30%, transparent 40%),
+        linear-gradient(225deg, var(--sm-brass-1), var(--sm-brass-2) 55%, var(--sm-brass-3));
+    box-shadow: inset 0 1px 0 rgb(255 248 220 / 0.7), inset 0 -1px 0 rgb(60 38 6 / 0.6), -4px 5px 7px rgb(20 10 2 / 0.5);
+}
+
+/* the interior: two bays, a wooden divider between them */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-grid {
+    max-width: none;
+    margin: 0;
+    gap: 14px;
+    align-items: stretch;
+    background: transparent;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-column {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0;
+    background:
+        radial-gradient(90% 70% at 100% 0%, rgb(var(--sk-lamp) / 0.16), transparent 70%),
+        linear-gradient(90deg, rgb(0 0 0 / 0.35), transparent 22%),
+        var(--sm-back);
+    box-shadow: inset 6px 8px 14px rgb(0 0 0 / 0.65), inset 0 0 0 1px rgb(0 0 0 / 0.5), 0 1px 0 rgb(255 225 180 / 0.25);
+}
+/* the shelf label: a brass holder with a paper slip */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-column h3 {
+    position: relative;
+    width: fit-content;
+    max-width: calc(100% - 28px);
+    margin: 14px 0 6px 14px;
+    padding: 0.28rem 0.85rem 0.25rem;
+    font-family: var(--sk-sans);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sm-ink);
+    background: linear-gradient(200deg, #fbf6e9, #e9e0c8);
+    border: 3px solid;
+    border-image: linear-gradient(225deg, var(--sm-brass-1), var(--sm-brass-2) 55%, var(--sm-brass-3)) 1;
+    box-shadow: -4px 5px 6px rgb(0 0 0 / 0.5), inset 0 0 0 1px rgb(0 0 0 / 0.12);
+}
+
+/* one thesis: cloth over boards, lying spine-out on its own shelf */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item {
+    --ml: 16px;
+    --mr: 20px;
+    --cloth: #1f3a5f;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    margin: 12px var(--mr) 14px var(--ml);
+    padding: 0.7rem 2.2rem 0.75rem 2.4rem;
+    border: 0;
+    border-radius: 2px 2px 1px 1px;
+    color: var(--sm-gold-2);
+    background:
+        /* raised bands near each end, edged in gold */
+        linear-gradient(90deg, rgb(var(--sm-gold-line) / 0.75) 0 1px, rgb(255 255 255 / 0.07) 1px 9px, rgb(var(--sm-gold-line) / 0.75) 9px 10px) 14px 0 / 10px 100% no-repeat,
+        linear-gradient(90deg, rgb(var(--sm-gold-line) / 0.75) 0 1px, rgb(255 255 255 / 0.07) 1px 9px, rgb(var(--sm-gold-line) / 0.75) 9px 10px) calc(100% - 14px) 0 / 10px 100% no-repeat,
+        /* lamp from the right, shade to the left */
+        linear-gradient(270deg, rgb(var(--sk-lamp) / 0.2), transparent 42%),
+        linear-gradient(90deg, rgb(0 0 0 / 0.3), transparent 28%),
+        /* the rounded spine: lit top, dark underside */
+        linear-gradient(180deg, rgb(255 255 255 / 0.13), transparent 16%, transparent 78%, rgb(0 0 0 / 0.34)),
+        /* cloth weave */
+        repeating-linear-gradient(0deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0.07) 0 1px, transparent 1px 3px),
+        var(--cloth);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.22),
+        inset 0 -3px 0 rgb(0 0 0 / 0.28),
+        inset 0 0 0 1px rgb(0 0 0 / 0.25),
+        -8px 4px 10px rgb(0 0 0 / 0.55);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:hover { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), inset 0 -3px 0 rgb(0 0 0 / 0.28), inset 0 0 0 1px rgb(0 0 0 / 0.25), -8px 4px 10px rgb(0 0 0 / 0.55); }
+/* the shelf board under it */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: calc(var(--ml) * -1);
+    right: calc(var(--mr) * -1);
+    height: 14px;
+    background:
+        linear-gradient(225deg, rgb(255 205 140 / 0.18), transparent 50%),
+        linear-gradient(#8a6140, #6a4529 45%, #4d3220);
+    box-shadow: inset 0 1px 0 rgb(255 225 180 / 0.45), 0 5px 8px rgb(0 0 0 / 0.45);
+    pointer-events: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(2) { --cloth: #1f3a5f; --mr: 18px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(3) { --cloth: #6e1c28; --mr: 30px; --ml: 20px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(4) { --cloth: #254a2e; --mr: 14px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(5) { --cloth: #1d1d20; --mr: 26px; --ml: 14px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(6) { --cloth: #52295f; --mr: 16px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(7) { --cloth: #4d300f; --mr: 32px; --ml: 20px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(8) { --cloth: #1d4560; --mr: 20px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(9) { --cloth: #6e1c28; --mr: 14px; --ml: 18px; }
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-name {
+    margin: 0;
+    font-family: var(--sm-serif);
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    font-variant: small-caps;
+    color: var(--sm-gold);
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.5), 0 1px 0 rgb(255 240 190 / 0.14);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] :is(.phd-year, .phd-institution) {
+    margin: 0;
+    font-family: var(--sm-serif);
+    font-size: 0.86rem;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    color: var(--sm-gold-2);
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.45);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-role {
+    margin: 0.18rem 0 0;
+    font-family: var(--sm-serif);
+    font-size: 0.9rem;
+    line-height: 1.42;
+    color: #efe0b4;
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.4);
+}
+
+/* decor: a mortarboard on top, a few unlettered books leaning in the short bay */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-cap {
+    display: block;
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 15%;
+    width: 9.5rem;
+    height: 4.6rem;
+    pointer-events: none;
+    background: no-repeat center bottom / 100% 100%
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 92'%3E%3Cellipse cx='92' cy='84' rx='66' ry='6' fill='%23000' opacity='.35'/%3E%3Cpath d='M58 52 H126 V74 Q92 84 58 74Z' fill='%2326262a'/%3E%3Cpath d='M58 52 H126 V58 H58Z' fill='%23000' opacity='.35'/%3E%3Cpath d='M6 36 L96 12 L186 36 L96 60Z' fill='%231d1d1f'/%3E%3Cpath d='M6 36 L96 12 L186 36 L172 40 L96 20 L18 40Z' fill='%23fff' opacity='.13'/%3E%3Cpath d='M6 36 L96 60 L186 36 L186 41 L96 66 L6 41Z' fill='%23000' opacity='.5'/%3E%3Ccircle cx='96' cy='36' r='5' fill='%23e2b022'/%3E%3Cpath d='M96 36 L152 41 L156 70' fill='none' stroke='%23e2b022' stroke-width='3' stroke-linecap='round'/%3E%3Crect x='151' y='68' width='10' height='16' rx='3' fill='%23e2b022'/%3E%3Cpath d='M153 72 V83 M156 72 V83 M159 72 V83' stroke='%23a67c10' stroke-width='1'/%3E%3C/svg%3E");
+    filter: drop-shadow(-6px 5px 4px rgb(6 9 20 / 0.5));
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-lean {
+    display: block;
+    position: relative;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+    container-type: size;
+    pointer-events: none;
+}
+/* shelf boards every 9.5rem, counted up from the bottom of the bay */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-lean::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(to top,
+            #4d3220 0 3px, #6a4529 3px 8px, #8a6140 8px 13px, #a37650 13px 14px, transparent 14px 9.5rem) 0 100% / 100% 100% no-repeat;
+    box-shadow: inset 0 -14px 0 transparent;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    display: none;
+    align-items: flex-end;
+    gap: 2px;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row:nth-child(1) { display: flex; bottom: 14px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row:nth-child(2) { bottom: calc(9.5rem + 14px); }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row:nth-child(3) { bottom: calc(19rem + 14px); }
+@container (min-height: 16.5rem) { .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row:nth-child(2) { display: flex; } }
+@container (min-height: 26rem) { .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row:nth-child(3) { display: flex; } }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row > span {
+    display: block;
+    flex: 0 0 auto;
+    width: 15px;
+    height: var(--h, 70px);
+    border-radius: 1px 1px 0 0;
+    background:
+        linear-gradient(90deg, rgb(0 0 0 / 0.35), transparent 30%, rgb(var(--sk-lamp) / 0.16)),
+        linear-gradient(transparent 12px, rgb(var(--sm-gold-line) / 0.55) 12px 13.5px, transparent 13.5px 18px, rgb(var(--sm-gold-line) / 0.55) 18px 19px, transparent 19px),
+        var(--c, #7a1f2b);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), -3px 0 4px rgb(0 0 0 / 0.4);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row > span:nth-child(3n) { width: 19px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row > span.is-tilt { rotate: 8deg; transform-origin: 0 100%; margin-left: 8px; }
+/* books lying flat: spine-out, a few in a pile */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row > span.is-pile {
+    display: flex;
+    flex-direction: column-reverse;
+    width: 9.5rem;
+    height: auto;
+    background: none;
+    box-shadow: none;
+    gap: 0;
+    margin-right: 6px;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-row > span.is-pile > i {
+    display: block;
+    height: 15px;
+    margin-left: var(--o, 0px);
+    width: var(--w, 100%);
+    background:
+        linear-gradient(90deg, transparent 6px, rgb(var(--sm-gold-line) / 0.6) 6px 7px, transparent 7px calc(100% - 7px), rgb(var(--sm-gold-line) / 0.6) calc(100% - 7px) calc(100% - 6px), transparent calc(100% - 6px)),
+        linear-gradient(270deg, rgb(var(--sk-lamp) / 0.16), transparent 40%),
+        linear-gradient(rgb(255 255 255 / 0.12), transparent 30%, rgb(0 0 0 / 0.3)),
+        var(--c, #2e3f55);
+    box-shadow: -3px 2px 4px rgb(0 0 0 / 0.4);
+}
+
+/* -- arrival: the books slide out onto their shelves, left to right */
+@keyframes sm-slide-in {
+    from { opacity: 0; translate: 14px 0; }
+    to   { opacity: 1; translate: 0 0; }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds.lab-ex-play .phd-item {
+    animation: sm-slide-in 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+    animation-delay: var(--lab-ex-d, 0ms);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds.lab-ex-play .lab-skin-cap {
+    animation: sm-slide-in 0.5s ease-out 0.5s both;
+}
+
+/* ============================ PROJECTOR SCREEN ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks { position: relative; padding: 8.25rem 0 6rem; counter-reset: sm-slide; }
+
+/* the projector, hung from the ceiling by a short rod, and its light cone */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-proj {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    top: 1.25rem;
+    left: calc(50% + 4rem);
+    width: 8rem;
+    height: 3rem;
+    pointer-events: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-proj::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    width: 6px;
+    height: 3rem;
+    margin-left: -3px;
+    background: linear-gradient(90deg, #22252b, #4a4f58 50%, #22252b);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-proj::after {
+    content: '';
+    position: absolute;
+    inset: 0.9rem 0 0;
+    border-radius: 7px;
+    background:
+        /* lens */
+        radial-gradient(circle at 24% 50%, #fff 0 2px, #9fd0ff 4px, #1c3350 9px, #0e1117 10px, #3a3f48 11.5px, transparent 12.5px),
+        /* vent slots */
+        repeating-linear-gradient(90deg, #15171b 0 2px, transparent 2px 6px) 62% 50% / 30% 40% no-repeat,
+        linear-gradient(225deg, rgb(255 196 120 / 0.14), transparent 45%),
+        linear-gradient(#3c4149, #22252b);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.15), inset 0 -2px 0 rgb(0 0 0 / 0.4), -8px 10px 12px rgb(6 9 20 / 0.5);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-cone {
+    display: block;
+    position: absolute;
+    z-index: 0;
+    top: 3.3rem;
+    left: 50%;
+    width: min(54rem, calc(100% - 3.5rem));
+    height: 3.7rem;
+    translate: -50% 0;
+    pointer-events: none;
+    clip-path: polygon(calc(50% + 5.8rem) 0, calc(50% + 6.2rem) 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.04), rgb(255 255 255 / 0.22));
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks > .container {
+    position: relative;
+    z-index: 1;
+    max-width: min(54rem, calc(100% - 3.5rem));
+    margin: 0 auto;
+    padding: 1.7rem 1.9rem 1.6rem;
+    border: 7px solid #1b1d21;
+    border-top: 0;
+    border-radius: 0 0 2px 2px;
+    background:
+        /* the projector's hot spot, falling off to the edges */
+        radial-gradient(80% 60% at 52% 12%, rgb(255 255 255 / 0.9), transparent 75%),
+        radial-gradient(140% 100% at 50% 40%, transparent 55%, rgb(60 50 30 / 0.14)),
+        /* the weave of the fabric */
+        repeating-linear-gradient(0deg, rgb(0 0 0 / 0.025) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0.02) 0 1px, transparent 1px 3px),
+        #efede4;
+    box-shadow: inset 0 6px 10px -4px rgb(0 0 0 / 0.35), var(--sk-shadow), 0 0 80px rgb(255 255 255 / 0.1);
+}
+/* the roller case, the length of the screen, with its end caps */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks > .container::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    right: -14px;
+    bottom: calc(100% - 4px);
+    height: 26px;
+    border-radius: 12px;
+    background:
+        radial-gradient(ellipse at 7px 50%, #565b64 0 4px, #14161a 5px, transparent 6px),
+        radial-gradient(ellipse at calc(100% - 7px) 50%, #565b64 0 4px, #14161a 5px, transparent 6px),
+        linear-gradient(225deg, rgb(255 196 120 / 0.14), transparent 40%),
+        linear-gradient(#4a4f58, #2a2d33 40%, #17191d);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), -8px 9px 12px rgb(6 9 20 / 0.55);
+}
+/* the weighted bar along the bottom edge */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks > .container::after {
+    content: '';
+    position: absolute;
+    left: -7px;
+    right: -7px;
+    top: calc(100% - 1px);
+    height: 14px;
+    border-radius: 0 0 7px 7px;
+    background: linear-gradient(#3e434b, #1c1e22 70%, #121316);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), -8px 9px 12px rgb(6 9 20 / 0.5);
+}
+/* the pull cord and its ring */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-ring {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    top: calc(100% + 12px);
+    left: 50%;
+    width: 18px;
+    height: 3.1rem;
+    margin-left: -9px;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% calc(100% - 7px), transparent 0 4px, #8a8f98 4.6px 6.4px, transparent 7px),
+        linear-gradient(90deg, transparent 8px, #6a6f78 8px 10px, transparent 10px) 0 0 / 100% calc(100% - 14px) no-repeat;
+    filter: drop-shadow(-3px 3px 2px rgb(6 9 20 / 0.5));
+}
+
+/* the title is the deck's title slide */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks .section-title {
+    margin: 0 0 1.25rem;
+    padding: 0 0 0.55rem;
+    text-align: left;
+    font-family: var(--sk-sans);
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    color: var(--sm-navy);
+    border-bottom: 3px solid #2f6fb0;
+}
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talks-list {
+    max-width: none;
+    margin: 0;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-item {
+    position: relative;
+    margin: 0 0 0.9rem;
+    padding: 0.8rem 1.1rem 0.7rem 3.5rem;
+    border-radius: 0;
+    border: 1px solid #c6ccd8;
+    border-left: 0;
+    border-top: 3px solid #2f6fb0;
+    background: linear-gradient(200deg, #fdfdfe, #f0f3f8);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.9), 0 1px 3px rgb(31 42 68 / 0.12);
+    counter-increment: sm-slide;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-item:nth-child(even) { border-top-color: #c2410c; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-item:last-child { margin-bottom: 0; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-item:hover { transform: none; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.9), 0 1px 3px rgb(31 42 68 / 0.12); }
+/* the slide number, in a navy tab */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-item::before {
+    content: counter(sm-slide, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: -3px;
+    bottom: 0;
+    width: 2.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--sk-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #e6ebf5;
+    background: linear-gradient(#27345a, var(--sm-navy));
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-title {
+    margin: 0 0 0.35rem;
+    font-family: var(--sk-sans);
+    font-size: 1.04rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--sm-navy);
+}
+/* the footer line of the slide */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-venue {
+    margin: 0;
+    padding-top: 0.35rem;
+    border-top: 1px solid #d5dae4;
+    font-family: var(--sk-sans);
+    font-size: 0.84rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #414b5e;
+}
+
+/* -- arrival: the beam comes on, then each slide is projected in turn */
+@keyframes sm-project {
+    0%   { opacity: 0; filter: brightness(2.2) blur(2px); }
+    55%  { opacity: 1; filter: brightness(1.25) blur(0); }
+    100% { opacity: 1; filter: none; }
+}
+@keyframes sm-beam {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks.lab-ex-play .lab-skin-cone { animation: sm-beam 0.7s ease-out both; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks.lab-ex-play .talk-item {
+    animation: sm-project 0.4s ease-out both;
+    animation-delay: calc(0.25s + var(--lab-ex-d, 0ms));
+}
+
+/* ============================ WALL TV ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media { position: relative; padding: 7rem 0 4.5rem; }
+
+/* the set: a black bezel round a blue screen, throwing cool light on the wall */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media > .container {
+    position: relative;
+    max-width: min(52rem, calc(100% - 3.5rem));
+    margin: 0 auto;
+    padding: 0;
+    border: 14px solid #14161a;
+    border-bottom-width: 26px;
+    border-radius: 12px;
+    background:
+        linear-gradient(118deg, transparent 18%, rgb(255 255 255 / 0.07) 26%, transparent 38%),
+        radial-gradient(60% 50% at 82% 18%, rgb(120 170 230 / 0.35), transparent 70%),
+        linear-gradient(#21416b, #2b5a8f);
+    box-shadow:
+        inset 0 0 0 2px #000,
+        inset 0 0 40px rgb(0 0 0 / 0.5),
+        var(--sk-shadow),
+        0 0 90px rgb(var(--sk-cool) / 0.2);
+}
+/* the standby light in the chin */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media > .container::after {
+    content: '';
+    position: absolute;
+    right: 20px;
+    bottom: -19px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffd0cc, #ff4d42 55%, #8f1d15);
+    box-shadow: 0 0 8px 2px rgb(255 77 66 / 0.6);
+}
+/* the bezel catches the lamp along its top right */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media > .container::before {
+    content: '';
+    position: absolute;
+    inset: -14px -14px auto auto;
+    width: 45%;
+    height: 14px;
+    border-radius: 0 12px 0 0;
+    background: linear-gradient(270deg, rgb(255 214 160 / 0.28), transparent);
+    pointer-events: none;
+}
+
+/* title: the programme strap at the head of the picture */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0;
+    padding: 0.6rem 1rem;
+    text-align: left;
+    font-family: var(--sk-sans);
+    font-size: 1.02rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(#10182b, #0a0f1c);
+    border-bottom: 2px solid #c1121f;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media .section-title::before {
+    content: 'LIVE';
+    flex: none;
+    padding: 0.16rem 0.5rem 0.1rem;
+    border-radius: 2px;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    color: #fff;
+    background: linear-gradient(#d3202c, #a80f1a);
+    box-shadow: 0 0 8px rgb(255 77 66 / 0.5);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-intro {
+    max-width: none;
+    margin: 0;
+    padding: 0.8rem 1rem 0.85rem;
+    text-align: left;
+    font-family: var(--sk-sans);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: #eef2fa;
+    background: #172a4d;
+}
+/* the outlets: a channel bar */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-outlets {
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.7rem 1rem;
+    justify-content: flex-start;
+    background: #0a0f1c;
+    border-bottom: 1px solid #000;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-badge {
+    --id: #c1121f;
+    padding: 0.38rem 0.8rem 0.34rem 0.7rem;
+    border: 1px solid rgb(143 190 255 / 0.3);
+    border-left: 4px solid var(--id);
+    border-radius: 2px;
+    font-family: var(--sk-sans);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #e6edf9;
+    background: linear-gradient(#182236, #111827);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-badge:nth-child(2) { --id: #2f6fb0; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-badge:nth-child(3) { --id: #e2b022; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-badge:nth-child(4) { --id: #2a9d62; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-badge:nth-child(5) { --id: #8a5ab0; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-badge:nth-child(6) { --id: #f2672e; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-badge:nth-child(7) { --id: #1f8fb3; }
+
+/* the highlights: news lower-thirds over the picture */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-highlights {
+    max-width: none;
+    margin: 0;
+    padding: 1.6rem 1.1rem 1.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-item {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: -7px 8px 10px rgb(4 10 30 / 0.45);
+    text-decoration: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-item:nth-child(odd) { width: calc(100% - 1.6rem); }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-item:hover { transform: none; box-shadow: -7px 8px 10px rgb(4 10 30 / 0.45); }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-item-title {
+    margin: 0;
+    padding: 0.5rem 1rem 0.5rem 1.05rem;
+    border-left: 6px solid #fff;
+    font-family: var(--sk-sans);
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #fff;
+    background: linear-gradient(#cf1f2b, #a80f1a);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-item-detail {
+    margin: 0;
+    padding: 0.42rem 1rem 0.52rem 1.05rem;
+    border-left: 6px solid #0b0f1a;
+    font-family: var(--sk-sans);
+    font-size: 0.87rem;
+    line-height: 1.45;
+    color: #e3eaf7;
+    background: #0b0f1a;
+}
+/* the one link: obviously one (underline, a play chip) */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] a.media-item .media-item-title {
+    padding-right: 3rem;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: rgb(255 255 255 / 0.65);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] a.media-item::after {
+    content: '';
+    position: absolute;
+    right: 0.8rem;
+    top: 0.62rem;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: center / 100% 100% no-repeat
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Ccircle cx='11' cy='11' r='10' fill='%23fff' fill-opacity='.22' stroke='%23fff' stroke-width='1.2'/%3E%3Cpath d='M8.6 6.6 L16 11 L8.6 15.4Z' fill='%23fff'/%3E%3C/svg%3E");
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] a.media-item:hover .media-item-title { text-decoration-thickness: 2px; text-decoration-color: #fff; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] a.media-item:hover .media-item-title { background: linear-gradient(#df2b37, #b6131f); }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] a.media-item:focus-visible { outline: 2px solid var(--sk-focus); outline-offset: 5px; border-radius: 0; }
+
+/* decor: the ON AIR sign on its brackets, the boom mic */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-onair {
+    display: block;
+    position: absolute;
+    bottom: calc(100% + 1.5rem);
+    left: 11%;
+    width: 6.6rem;
+    height: 2.3rem;
+    border-radius: 5px;
+    background:
+        linear-gradient(225deg, rgb(255 130 110 / 0.14), transparent 50%),
+        #2a1214;
+    box-shadow:
+        inset 0 0 0 2px #14090a,
+        inset 0 1px 0 rgb(255 255 255 / 0.1),
+        -6px 8px 10px rgb(6 9 20 / 0.5),
+        0 0 36px rgb(255 77 66 / 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-onair::before {
+    content: attr(data-text);
+    font-family: var(--sk-sans);
+    font-size: 1.06rem;
+    font-weight: 800;
+    letter-spacing: 0.17em;
+    padding-left: 0.17em;
+    color: #ff5a52;
+    text-shadow: 0 0 6px rgb(255 90 82 / 0.9), 0 0 16px rgb(255 77 66 / 0.6);
+}
+/* the two posts it hangs on */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-onair::after {
+    content: '';
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    top: 100%;
+    height: 1.5rem;
+    background:
+        linear-gradient(90deg, #1d2025, #4a4f58 50%, #1d2025) left top / 5px 100% no-repeat,
+        linear-gradient(90deg, #1d2025, #4a4f58 50%, #1d2025) right top / 5px 100% no-repeat;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-boom {
+    display: block;
+    position: absolute;
+    z-index: 3;
+    right: -3rem;
+    top: -6.1rem;
+    width: 12rem;
+    height: 9.6rem;
+    pointer-events: none;
+    background: no-repeat center / 100% 100%
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 154'%3E%3Cpath d='M192 0 L74 108' stroke='%232a2d33' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M192 0 L74 108' stroke='%23fff' stroke-opacity='.18' stroke-width='1.5' stroke-linecap='round' transform='translate(-2 -2)'/%3E%3Ccircle cx='74' cy='108' r='6' fill='%233a3f46'/%3E%3Cg transform='rotate(-52 62 120)'%3E%3Ccircle cx='62' cy='120' r='22' fill='%23000' opacity='.28'/%3E%3Ccircle cx='62' cy='120' r='20' fill='none' stroke='%235d6166' stroke-width='2.5'/%3E%3Crect x='51' y='96' width='22' height='48' rx='11' fill='%233a3f46'/%3E%3Crect x='54' y='101' width='16' height='20' rx='8' fill='%235d6166'/%3E%3Cpath d='M56 104 V118 M62 104 V118 M68 104 V118' stroke='%23252830' stroke-width='1.2'/%3E%3C/g%3E%3Cpath d='M78 110 Q130 120 150 150' fill='none' stroke='%231d1f24' stroke-width='2'/%3E%3C/svg%3E");
+    filter: drop-shadow(-6px 6px 5px rgb(6 9 20 / 0.5));
+}
+
+/* -- arrival: the ON AIR light comes on, the lower-thirds wipe in */
+@keyframes sm-onair {
+    0%   { filter: brightness(0.35); }
+    30%  { filter: brightness(1.25); }
+    45%  { filter: brightness(0.6); }
+    100% { filter: brightness(1); }
+}
+@keyframes sm-wipe {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 -12px -12px -12px); }
+}
+@keyframes sm-tune {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media.lab-ex-play .lab-skin-onair { animation: sm-onair 0.8s linear both; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media.lab-ex-play .section-title,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media.lab-ex-play .media-intro,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media.lab-ex-play .media-outlets { animation: sm-tune 0.45s steps(5, end) 0.15s both; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media.lab-ex-play .media-item {
+    animation: sm-wipe 0.5s cubic-bezier(0.3, 0.1, 0.3, 1) both;
+    animation-delay: calc(0.45s + var(--lab-ex-d, 0ms) * 2);
+}
+
+/* ============================ SMALLER SCREENS ============================ */
+
+@media (max-width: 900px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] :is(#phds, #talks, #media) > .container { max-width: calc(100% - 1.4rem); }
+}
+@media (max-width: 760px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds { padding-top: 5.5rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-grid { grid-template-columns: 1fr; gap: 14px; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #phds > .container { padding-left: 11px; padding-right: 11px; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-cap { left: 8%; width: 8rem; height: 3.9rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item { --ml: 12px; --mr: 14px !important; padding: 0.65rem 1.5rem 0.7rem 2rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .phd-item:nth-child(odd) { --mr: 20px !important; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks { padding-top: 7.5rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks > .container { padding: 1.2rem 0.8rem 1.2rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #talks .section-title { font-size: 1.35rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-item { padding-left: 3rem; padding-right: 0.8rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .talk-item::before { width: 2.3rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-proj { left: calc(50% + 1rem); }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media { padding-top: 6.5rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media > .container { border-width: 9px; border-bottom-width: 20px; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media > .container::after { bottom: -15px; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media > .container::before { inset: -9px -9px auto auto; height: 9px; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] #media .section-title { font-size: 0.9rem; letter-spacing: 0.08em; padding: 0.55rem 0.75rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-intro, .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-outlets { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-highlights { padding: 1.2rem 0.7rem 1.3rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .media-item:nth-child(odd) { width: calc(100% - 0.8rem); }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-onair { left: 7%; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="seminar"] .lab-skin-boom { right: -1rem; width: 9rem; height: 7.2rem; top: -6.9rem; }
+}
+
+} /* @media screen */

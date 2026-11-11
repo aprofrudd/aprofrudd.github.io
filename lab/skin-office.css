@@ -1,4 +1,824 @@
-/* lab/skin-office.css: this room's content drawn as the objects it lives in.
-   Scope every rule under
-   .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"]
-   inside @media screen. Shared shell and tokens: lab/skin.css. */
+/* lab/skin-office.css: the Office, read off the wall.
+     #experience  the grey four-drawer filing cabinet, one drawer pulled out:
+                  each role a manila hanging folder on the drawer rail, its
+                  date typed on the folder tab; earlier roles as record cards
+     #education   the three framed certificates, hung on nails: frame, mount,
+                  bevel, glass; a foil seal each; dates on brass plaques
+     #skills      the pegboard: a stencilled header batten, each group a
+                  label-maker strip, each skill a tag hung on a peg hook
+
+   Restyles the existing DOM only (nothing added; lab/skin-office.js adds no
+   decoration). Every rule is scoped to the live, skinned drawer while it holds
+   the Office, and to screens; print and "Read as one page" never see any of it.
+
+   Light, as in the scene and in lab/skin.css: the lamp up and to the right
+   (warm highlights top-right, shadows cast down-left), the corridor off to
+   the left (cool, faint).
+
+   Arrival gestures hang off .lab-ex-play (added and always removed again by
+   lab/exhibits.js) with fill-mode both, and all land inside 2.1s. */
+
+@media screen {
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] {
+    --of-serif: 'Iowan Old Style', 'Charter', 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
+    --of-ink: #2a2620;
+    --of-ink-soft: #4b4232;
+    --of-manila-hi: #f2e4bd;
+    --of-manila: #e9d6a6;
+    --of-manila-lo: #dcc58f;
+}
+
+/* The titles all become part of their objects: no blue underline, no ECG blip. */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] .section-title::before {
+    content: none;
+}
+
+/* ============================ FILING CABINET ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience {
+    padding: 4.75rem 0 3.25rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience > .container {
+    position: relative;
+    max-width: min(50rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 1.15rem 1.15rem 1.35rem;
+    border-radius: 4px;
+    /* stove-enamelled steel, lamp on the top-right corner */
+    background:
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.2), transparent 38%),
+        linear-gradient(45deg, rgb(var(--sk-cool) / 0.06), transparent 45%),
+        linear-gradient(90deg, rgb(255 255 255 / 0.06), transparent 1.2rem, transparent calc(100% - 1.6rem), rgb(0 0 0 / 0.16) calc(100% - 1.6rem)),
+        linear-gradient(#7f8d97, #707e88 45%, #67757f);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.2),
+        inset 0 0 0 1px rgb(0 0 0 / 0.28),
+        var(--sk-shadow);
+}
+/* the top of the cabinet, with the two box files standing on it (as in the scene) */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience > .container::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    right: -7px;
+    bottom: 100%;
+    height: 3.6rem;
+    pointer-events: none;
+    background:
+        /* blue box file with its finger hole */
+        radial-gradient(circle, #1e3047 0 5px, transparent 5.5px) 2.15rem 1.25rem / 14px 14px no-repeat,
+        linear-gradient(90deg, #2a4361, #33527a 60%, #2a4361) 1.4rem 0.35rem / 2.6rem calc(100% - 0.35rem - 9px) no-repeat,
+        /* red box file */
+        radial-gradient(circle, #5e1f1c 0 4.5px, transparent 5px) 4.95rem 1.7rem / 12px 12px no-repeat,
+        linear-gradient(90deg, #7c2a27, #93332f 60%, #7c2a27) 4.25rem 0.95rem / 2.8rem calc(100% - 0.95rem - 9px) no-repeat,
+        /* the top lip */
+        linear-gradient(#9aa7b0, #82909a 40%, #6c7882) left bottom / 100% 10px no-repeat;
+    border-radius: 0 0 2px 2px;
+    filter: drop-shadow(-4px 4px 4px rgb(6 9 20 / 0.4));
+}
+
+/* the drawer front: the title is the card in its chrome label holder,
+   the pull handle under it */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .section-title {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0.35rem auto 0;
+    padding: 0.45rem 1.5rem 0.4rem;
+    border: 4px solid #b9c0c6;
+    border-image: linear-gradient(225deg, #f1f4f6, #bcc3c9 40%, #858e96) 1;
+    background: linear-gradient(#f7f3e8, #ebe5d5);
+    color: var(--of-ink);
+    font-family: var(--sk-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-align: center;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.18), -2px 3px 4px rgb(20 26 32 / 0.35);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .section-title::after {
+    top: calc(100% + 1.05rem);
+    bottom: auto;
+    width: 7.5rem;
+    height: 0.85rem;
+    border-radius: 7px;
+    background:
+        linear-gradient(rgb(255 255 255 / 0.55), transparent 45%),
+        linear-gradient(90deg, #858e96, #d6dbdf 70%, #a3abb2);
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.25), -3px 5px 5px rgb(20 26 32 / 0.45);
+}
+
+/* the drawer, pulled out: dark steel well, rail down the left */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline {
+    max-width: none;
+    margin: 3.4rem 0 0;
+    padding: 1.4rem 1.35rem 1.35rem 3.1rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 1rem;
+    border-radius: 3px;
+    background:
+        linear-gradient(rgb(0 0 0 / 0.5), transparent 1.6rem),
+        linear-gradient(90deg, rgb(var(--sk-cool) / 0.05), transparent 30%),
+        linear-gradient(#2a3136, #313940);
+    box-shadow:
+        inset 0 0 0 1px #1a1f23,
+        inset 0 0 0 6px #5c6871,
+        inset 0 0 0 7px #222a30,
+        0 1px 0 rgb(255 255 255 / 0.12);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline::before {
+    left: 1.25rem;
+    top: 0.9rem;
+    bottom: 0.9rem;
+    width: 7px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #5d676f, #c9cfd4 45%, #7d878f);
+    box-shadow: -2px 3px 4px rgb(0 0 0 / 0.5);
+}
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item {
+    grid-column: 1 / -1;
+    padding: 1.55rem 0 0;
+    margin: 0 0 1.05rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item:last-child { margin-bottom: 0; }
+
+/* each folder's hanger rod, hooked over the rail */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-marker {
+    left: -1.95rem;
+    top: 2.35rem;
+    width: 1.95rem;
+    height: 8px;
+    border: 0;
+    border-radius: 4px 0 0 4px;
+    background:
+        radial-gradient(circle at 5px 50%, #2a3036 0 2px, transparent 2.6px),
+        linear-gradient(#e0e4e7, #9aa2a9 60%, #6f777e);
+    box-shadow: -2px 3px 3px rgb(0 0 0 / 0.45);
+}
+
+/* the manila folder */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-content {
+    position: relative;
+    max-width: 44rem;
+    padding: 1.3rem 1.75rem 1.4rem;
+    border-radius: 0 3px 3px 3px;
+    background:
+        /* the scored fold lines along the bottom */
+        linear-gradient(transparent calc(100% - 9px), rgb(90 66 24 / 0.13) calc(100% - 9px), rgb(90 66 24 / 0.13) calc(100% - 8px), transparent calc(100% - 8px)) ,
+        linear-gradient(225deg, rgb(255 238 205 / 0.4), transparent 42%),
+        linear-gradient(var(--of-manila-hi), var(--of-manila) 32%, var(--of-manila-lo));
+    color: var(--of-ink);
+    box-shadow:
+        -7px 10px 14px rgb(4 6 10 / 0.5),
+        -1px 2px 3px rgb(4 6 10 / 0.35),
+        inset 0 1px 0 rgb(255 255 255 / 0.55);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-header {
+    display: block;
+    margin: 0 0 0.25rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-header h3 {
+    margin: 0;
+    font-family: var(--sk-sans);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #1f1b16;
+}
+/* the folder tab carries the dates, typed on a strip */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-date {
+    position: absolute;
+    bottom: 100%;
+    left: 1.1rem;
+    padding: 0.3rem 0.95rem 0.15rem;
+    border-radius: 7px 7px 0 0;
+    background: linear-gradient(#f4e8c6, var(--of-manila-hi));
+    color: var(--of-ink);
+    font-family: var(--sk-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+    white-space: nowrap;
+    box-shadow: -3px -1px 4px rgb(4 6 10 / 0.25), inset 0 1px 0 rgb(255 255 255 / 0.6);
+}
+/* tabs are staggered across the folders, as real ones are */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item:nth-child(3n+2) .timeline-date { left: 38%; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item:nth-child(3n) .timeline-date { left: auto; right: 1.1rem; }
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .company {
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid rgb(90 66 24 / 0.22);
+    font-family: var(--of-serif);
+    font-size: 1.02rem;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--of-ink-soft);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .experience-list {
+    max-width: 38rem;
+    margin: 0;
+    padding: 0;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .experience-list li {
+    margin: 0 0 0.45rem;
+    padding-left: 1.3rem;
+    font-family: var(--of-serif);
+    font-size: 1.03rem;
+    line-height: 1.58;
+    color: var(--of-ink);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .experience-list li:last-child { margin-bottom: 0; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .experience-list li::before {
+    content: '';
+    top: 0.68em;
+    left: 0.15rem;
+    width: 6px;
+    height: 6px;
+    background: #6b5530;
+}
+
+/* earlier roles: record cards stood at the front of the drawer */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact {
+    grid-column: auto;
+    padding-top: 0.5rem;
+    margin-bottom: 0;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact .timeline-marker { display: none; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact .timeline-content {
+    height: 100%;
+    padding: 0.85rem 1rem 0.95rem;
+    border-radius: 2px;
+    background:
+        linear-gradient(225deg, rgb(255 238 205 / 0.25), transparent 45%),
+        linear-gradient(transparent 3.55rem, rgb(196 64 52 / 0.7) 3.55rem, rgb(196 64 52 / 0.7) calc(3.55rem + 1.5px), transparent calc(3.55rem + 1.5px)),
+        linear-gradient(#fcfbf6, #f3f0e6);
+    rotate: -0.3deg;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact:nth-child(even) .timeline-content { rotate: 0.25deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact .timeline-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin-bottom: 0.75rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact .timeline-header h3 {
+    order: 2;
+    font-size: 1.02rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact .timeline-date {
+    order: 1;
+    position: static;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    font-size: 0.74rem;
+    color: #8a2a22;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact .company {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 0.95rem;
+}
+
+/* -- arrival: the label card, then each folder drops into the drawer */
+@keyframes of-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes of-file {
+    0%   { opacity: 0; translate: 0 -18px; }
+    55%  { opacity: 1; }
+    100% { opacity: 1; translate: 0 0; }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience.lab-ex-play .section-title {
+    animation: of-fade 0.3s steps(3, end) 0.05s both;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience.lab-ex-play .timeline-item {
+    animation: of-file 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+    animation-delay: calc(0.2s + var(--lab-ex-d, 0ms) * 2);
+}
+
+/* ============================ CERTIFICATES ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education {
+    padding: 1.5rem 0 3.25rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education > .container {
+    max-width: min(52rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+}
+/* sign-written on the wall above the frames */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .section-title {
+    margin: 0 0 0.4rem;
+    text-align: left;
+    font-family: var(--sk-sans);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sk-cream);
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .section-title::after {
+    content: none;
+}
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4.2rem 1.4rem;
+    align-items: stretch;
+    padding-top: 2.6rem;
+}
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card {
+    --of-frame: linear-gradient(225deg, #4c525c, #26292f 32%, #1a1c20 75%, #141518);
+    --of-seal: #b8892e;
+    --of-seal-hi: #e3bd62;
+    --of-seal-ink: #fff4d6;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0 2.6rem;
+    padding: calc(22px + 1.3rem) calc(22px + 0.65rem) calc(22px + 1rem);
+    border: 13px solid #22252a;
+    border-image: var(--of-frame) 1;
+    border-radius: 0;
+    background: linear-gradient(200deg, #fcfaf3, #f3eddf);
+    color: var(--of-ink);
+    text-align: center;
+    box-shadow:
+        /* the frame's rebate shading the mount, down-left */
+        inset 4px -5px 7px -2px rgb(0 0 0 / 0.2),
+        /* mount board, its cut bevel, the line where the bevel meets the paper */
+        inset 0 0 0 14px #e9e3d3,
+        inset 0 0 0 15.5px #fffdf7,
+        inset 0 0 0 16.5px rgb(90 70 40 / 0.18),
+        /* the certificate's own printed border */
+        inset 0 0 0 21px #f7f2e6,
+        inset 0 0 0 22px var(--of-seal),
+        var(--sk-shadow);
+    transition: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card:nth-child(2) {
+    --of-frame: linear-gradient(225deg, #94704c, #6e4c30 32%, #5a3d26 75%, #4a321f);
+    --of-seal: #2c4a7a;
+    --of-seal-hi: #5b7db3;
+    --of-seal-ink: #eef3ff;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card:nth-child(3) {
+    --of-seal: #a8322d;
+    --of-seal-hi: #d4675f;
+    --of-seal-ink: #fff0ee;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card:hover {
+    transform: none;
+    box-shadow:
+        inset 4px -5px 7px -2px rgb(0 0 0 / 0.2),
+        inset 0 0 0 14px #e9e3d3,
+        inset 0 0 0 15.5px #fffdf7,
+        inset 0 0 0 16.5px rgb(90 70 40 / 0.18),
+        inset 0 0 0 21px #f7f2e6,
+        inset 0 0 0 22px var(--of-seal),
+        var(--sk-shadow);
+}
+/* the hanging wire, up to a nail */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card::before {
+    content: '';
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    bottom: calc(100% + 13px);
+    height: 2.35rem;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 4px, #c5cbd0 0 2px, #4a4f57 2.6px, transparent 3.4px) 0 0 / 100% 100% no-repeat,
+        no-repeat 0 0 / 100% 100%
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M1 40L50 3L99 40' fill='none' stroke='%2315171b' stroke-width='1.4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+    filter: drop-shadow(-3px 3px 2px rgb(6 9 20 / 0.45));
+}
+/* the glass: a soft streak and the lamp's reflection */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(118deg, transparent 26%, rgb(255 255 255 / 0.2) 33%, rgb(255 255 255 / 0) 44%),
+        radial-gradient(70% 45% at 100% 0%, rgb(255 222 170 / 0.16), transparent 70%),
+        linear-gradient(to top left, rgb(var(--sk-cool) / 0.04), transparent 40%);
+}
+
+/* the seal: foil, pleated edge, two ribbon tails; it sits under the text */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-icon {
+    order: 9;
+    position: relative;
+    flex: none;
+    width: 3.1rem;
+    height: 3.1rem;
+    margin: auto 0 0.9rem;
+    border-radius: 50%;
+    color: var(--of-seal-ink);
+    background:
+        radial-gradient(circle, var(--of-seal) 0 56%, rgb(255 255 255 / 0.45) 57% 60%, transparent 61%),
+        repeating-conic-gradient(var(--of-seal) 0 8deg, var(--of-seal-hi) 8deg 16deg);
+    box-shadow: -2px 3px 3px rgb(30 20 5 / 0.3);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-icon svg {
+    position: relative;
+    z-index: 1;
+    width: 1.35rem;
+    height: 1.35rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-icon::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 80%;
+    width: 1.5rem;
+    height: 1.25rem;
+    margin-left: -0.75rem;
+    background:
+        linear-gradient(var(--of-seal), var(--of-seal)) left top / 44% 100% no-repeat,
+        linear-gradient(var(--of-seal-hi), var(--of-seal-hi)) right top / 44% 100% no-repeat;
+    clip-path: polygon(0 0, 44% 0, 44% 100%, 22% 80%, 0 100%, 0 0, 56% 0, 100% 0, 100% 100%, 78% 80%, 56% 100%);
+}
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card h3 {
+    margin: 0 0 0.45rem;
+    text-wrap: balance;
+    font-family: var(--of-serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-variant: small-caps;
+    letter-spacing: 0.03em;
+    line-height: 1.25;
+    color: #1f1b16;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card h4 {
+    margin: 0 0 0.75rem;
+    font-family: var(--of-serif);
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--of-ink-soft);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-school {
+    margin: 0;
+    font-family: var(--of-serif);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.45;
+    color: #2b2822;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-details {
+    order: 10;
+    margin: 0;
+    font-family: var(--of-serif);
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--of-ink-soft);
+}
+/* the date: an engraved brass plaque screwed to the wall under the frame */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-date {
+    position: absolute;
+    top: calc(100% + 13px + 0.75rem);
+    left: 50%;
+    translate: -50% 0;
+    margin: 0;
+    padding: 0.2rem 1.1rem 0.15rem;
+    border-radius: 2px;
+    background:
+        radial-gradient(circle at 6px 50%, #5a4417 0 1.4px, transparent 2px),
+        radial-gradient(circle at calc(100% - 6px) 50%, #5a4417 0 1.4px, transparent 2px),
+        linear-gradient(225deg, #f3dc9c, #d6b25c 38%, #b8913c);
+    color: #2a1c04;
+    font-family: var(--of-serif);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    line-height: 1.5;
+    text-shadow: 0 1px 0 rgb(255 240 200 / 0.55);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 -1px 0 rgb(0 0 0 / 0.25), -2px 3px 4px rgb(6 9 20 / 0.45);
+}
+
+/* -- arrival: each frame is hung and settles on its wire */
+@keyframes of-swing {
+    0%   { opacity: 0; rotate: 3deg; }
+    18%  { opacity: 1; }
+    40%  { rotate: -1.6deg; }
+    62%  { rotate: 0.7deg; }
+    82%  { rotate: -0.25deg; }
+    100% { opacity: 1; rotate: 0deg; }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education.lab-ex-play .education-card {
+    transform-origin: 50% -2.6rem;
+    animation: of-swing 1.05s ease-out both;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education.lab-ex-play .education-card:nth-child(2) { animation-delay: 0.18s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education.lab-ex-play .education-card:nth-child(3) { animation-delay: 0.36s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education.lab-ex-play .section-title {
+    animation: of-fade 0.5s ease-out both;
+}
+
+/* ============================ PEGBOARD ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills {
+    padding: 1.25rem 0 3.5rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills > .container {
+    position: relative;
+    max-width: min(52rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 0 1.6rem 1.9rem;
+    border: 12px solid #9c7d55;
+    border-image: linear-gradient(225deg, #c6a172, #9c7d55 30%, #7d6141 72%, #6a5136) 1;
+    background:
+        linear-gradient(225deg, rgb(255 212 150 / 0.26), transparent 45%),
+        linear-gradient(45deg, rgb(30 18 6 / 0.3), transparent 55%),
+        /* the holes: a dark pit, its lower-left rim catching the lamp */
+        radial-gradient(circle at 50% 50%, #5e4528 0 2.3px, #8a6a44 2.9px, transparent 3.4px) 6px 6px / 22px 22px,
+        radial-gradient(circle at 50% 50%, rgb(255 230 190 / 0.35) 0 3.2px, transparent 3.7px) 5px 7px / 22px 22px,
+        #c4a273;
+    box-shadow:
+        inset -4px 5px 9px rgb(30 18 6 / 0.35),
+        var(--sk-shadow);
+}
+/* the header batten, stencilled */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .section-title {
+    position: relative;
+    margin: 0 -1.6rem 1.7rem;
+    padding: 0.85rem 1.6rem 0.75rem;
+    background:
+        linear-gradient(225deg, rgb(255 225 175 / 0.3), transparent 40%),
+        repeating-linear-gradient(90deg, rgb(90 60 25 / 0.07) 0 2px, transparent 2px 9px, rgb(90 60 25 / 0.05) 9px 10px, transparent 10px 23px),
+        linear-gradient(#d1ad79, #c49f6b 60%, #b48f5c);
+    color: #1d1813;
+    font-family: var(--sk-sans);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-align: left;
+    box-shadow: 0 1px 0 rgb(255 240 210 / 0.35), 0 6px 8px -4px rgb(30 18 6 / 0.55);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .section-title::after {
+    content: none;
+}
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skills-grid {
+    display: block;
+}
+/* each group is a row of hooks with its label strip */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category {
+    display: grid;
+    grid-template-columns: 11.5rem minmax(0, 1fr);
+    column-gap: 1.25rem;
+    align-items: start;
+    margin: 0 0 1.35rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category:last-child { margin-bottom: 0; }
+
+/* label-maker tape: embossed white letters on coloured tape */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category h3 {
+    --of-tape: #1f3f7a;
+    justify-self: start;
+    max-width: 100%;
+    margin: 1.05rem 0 0;
+    padding: 0.36rem 0.7rem 0.32rem;
+    border-radius: 2px;
+    background:
+        linear-gradient(rgb(255 255 255 / 0.14), transparent 40%, rgb(0 0 0 / 0.18)),
+        var(--of-tape);
+    color: #f7f6f1;
+    font-family: var(--sk-sans);
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.55), 0 -1px 0 rgb(255 255 255 / 0.2);
+    box-shadow: -2px 3px 4px rgb(30 18 6 / 0.45);
+    rotate: -0.4deg;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category:nth-child(2) h3 { --of-tape: #18191c; rotate: 0.3deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category:nth-child(3) h3 { --of-tape: #9e2a24; rotate: -0.2deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category:nth-child(4) h3 { --of-tape: #1f3f7a; rotate: 0.35deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category:nth-child(5) h3 { --of-tape: #18191c; rotate: -0.3deg; }
+
+/* the tags hang on peg hooks; the shadow is cast by the whole row, so the
+   tags can keep their cut corners */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tags {
+    gap: 1.25rem 0.85rem;
+    padding-top: 1.05rem;
+    filter: drop-shadow(-3px 4px 3px rgb(30 18 6 / 0.42));
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tag {
+    position: relative;
+    padding: 0.4rem 0.85rem 0.38rem 1.6rem;
+    border: 0;
+    border-radius: 0 3px 3px 0;
+    background:
+        linear-gradient(225deg, rgb(255 255 255 / 0.4), transparent 50%),
+        linear-gradient(#fbf7ea, #efe7d2);
+    color: var(--of-ink);
+    font-family: var(--sk-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.3;
+    /* a luggage tag (cut corners on the hook end), plus a strip above the
+       eyelet so the string to the hook is not clipped */
+    clip-path: polygon(0 0.62rem, 0.6rem 0.04rem, 0.6rem -1.15rem, 1.02rem -1.15rem, 1.02rem 0, 100% 0, 100% 100%, 0.62rem 100%, 0 calc(100% - 0.62rem));
+    transition: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tag:nth-child(3n+2) {
+    background:
+        linear-gradient(225deg, rgb(255 255 255 / 0.35), transparent 50%),
+        linear-gradient(#f3e5bc, #e6d3a0);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tag:hover {
+    background:
+        linear-gradient(225deg, rgb(255 255 255 / 0.4), transparent 50%),
+        linear-gradient(#fbf7ea, #efe7d2);
+    color: var(--of-ink);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tag:nth-child(3n+2):hover {
+    background:
+        linear-gradient(225deg, rgb(255 255 255 / 0.35), transparent 50%),
+        linear-gradient(#f3e5bc, #e6d3a0);
+}
+/* the reinforced eyelet */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tag::before {
+    content: '';
+    position: absolute;
+    left: 0.48rem;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #8a6a44 0 2.2px, #c9ced3 2.7px 4px, #8e959c 4.4px, transparent 5px);
+}
+/* the string loop up to the peg hook */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tag::after {
+    content: '';
+    position: absolute;
+    left: 0.66rem;
+    top: -1.1rem;
+    width: 0.3rem;
+    height: calc(1.1rem + 50%);
+    border: 1.5px solid #5d5348;
+    border-bottom: 0;
+    border-radius: 4px 4px 0 0;
+    box-sizing: border-box;
+}
+
+/* -- arrival: the strips are printed out, the tags swing on their hooks */
+@keyframes of-print {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
+}
+@keyframes of-tagswing {
+    0%   { opacity: 0; rotate: 9deg; }
+    20%  { opacity: 1; }
+    45%  { rotate: -4deg; }
+    70%  { rotate: 1.6deg; }
+    88%  { rotate: -0.5deg; }
+    100% { opacity: 1; rotate: 0deg; }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills.lab-ex-play .skill-category h3 {
+    animation: of-print 0.45s steps(12, end) both;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills.lab-ex-play .skill-category:nth-child(2) h3 { animation-delay: 0.12s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills.lab-ex-play .skill-category:nth-child(3) h3 { animation-delay: 0.24s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills.lab-ex-play .skill-category:nth-child(4) h3 { animation-delay: 0.36s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills.lab-ex-play .skill-category:nth-child(5) h3 { animation-delay: 0.48s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills.lab-ex-play .skill-tag {
+    transform-origin: 0.81rem -1.1rem;
+    animation: of-tagswing 0.8s ease-out both;
+    animation-delay: calc(0.2s + var(--lab-ex-d, 0ms) * 1.5);
+}
+
+/* ============================ SMALLER DRAWERS ============================ */
+
+/* The objects re-arrange by the width the drawer gives them, not the viewport. */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] :is(#experience, #education, #skills) {
+    container: of / inline-size;
+}
+
+@media (max-width: 900px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] :is(#experience, #education, #skills) > .container {
+        max-width: calc(100% - 2rem);
+    }
+}
+
+@container of (max-width: 680px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-grid {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        row-gap: 4.4rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #education .education-card {
+        width: min(100%, 22rem);
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact:last-child {
+        grid-column: 1 / -1;
+        justify-self: start;
+        width: calc(50% - 0.5rem);
+    }
+}
+
+@container of (max-width: 560px) {
+    /* cabinet */
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience > .container {
+        padding: 0.9rem 0.7rem 1rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .section-title {
+        padding: 0.4rem 1rem 0.35rem;
+        letter-spacing: 0.22em;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 1.2rem 0.8rem 1rem 2.15rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline::before { left: 0.75rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-marker {
+        left: -1.4rem;
+        width: 1.4rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-content {
+        padding: 1.05rem 1rem 1.15rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-date {
+        left: 0.7rem;
+        font-size: 0.74rem;
+        padding: 0.28rem 0.75rem 0.12rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item:nth-child(3n+2) .timeline-date { left: 22%; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item:nth-child(3n) .timeline-date { right: 0.7rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-header h3 { font-size: 1.1rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .experience-list li {
+        font-size: 1rem;
+        line-height: 1.55;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact,
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact:last-child {
+        grid-column: 1 / -1;
+        justify-self: stretch;
+        width: auto;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #experience .timeline-item-compact .timeline-content { height: auto; }
+
+    /* pegboard: label strip above its tags */
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills > .container {
+        padding: 0 0.9rem 1.4rem;
+        border-width: 9px;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .section-title {
+        margin: 0 -0.9rem 1.4rem;
+        padding: 0.75rem 0.9rem 0.65rem;
+        font-size: 0.86rem;
+        letter-spacing: 0.16em;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category {
+        grid-template-columns: minmax(0, 1fr);
+        margin-bottom: 1.6rem;
+    }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-category h3 { margin-top: 0; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tags { gap: 1.2rem 0.6rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] #skills .skill-tag { font-size: 0.82rem; }
+}
+
+/* Reduced motion: no gestures, everything simply present. */
+@media (prefers-reduced-motion: reduce) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] *,
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] *::before,
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="office"] *::after {
+        animation: none !important;
+    }
+}
+
+} /* @media screen */

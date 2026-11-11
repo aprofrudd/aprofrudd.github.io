@@ -1,4 +1,694 @@
-/* lab/skin-desk.css: this room's content drawn as the objects it lives in.
-   Scope every rule under
-   .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"]
-   inside @media screen. Shared shell and tokens: lab/skin.css. */
+/* lab/skin-desk.css: the Front Desk, read off the wall.
+     #available  the counter: each service is a tent card standing on the
+                 laminate worktop, the hanging sign above, the OPEN plaque and
+                 the service bell on the back edge
+     #faq        the yellow "?" help poster: plain printed paper, long
+                 answers set for reading
+     #contact    the wall telephone: a holder of business cards, the social
+                 links as labelled speed-dial keys on the phone's keypad
+
+   Restyles the existing DOM only. The extras (OPEN plaque, bell, handset and
+   cord) are built by lab/skin-desk.js: aria-hidden, hidden unless shown here,
+   no text nodes of their own (the plaque letters are drawn by CSS from a data
+   attribute, the key labels from each link's own aria-label). Every rule is
+   scoped to the live, skinned drawer while it holds the Front Desk, and to
+   screens; print and "Read as one page" never see any of it.
+
+   Light as in lab/skin.css: lamp warm from the upper right (highlights top
+   right, shadows cast down-left), corridor cool and faint from the left.
+
+   Arrival gestures hang off .lab-ex-play (added and always removed again by
+   lab/exhibits.js) with fill-mode both, all landing inside 2.1s. */
+
+@media screen {
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] {
+    --dk-paper: #f1e9d6;
+    --dk-paper-hi: #f8f2e3;
+    --dk-paper-lo: #e6dcc5;
+    --dk-ink: #2a2620;
+    --dk-link: #1d4f9a;
+    --dk-teal: #2d5263;
+    --dk-teal-hi: #3a6477;
+    --dk-teal-lo: #1d3440;
+    --dk-lam: #bdb8a9;
+    --dk-serif: 'Iowan Old Style', 'Charter', 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
+    --dk-yellow: #f2c94c;
+}
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] :is(#available, #faq, #contact) .section-title::before,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] :is(#available, #faq, #contact) .section-title::after { content: none; }
+
+/* ============================ COUNTER ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available { position: relative; padding: 5.25rem 0 4.5rem; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available > .container {
+    position: relative;
+    max-width: min(56rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: end;
+    column-gap: 1.2rem;
+}
+
+/* the sign, hung on two rods from the ceiling */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available .section-title {
+    position: relative;
+    justify-self: start;
+    margin: 0 0 1.5rem 1.4rem;
+    padding: 0.75rem 1.7rem 0.7rem;
+    border: 6px solid #2a2d33;
+    border-radius: 6px;
+    text-align: left;
+    font-family: var(--sk-sans);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    color: #1f3a46;
+    background:
+        linear-gradient(225deg, rgb(255 196 120 / 0.3), transparent 45%),
+        linear-gradient(#f9f2e0, #eee5cd);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12), inset 0 1px 0 #fff, var(--sk-shadow), 0 0 50px rgb(255 196 120 / 0.14);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available .section-title::before {
+    content: '';
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: calc(100% + 6px);
+    height: 4rem;
+    background:
+        linear-gradient(90deg, #26292e, #565b63 50%, #26292e) left bottom / 4px 100% no-repeat,
+        linear-gradient(90deg, #26292e, #565b63 50%, #26292e) right bottom / 4px 100% no-repeat;
+    pointer-events: none;
+}
+/* the worktop: cream laminate with a thick front edge, standing on a teal
+   slatted counter front */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-grid {
+    position: relative;
+    z-index: 1;
+    grid-column: 1 / -1;
+    max-width: none;
+    margin: 0 0 3.7rem;
+    padding: 1.9rem 1.7rem 1.9rem;
+    gap: 1.9rem 1.6rem;
+    grid-template-columns: 1fr 1fr;
+    border-radius: 3px 3px 0 0;
+    background:
+        radial-gradient(75% 70% at 100% 0%, rgb(var(--sk-lamp) / 0.34), transparent 72%),
+        linear-gradient(45deg, rgb(20 26 44 / 0.28), transparent 60%),
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0.018) 0 2px, transparent 2px 5px),
+        radial-gradient(circle at 20% 40%, rgb(0 0 0 / 0.05) 0 0.7px, transparent 1.2px) 0 0 / 9px 7px,
+        var(--dk-lam);
+    border-bottom: 11px solid #a9a495;
+    border-image: none;
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.7),
+        0 11px 0 -1px #cfcabb,
+        var(--sk-shadow);
+}
+/* the counter front: slats and a kickboard, throwing a shadow onto the floor */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-grid::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 11px);
+    height: 3.7rem;
+    background:
+        linear-gradient(rgb(0 0 0 / 0.38), rgb(0 0 0 / 0) 1.1rem),
+        linear-gradient(#1d3440, #14262f) left bottom / 100% 0.65rem no-repeat,
+        repeating-linear-gradient(90deg, #2d5263 0 24px, #3a6477 24px 26px),
+        var(--dk-teal);
+    box-shadow: -12px 14px 22px rgb(6 9 20 / 0.55);
+    pointer-events: none;
+}
+
+/* a service: a tent card standing on the worktop */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item {
+    --tc: #2d5263;
+    position: relative;
+    margin: 0;
+    padding: 1.15rem 1.35rem 2.1rem;
+    border: 0;
+    border-radius: 2px 2px 0 0;
+    color: var(--dk-ink);
+    background:
+        linear-gradient(var(--tc), var(--tc)) 0 0 / 100% 5px no-repeat,
+        linear-gradient(225deg, rgb(255 205 140 / 0.22), transparent 45%),
+        linear-gradient(200deg, var(--dk-paper-hi), var(--dk-paper) 50%, var(--dk-paper-lo));
+    box-shadow: -8px 10px 12px rgb(14 8 2 / 0.38), -1px 2px 3px rgb(14 8 2 / 0.32), inset 0 0 0 1px rgb(0 0 0 / 0.06);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item:hover { transform: none; box-shadow: -8px 10px 12px rgb(14 8 2 / 0.38), -1px 2px 3px rgb(14 8 2 / 0.32), inset 0 0 0 1px rgb(0 0 0 / 0.06); }
+/* the fold: the card's base flap, shaded where it bends */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1.2rem;
+    background:
+        linear-gradient(rgb(255 255 255 / 0.55) 0 1px, transparent 1px),
+        linear-gradient(rgb(0 0 0 / 0.09), rgb(0 0 0 / 0.2));
+    box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.12);
+    pointer-events: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item:nth-child(4n+2) { --tc: #b88f3d; rotate: 0.3deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item:nth-child(4n+3) { --tc: #b5643c; rotate: -0.25deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item:nth-child(4n+4) { --tc: #2f7d4f; rotate: 0.2deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item:nth-child(4n+1) { rotate: -0.3deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item h3 {
+    margin: 0.2rem 0 0.4rem;
+    font-family: var(--dk-serif);
+    font-size: 1.16rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #1d1a15;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-item p {
+    margin: 0;
+    font-family: var(--dk-serif);
+    font-size: 0.97rem;
+    line-height: 1.58;
+    color: #35302a;
+}
+
+/* decor: OPEN plaque and service bell, standing on the back edge */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-open,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-bell {
+    display: block;
+    position: relative;
+    z-index: 2;
+    margin-bottom: -1rem;
+    pointer-events: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-open {
+    margin-right: 1.3rem;
+    width: 7.4rem;
+    height: 3.4rem;
+    border-radius: 6px 6px 3px 3px;
+    background:
+        linear-gradient(118deg, transparent 20%, rgb(255 255 255 / 0.5) 30%, transparent 42%),
+        linear-gradient(225deg, rgb(255 196 120 / 0.3), transparent 45%),
+        linear-gradient(#f7f0de, #e9dfc6);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.14), inset 0 1px 0 #fff, -8px 7px 9px rgb(14 8 2 / 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-open::before {
+    content: attr(data-text);
+    font-family: var(--sk-sans);
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    padding-left: 0.16em;
+    color: #2a7243;
+    text-shadow: 0 1px 0 rgb(255 255 255 / 0.7);
+}
+/* its little stand */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-open::after {
+    content: '';
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 100%;
+    height: 0.55rem;
+    border-radius: 0 0 4px 4px;
+    background: linear-gradient(#4a4f58, #25282d);
+    box-shadow: -6px 6px 6px rgb(14 8 2 / 0.4);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-bell {
+    width: 4.6rem;
+    height: 3.2rem;
+    background: no-repeat center bottom / 100% 100%
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 64'%3E%3Cellipse cx='50' cy='58' rx='40' ry='5' fill='%23000' opacity='.35'/%3E%3Crect x='14' y='48' width='62' height='9' rx='3' fill='%232a2d33'/%3E%3Crect x='14' y='48' width='62' height='2' rx='1' fill='%23fff' opacity='.2'/%3E%3Cellipse cx='45' cy='49' rx='32' ry='5' fill='%231d1f24'/%3E%3Cpath d='M15 48 A30 29 0 0 1 75 48Z' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%23737a84'/%3E%3Cstop offset='.55' stop-color='%23e3e7ea'/%3E%3Cstop offset='1' stop-color='%23a4acb4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M26 40 Q32 26 46 22' fill='none' stroke='%23fff' stroke-opacity='.8' stroke-width='2.5' stroke-linecap='round'/%3E%3Crect x='42' y='12' width='6' height='11' fill='%239aa1a8'/%3E%3Cellipse cx='45' cy='11' rx='8' ry='3.6' fill='%23c7ccd1'/%3E%3C/svg%3E");
+    filter: drop-shadow(-5px 5px 4px rgb(14 8 2 / 0.45));
+}
+
+/* -- arrival: the OPEN plaque lights, the bell bobs, each card is set down */
+@keyframes dk-set-down {
+    0%   { opacity: 0; translate: 0 -14px; }
+    65%  { opacity: 1; translate: 0 2px; }
+    100% { opacity: 1; translate: 0 0; }
+}
+@keyframes dk-bob {
+    0%, 100% { rotate: 0deg; }
+    25% { rotate: -5deg; }
+    50% { rotate: 4deg; }
+    75% { rotate: -2deg; }
+}
+@keyframes dk-flick {
+    0%   { filter: brightness(0.5); }
+    30%  { filter: brightness(1.2); }
+    55%  { filter: brightness(0.8); }
+    100% { filter: none; }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available.lab-ex-play .available-item {
+    animation: dk-set-down 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+    animation-delay: calc(0.35s + var(--lab-ex-d, 0ms) * 2);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available.lab-ex-play .lab-skin-bell { animation: dk-bob 0.7s ease-in-out 0.2s both; transform-origin: 50% 100%; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available.lab-ex-play .lab-skin-open { animation: dk-flick 0.7s linear 0.1s both; }
+
+/* ============================ HELP POSTER ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq { position: relative; padding: 4.5rem 0 4.25rem; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq > .container {
+    position: relative;
+    max-width: min(46rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 0 0 1.2rem;
+    background:
+        radial-gradient(90% 60% at 100% 0%, rgb(var(--sk-lamp) / 0.2), transparent 70%),
+        linear-gradient(200deg, #fbf8ef, #f3eedf 60%, #ece5d1);
+    box-shadow: -10px 14px 24px rgb(6 9 20 / 0.5), -2px 3px 5px rgb(6 9 20 / 0.35), inset 0 0 0 1px rgb(0 0 0 / 0.06);
+}
+/* two strips of tape at the top corners */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq > .container::before,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq > .container::after {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: -14px;
+    z-index: 2;
+    width: 84px;
+    height: 24px;
+    background: linear-gradient(rgb(250 246 230 / 0.7), rgb(236 230 208 / 0.6));
+    box-shadow: 0 1px 2px rgb(20 10 2 / 0.25);
+    rotate: -28deg;
+    pointer-events: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq > .container::after {
+    left: auto;
+    right: -14px;
+    rotate: 28deg;
+}
+/* the yellow header, with the "?" */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq .section-title {
+    position: relative;
+    margin: 0;
+    padding: 1.55rem 2rem 1.35rem 6.5rem;
+    min-height: 5.5rem;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    font-family: var(--sk-sans);
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #1d1f24;
+    background:
+        radial-gradient(circle, rgb(0 0 0 / 0.1) 0 1px, transparent 1.4px) 0 0 / 7px 7px,
+        linear-gradient(225deg, rgb(255 244 190 / 0.5), transparent 55%),
+        var(--dk-yellow);
+    border-bottom: 5px solid #1d1f24;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq .section-title::before {
+    content: '?';
+    position: absolute;
+    left: 1.5rem;
+    top: 50%;
+    translate: 0 -50%;
+    width: 3.7rem;
+    height: 3.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--dk-yellow);
+    background: radial-gradient(circle at 35% 30%, #34373d, #1d1f24 70%);
+    box-shadow: -3px 4px 5px rgb(60 40 0 / 0.4);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-list { max-width: none; margin: 0; padding: 0.4rem 0 0; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-item {
+    margin: 0;
+    padding: 1.45rem 2.2rem 1.4rem 2.2rem;
+    border: 0;
+    border-radius: 0;
+    background: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-item + .faq-item { border-top: 1px dashed rgb(42 38 32 / 0.35); }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-question {
+    position: relative;
+    margin: 0 0 0.55rem;
+    padding-left: 1.7rem;
+    font-family: var(--sk-sans);
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.35;
+    color: #1d1f24;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-question::before {
+    content: '';
+    position: absolute;
+    left: 0.15rem;
+    top: 0.32em;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: var(--dk-yellow);
+    box-shadow: 0 0 0 2px #1d1f24;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-answer {
+    max-width: 39rem;
+    margin: 0 0 0 1.7rem;
+    font-family: var(--dk-serif);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--dk-ink);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-answer a { color: var(--dk-link); text-decoration: underline; text-underline-offset: 3px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-answer a:focus-visible { outline-color: var(--sk-focus-ink); }
+
+/* -- arrival: the header is printed across, the first answers fade up */
+@keyframes dk-print {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq.lab-ex-play .section-title { animation: dk-print 0.55s steps(16, end) 0.05s both; }
+
+/* ============================ WALL TELEPHONE ============================ */
+
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact { position: relative; padding: 4.25rem 0 4.5rem; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact > .container {
+    position: relative;
+    max-width: min(54rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 0;
+}
+/* the title: an enamel plate, as on a phone booth */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact .section-title {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0.2rem;
+    padding: 0.6rem 1.8rem 0.55rem;
+    border: 3px solid #1f3a5f;
+    border-radius: 4px;
+    text-align: left;
+    font-family: var(--sk-sans);
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #1f3a5f;
+    background:
+        radial-gradient(circle at 10px 50%, #aab4c0 0 1.6px, #4a5566 2.3px, transparent 3.2px),
+        radial-gradient(circle at calc(100% - 10px) 50%, #aab4c0 0 1.6px, #4a5566 2.3px, transparent 3.2px),
+        linear-gradient(118deg, transparent 22%, rgb(255 255 255 / 0.7) 31%, transparent 42%),
+        linear-gradient(225deg, rgb(255 196 120 / 0.2), transparent 50%),
+        #f4f6f8;
+    box-shadow: inset 0 0 0 1px #fff, -5px 6px 8px rgb(6 9 20 / 0.5);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-content { max-width: none; margin: 0; }
+/* the intro: a typed note taped up beside the phone */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-intro {
+    position: relative;
+    max-width: 40rem;
+    margin: 0 0 2.4rem 0.4rem;
+    padding: 1.35rem 1.7rem 1.3rem;
+    text-align: left;
+    font-family: var(--dk-serif);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--dk-ink);
+    background: linear-gradient(200deg, var(--dk-paper-hi), var(--dk-paper) 50%, var(--dk-paper-lo));
+    box-shadow: -7px 10px 14px rgb(14 8 2 / 0.4), -1px 2px 3px rgb(14 8 2 / 0.3);
+    rotate: -0.3deg;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-intro::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: calc(50% - 40px);
+    width: 80px;
+    height: 22px;
+    background: linear-gradient(rgb(250 246 230 / 0.66), rgb(236 230 208 / 0.58));
+    box-shadow: 0 1px 2px rgb(20 10 2 / 0.22);
+    rotate: -2deg;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 2.2rem;
+    align-items: start;
+}
+
+/* the business-card holder: a dark acrylic tray, the cards slotted in */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-info {
+    position: relative;
+    padding: 1.1rem 1.1rem 0.5rem;
+    border-radius: 6px;
+    background:
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.14), transparent 45%),
+        linear-gradient(#2b313c, #1e232b);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 0 0 1px #14171c, var(--sk-shadow);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 0.85rem;
+    padding: 0.9rem 1.2rem 1.15rem 0.9rem;
+    border-radius: 2px;
+    background: linear-gradient(200deg, #fdfcf8, #ece8dc);
+    box-shadow: -4px 5px 7px rgb(0 0 0 / 0.45), inset 0 0 0 1px rgb(0 0 0 / 0.08);
+    color: var(--dk-ink);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item:nth-child(odd) { rotate: -0.2deg; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item:nth-child(even) { rotate: 0.25deg; }
+/* the tray's glass lip along the foot of each slot */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item::after {
+    content: '';
+    position: absolute;
+    left: -6px;
+    right: -6px;
+    bottom: -4px;
+    height: 0.6rem;
+    border-radius: 0 0 3px 3px;
+    background: linear-gradient(rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.04));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 3px 4px rgb(0 0 0 / 0.35);
+    pointer-events: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-icon {
+    width: 2.7rem;
+    height: 2.7rem;
+    flex: none;
+    border-radius: 50%;
+    color: #f1ead9;
+    background: radial-gradient(circle at 35% 30%, #3a5f90, #1f3a5f 70%);
+    box-shadow: inset 0 0 0 2px rgb(226 176 34 / 0.7), -2px 3px 3px rgb(14 8 2 / 0.3);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-icon svg { width: 1.3rem; height: 1.3rem; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item h4 {
+    margin: 0 0 0.1rem;
+    font-family: var(--sk-sans);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #4b4f58;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item p {
+    margin: 0;
+    font-family: var(--dk-serif);
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--dk-ink);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin: -0.4rem 0;
+    font-family: var(--sk-sans);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dk-link);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    overflow-wrap: anywhere;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item a:hover { color: #0f3570; text-decoration-thickness: 2px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item a:focus-visible { outline-color: var(--sk-focus-ink); outline-offset: 1px; }
+
+/* the telephone: cream body on the wall, handset on its left, a coiled cord */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-links {
+    position: relative;
+    padding: 1.15rem 1.15rem 1.3rem 4.3rem;
+    border-radius: 14px;
+    background:
+        linear-gradient(118deg, transparent 20%, rgb(255 255 255 / 0.35) 29%, transparent 38%),
+        linear-gradient(225deg, rgb(255 196 120 / 0.3), transparent 50%),
+        linear-gradient(45deg, rgb(40 48 70 / 0.1), transparent 55%),
+        #e3dccb;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7), inset 0 -3px 0 rgb(0 0 0 / 0.12), var(--sk-shadow);
+}
+/* the display */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-links h4 {
+    margin: 0 0 0.95rem;
+    padding: 0.5rem 0.75rem 0.45rem;
+    border-radius: 3px;
+    font-family: var(--sk-mono);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #bfe7ff;
+    background: linear-gradient(#22313f, #172430);
+    box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.7), 0 1px 0 rgb(255 255 255 / 0.7);
+}
+/* the keypad */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-icons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 0.7rem;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-link {
+    width: auto;
+    height: auto;
+    min-height: 4.4rem;
+    padding: 0.55rem 0.35rem 0.5rem;
+    flex-direction: column;
+    gap: 0.28rem;
+    border-radius: 9px;
+    text-align: center;
+    color: #2a2d33;
+    background:
+        linear-gradient(225deg, rgb(255 255 255 / 0.4), transparent 50%),
+        linear-gradient(#d9d1bb, #c4bba2);
+    box-shadow: -3px 4px 5px rgb(14 8 2 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.75), inset 0 -2px 0 rgb(0 0 0 / 0.14);
+    transition: translate 0.08s, box-shadow 0.08s;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-link svg { width: 1.45rem; height: 1.45rem; flex: none; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-link::after {
+    content: attr(aria-label);
+    font-family: var(--sk-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: #2a2d33;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-link:hover {
+    transform: none;
+    translate: -1px 2px;
+    color: #12141a;
+    background:
+        linear-gradient(225deg, rgb(255 255 255 / 0.5), transparent 50%),
+        linear-gradient(#e6d6a6, #d4bf80);
+    box-shadow: -2px 2px 3px rgb(14 8 2 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.75), inset 0 -1px 0 rgb(0 0 0 / 0.14);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-link:focus-visible { outline-color: var(--sk-focus-ink); outline-offset: 2px; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-link:active { translate: -2px 3px; box-shadow: -1px 1px 2px rgb(14 8 2 / 0.4), inset 0 2px 3px rgb(0 0 0 / 0.2); }
+
+/* decor: the handset and its cord */
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-handset {
+    display: block;
+    position: absolute;
+    left: 0.9rem;
+    top: 1.1rem;
+    width: 2.4rem;
+    height: calc(100% - 7rem);
+    min-height: 8rem;
+    border-radius: 1.2rem;
+    background:
+        linear-gradient(90deg, rgb(0 0 0 / 0.12), transparent 30%, rgb(255 255 255 / 0.2) 70%, rgb(0 0 0 / 0.1)),
+        #d4ccb7;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), -5px 6px 7px rgb(14 8 2 / 0.4);
+    pointer-events: none;
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-handset::before,
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-handset::after {
+    content: '';
+    position: absolute;
+    left: -0.3rem;
+    right: -0.3rem;
+    height: 2.4rem;
+    border-radius: 1rem;
+    background:
+        linear-gradient(90deg, rgb(0 0 0 / 0.1), transparent 35%, rgb(255 255 255 / 0.2) 75%),
+        #cbc3ae;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), -3px 4px 4px rgb(14 8 2 / 0.3);
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-handset::before { top: -0.4rem; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-handset::after { bottom: -0.4rem; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-cord {
+    display: block;
+    position: absolute;
+    left: 1.3rem;
+    width: 1.8rem;
+    top: calc(100% - 5.2rem);
+    height: 4.6rem;
+    pointer-events: none;
+    background: radial-gradient(ellipse 50% 50%, transparent 0 55%, #b2aa93 60% 82%, transparent 86%) 0 0 / 100% 0.55rem repeat-y;
+    filter: drop-shadow(-3px 3px 2px rgb(14 8 2 / 0.35));
+}
+
+/* -- arrival: the note is taped up, the display wakes, the keys light in turn */
+@keyframes dk-tape-up {
+    0%   { opacity: 0; translate: 5px -14px; }
+    100% { opacity: 1; translate: 0 0; }
+}
+@keyframes dk-lcd {
+    0%   { filter: brightness(0.2); }
+    40%  { filter: brightness(1.3); }
+    100% { filter: none; }
+}
+@keyframes dk-key {
+    from { opacity: 0; scale: 0.85; }
+    to   { opacity: 1; scale: 1; }
+}
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .contact-intro { animation: dk-tape-up 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) 0.1s both; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .contact-item { animation: dk-tape-up 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .contact-item:nth-child(1) { animation-delay: 0.3s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .contact-item:nth-child(2) { animation-delay: 0.42s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .contact-item:nth-child(3) { animation-delay: 0.54s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .contact-item:nth-child(4) { animation-delay: 0.66s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .social-links h4 { animation: dk-lcd 0.6s linear 0.5s both; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .social-link { animation: dk-key 0.25s ease-out both; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .social-link:nth-child(1) { animation-delay: 0.8s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .social-link:nth-child(2) { animation-delay: 0.88s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .social-link:nth-child(3) { animation-delay: 0.96s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .social-link:nth-child(4) { animation-delay: 1.04s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .social-link:nth-child(5) { animation-delay: 1.12s; }
+.lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact.lab-ex-play .social-link:nth-child(6) { animation-delay: 1.2s; }
+
+/* ============================ SMALLER SCREENS ============================ */
+
+@media (max-width: 900px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+}
+@media (max-width: 760px) {
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available { padding-top: 5rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available > .container,
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq > .container,
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #contact > .container { max-width: calc(100% - 1.4rem); }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available > .container { grid-template-columns: 1fr auto auto; column-gap: 0.7rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #available .section-title { margin-left: 0.4rem; padding: 0.6rem 0.9rem 0.55rem; font-size: 0.82rem; letter-spacing: 0.1em; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-open { width: 5.2rem; height: 2.8rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-open::before { font-size: 1.15rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .lab-skin-bell { width: 3.6rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-grid { grid-template-columns: 1fr; padding: 1.5rem 1rem 1.6rem; gap: 1.6rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq .section-title { padding: 1.2rem 1rem 1.1rem 5.3rem; font-size: 1.3rem; min-height: 4.8rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq .section-title::before { width: 3rem; height: 3rem; font-size: 2.1rem; left: 1.1rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-item { padding: 1.25rem 1.15rem 1.2rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-question { font-size: 1.05rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-answer { font-size: 1.02rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-info { padding: 0.9rem 0.8rem 0.4rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .contact-item { padding-right: 0.8rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .social-links { padding-left: 3.9rem; }
+}
+
+} /* @media screen */
