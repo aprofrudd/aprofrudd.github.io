@@ -29,7 +29,7 @@
     // perspective carried on toward the viewer (each gap about 1.4x the last).
     var JOINTS = [50, 40, 26, 6, -22, -62, -118, -196, -300, -446, -650, -936, -1336];
 
-    var hero, stage, svg, last = '', queued = false;
+    var hero, stage, svg, scene, last = '', queued = false;
 
     function px(n) { return (Math.round(n * 100) / 100) + 'px'; }
 
@@ -45,6 +45,10 @@
     function paint() {
         queued = false;
         if (!hero || !stage || !svg) return;
+        // Not while the room is being dragged, gliding or flying: that would be layout
+        // reads and a big style write on every frame. The class change at the end of the
+        // move queues one repaint.
+        if (scene && scene.classList.contains('lab-sc-moving')) return;
         // Only while the stage sits directly under the header (not while a
         // room has the lab fixed behind the drawer).
         var hr = hero.getBoundingClientRect();
@@ -124,6 +128,7 @@
         hero = document.querySelector('.hero');
         stage = document.getElementById('lab-stage');
         svg = stage && stage.querySelector('svg');
+        scene = stage && stage.querySelector('.lab-sc');
         if (!hero || !svg) return;
         paint();
         window.addEventListener('resize', queue);
@@ -131,6 +136,9 @@
         if (window.MutationObserver) {
             new MutationObserver(queue).observe(svg, { attributes: true, attributeFilter: ['style', 'width', 'height'] });
             new MutationObserver(queue).observe(root, { attributes: true, attributeFilter: ['class'] });
+            if (scene) new MutationObserver(queue).observe(scene, { attributes: true, attributeFilter: ['class'] });
+            // the camera's transform lives on a wrapper round the svg
+            if (svg.parentNode && svg.parentNode !== stage) new MutationObserver(queue).observe(svg.parentNode, { attributes: true, attributeFilter: ['style'] });
         }
         // lab.js measures the rail into --lab-nav-h the instant lab-live is
         // set; if anything was still settling then (fonts, a transition),

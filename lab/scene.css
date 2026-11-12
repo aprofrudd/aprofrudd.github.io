@@ -8,6 +8,7 @@
     --lab-sc-label: #c9cdd6;
     --lab-sc-tag-bg: #fffaf0;
     --lab-sc-tag-ink: #1d1f24;
+    --lab-sc-k: 1;            /* 1 / base scale, set by scene.js on this element (not on the svg) */
     position: relative;
     width: 100%;
     height: 100%;
@@ -32,16 +33,45 @@
 .lab-sc.lab-sc-day::after { opacity: .35; }
 .lab-sc.lab-sc-panmode { cursor: grab; }
 .lab-sc.is-dragging { cursor: grabbing; }
-.lab-sc.is-dragging * { cursor: grabbing !important; }
+.lab-sc.is-dragging .lab-sc-svg a, .lab-sc.is-dragging .lab-sc-svg [role="button"] { cursor: grabbing; }
 
+.lab-sc-scroll {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+/* pan mode at rest scale: a native horizontal scroller (see applyCam in scene.js) */
+.lab-sc.lab-sc-scrollmode { touch-action: auto; }
+.lab-sc-scrollmode .lab-sc-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+}
+.lab-sc-scroll::-webkit-scrollbar { display: none; }
+.lab-sc-nosnap .lab-sc-scroll { scroll-snap-type: none; }
+.lab-sc-snap {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    scroll-snap-align: center;
+    pointer-events: none;
+}
+.lab-sc-cam {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+}
 .lab-sc-svg {
     position: absolute;
     left: 0;
     top: 0;
     display: block;
     overflow: visible;
-    transform-origin: 0 0;
-    --lab-sc-k: 1;
 }
 .lab-sc-svg text { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
 .lab-sc-svg .lab-sc-mono { font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace; }
@@ -113,7 +143,26 @@
 .lab-sc-wings { transform-box: fill-box; transform-origin: 50% 50%; animation: lab-sc-flap .12s linear infinite alternate; }
 @keyframes lab-sc-flap { from { transform: scaleX(1); } to { transform: scaleX(.35); } }
 
-.lab-sc-paused * { animation-play-state: paused !important; }
+/* named for the same reason as .lab-sc-moving below */
+.lab-sc-paused .lab-sc-rain,
+.lab-sc-paused .lab-sc-trace,
+.lab-sc-paused .lab-sc-cursor,
+.lab-sc-paused .lab-sc-feed,
+.lab-sc-paused .lab-sc-fly,
+.lab-sc-paused .lab-sc-sway,
+.lab-sc-paused .lab-sc-steam,
+.lab-sc-paused .lab-sc-corr,
+.lab-sc-paused .lab-sc-ticker,
+.lab-sc-paused .lab-sc-mothpath,
+.lab-sc-paused .lab-sc-wings,
+.lab-sc-paused .lab-sc-belt,
+.lab-sc-paused .lab-sc-hglow,
+.lab-sc-paused .lab-sc-bcn-pulse,
+.lab-sc-paused .lab-sc-star,
+.lab-sc-paused .lab-sc-rwarm,
+.lab-sc-paused .lab-sc-dark-on,
+.lab-sc-paused .lab-sc-lampglow,
+.lab-sc-paused .lab-sc-hint-arrows { animation-play-state: paused !important; }
 .lab-sc-paused .lab-sc-steam { opacity: .7; }
 .lab-sc-paused .lab-sc-toy-mug.is-sipping .lab-sc-mugbody,
 .lab-sc-paused .lab-sc-toy-mobile.is-ringing .lab-sc-mobilebody { animation-play-state: running !important; }
@@ -235,7 +284,8 @@
     transform: translateX(-50%);
     padding: 7px 14px;
     border-radius: 999px;
-    background: rgba(12, 15, 24, .78);
+    background: rgba(12, 15, 24, .82);
+    box-shadow: inset 0 0 0 1px rgba(255, 179, 71, .35), 0 2px 8px rgba(0, 0, 0, .35);
     color: #f3efe6;
     font: 600 12px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     letter-spacing: .02em;
@@ -248,6 +298,163 @@
 .lab-sc-hint-arrows { color: var(--lab-sc-accent); margin-right: 4px; }
 .lab-sc-panmode .lab-sc-hint { opacity: 1; }
 .lab-sc-panmode .lab-sc-hint.is-gone { opacity: 0; }
+.lab-sc-panmode .lab-sc-hint-arrows { display: inline-block; animation: lab-sc-nudge 2.4s ease-in-out infinite; }
+.lab-sc-panmode .lab-sc-hint.is-gone .lab-sc-hint-arrows { animation: none; }
+@keyframes lab-sc-nudge { 0%, 60%, 100% { transform: translateX(0); } 75% { transform: translateX(4px); } 88% { transform: translateX(-2px); } }
+
+/* ---------- panning: a still picture while the camera moves ---------- */
+/* While the room is scrolling, being dragged, gliding, peeking or flying, every idle
+   animation in it is paused, so nothing inside the scrolled layer repaints and the move
+   is pure compositor work. */
+/* Named, not `*`: a universal selector here would restyle all ~3000 elements of the drawing
+   each time the class flips, which was itself a 100ms+ frame on a throttled phone. Keep this
+   list in step with every `animation:` in this file. */
+.lab-sc-moving .lab-sc-rain,
+.lab-sc-moving .lab-sc-trace,
+.lab-sc-moving .lab-sc-cursor,
+.lab-sc-moving .lab-sc-feed,
+.lab-sc-moving .lab-sc-fly,
+.lab-sc-moving .lab-sc-sway,
+.lab-sc-moving .lab-sc-steam,
+.lab-sc-moving .lab-sc-corr,
+.lab-sc-moving .lab-sc-ticker,
+.lab-sc-moving .lab-sc-mothpath,
+.lab-sc-moving .lab-sc-wings,
+.lab-sc-moving .lab-sc-belt,
+.lab-sc-moving .lab-sc-hglow,
+.lab-sc-moving .lab-sc-bcn-pulse,
+.lab-sc-moving .lab-sc-star,
+.lab-sc-moving .lab-sc-rwarm,
+.lab-sc-moving .lab-sc-dark-on,
+.lab-sc-moving .lab-sc-lampglow { animation-play-state: paused !important; }
+
+/* ---------- way-finding in pan mode: edges, chevrons, the room strip ---------- */
+.lab-sc-edge, .lab-sc-chev, .lab-sc-strip { display: none; }
+.lab-sc-panmode .lab-sc-edge, .lab-sc-panmode .lab-sc-chev { display: block; }
+.lab-sc-panmode .lab-sc-strip { display: flex; }
+html.lab-open .lab-sc-edge, html.lab-open .lab-sc-chev, html.lab-open .lab-sc-strip, html.lab-open .lab-sc-hint { display: none; }
+
+.lab-sc-edge {
+    position: absolute;
+    top: 0;
+    bottom: 50px;
+    width: 46px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .35s ease;
+    z-index: 1;
+}
+.lab-sc-edge-l { left: 0; background: linear-gradient(to right, rgba(8, 11, 22, .62), rgba(8, 11, 22, 0)); }
+.lab-sc-edge-r { right: 0; background: linear-gradient(to left, rgba(8, 11, 22, .62), rgba(8, 11, 22, 0)); }
+.lab-sc-more-l .lab-sc-edge-l, .lab-sc-more-r .lab-sc-edge-r { opacity: 1; }
+
+/* the chevrons sit on the floor, below every beacon, at the edge with more room */
+.lab-sc-chev {
+    position: absolute;
+    bottom: 64px;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease, visibility 0s linear .3s;
+    z-index: 2;
+    -webkit-tap-highlight-color: transparent;
+}
+.lab-sc-chev::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: radial-gradient(130% 120% at 50% 110%, rgba(255, 179, 71, .28), rgba(255, 179, 71, 0) 70%), linear-gradient(#3a3226, #22201c);
+    box-shadow: inset 0 0 0 1px rgba(255, 179, 71, .55), inset 0 1px 0 rgba(255, 230, 180, .18), 0 0 12px rgba(255, 179, 71, .25), 0 2px 5px rgba(0, 0, 0, .5);
+}
+.lab-sc-chev svg { position: absolute; left: 13px; top: 13px; width: 18px; height: 18px; overflow: visible; }
+.lab-sc-chev path { fill: none; stroke: #ffd58a; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.lab-sc-chev-l { left: 4px; }
+.lab-sc-chev-r { right: 4px; }
+.lab-sc-more-l .lab-sc-chev-l, .lab-sc-more-r .lab-sc-chev-r { opacity: 1; visibility: visible; transition: opacity .3s ease, visibility 0s; }
+.lab-sc-chev:focus-visible { outline: 2px solid #ffd58a; outline-offset: 1px; }
+.lab-sc-chev:active::before { background: linear-gradient(#4a3d29, #2c2820); }
+
+/* the strip: six stops under the floor, a lit thumb showing what is in view */
+.lab-sc-strip {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 50px;
+    margin: 0;
+    padding: 0 6px;
+    align-items: stretch;
+    background: linear-gradient(#1b1e26, #121419);
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, .7), inset 0 2px 0 rgba(255, 255, 255, .05);
+    z-index: 2;
+}
+.lab-sc-strip-track {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: 4px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, .07);
+    overflow: hidden;
+    pointer-events: none;
+}
+.lab-sc-strip-thumb {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffb347;
+    box-shadow: 0 0 6px rgba(255, 179, 71, .8);
+    transform-origin: 0 50%;
+    transform: scaleX(.2);
+    will-change: transform;
+}
+.lab-sc-stop {
+    flex: 1 1 0;
+    min-width: 44px;
+    min-height: 44px;
+    margin: 6px 0 0;
+    padding: 2px 0 0;
+    border: 0;
+    background: transparent;
+    color: #8f949f;
+    font: 600 9px/1.15 "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+}
+.lab-sc-stop-n { color: #b98f52; font-size: 10px; }
+.lab-sc-stop-t { white-space: nowrap; }
+.lab-sc-stop + .lab-sc-stop::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 10px;
+    width: 1px;
+    background: rgba(255, 255, 255, .06);
+}
+.lab-sc-stop.is-here { color: #ffe3b3; text-shadow: 0 0 8px rgba(255, 179, 71, .55); }
+.lab-sc-stop.is-here .lab-sc-stop-n { color: #ffb347; }
+.lab-sc-stop:focus-visible { outline: 2px solid #ffd58a; outline-offset: -3px; border-radius: 4px; }
+
 
 /* ---------- reading state: the object the visitor is reading about ---------- */
 .lab-sc-reading { pointer-events: none; }
@@ -262,6 +469,7 @@
 
 /* ---------- reduced motion: one still frame ---------- */
 .lab-sc-reduced *, .lab-sc-reduced *::before { animation: none !important; }
+.lab-sc-reduced .lab-sc-edge, .lab-sc-reduced .lab-sc-chev { transition: none; }
 .lab-sc-reduced .lab-sc-steam { opacity: .6; }
 @media (prefers-reduced-motion: reduce) {
     .lab-sc * { animation: none !important; }

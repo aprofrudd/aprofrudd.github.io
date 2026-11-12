@@ -28,14 +28,15 @@
 
     var SW = 4520, SH = 1200, FL = 980;
     var ZONES = [
-        { key: 'reception', name: 'Reception', x0: 0, x1: 700 },
-        { key: 'lab', name: 'Performance Lab', x0: 700, x1: 2100 },     // treadmill through the ergometer
-        { key: 'office', name: 'Office', x0: 2100, x1: 2780 },
-        { key: 'print', name: 'Print Room', x0: 2780, x1: 3320 },
-        { key: 'seminar', name: 'Seminar Room', x0: 3320, x1: 3990 },
-        { key: 'desk', name: 'Front Desk', x0: 3990, x1: 4520 }
+        { key: 'reception', name: 'Reception', short: 'Reception', x0: 0, x1: 700 },
+        { key: 'lab', name: 'Performance Lab', short: 'Lab', x0: 700, x1: 2100 },     // treadmill through the ergometer
+        { key: 'office', name: 'Office', short: 'Office', x0: 2100, x1: 2780 },
+        { key: 'print', name: 'Print Room', short: 'Print', x0: 2780, x1: 3320 },
+        { key: 'seminar', name: 'Seminar Room', short: 'Seminar', x0: 3320, x1: 3990 },
+        { key: 'desk', name: 'Front Desk', short: 'Desk', x0: 3990, x1: 4520 }
     ];
     var FOCUS_Y0 = 130, FOCUS_Y1 = 1185;
+    var STRIP_H = 50;          // CSS px kept under the floor for the room strip in pan mode (see .lab-sc-strip)
     // Tight art bounds [x0, y0, x1, y1] for hotspots whose click box is much taller or wider
     // than the object. Used for hover rings, the reading rim and close-up framing only.
     var FIT = {
@@ -917,9 +918,16 @@
                 '<circle class="lab-sc-bcn-hit" r="20"/></a>';
         });
 
+        var coarse = false;
+        try { coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); } catch (e) { /* ignore */ }
         var root = document.createElement('div');
         root.className = 'lab-sc' + (reduced ? ' lab-sc-reduced' : '');
         root.innerHTML =
+            // The camera moves this wrapper, never the svg: a transform change on the svg root
+            // makes Chrome re-lay-out every <text> in it (their font scale follows the root
+            // transform) and repaint the whole drawing, every frame of a pan.
+            '<div class="lab-sc-scroll"><div class="lab-sc-cam">' +
+            ZONES.map(function (z) { return '<span class="lab-sc-snap" data-snap="' + z.key + '" aria-hidden="true"></span>'; }).join('') +
             '<svg class="lab-sc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + SW + ' ' + SH + '" role="group" aria-label="Illustrated physiology lab after hours. Objects link to sections of the page.">' +
             '<defs>' + d.defs + maskOn + maskOff +
             '<radialGradient id="' + pre + 'rdDim" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="#05070f" stop-opacity="0"/><stop offset=".55" stop-color="#05070f" stop-opacity="0"/><stop offset="1" stop-color="#05070f" stop-opacity="1"/></radialGradient>' +
@@ -935,10 +943,21 @@
                 '<ellipse class="lab-sc-rwarm" fill="' + U('rdWarm') + '"/>' +
                 '<g class="lab-sc-rparts"></g></g>' +
             '<g class="lab-sc-ui">' + ui + '<g class="lab-sc-rings" aria-hidden="true">' + rings + '</g><g class="lab-sc-beacons">' + beacons + '</g></g>' +
-            '</svg>' +
-            '<div class="lab-sc-hint" aria-hidden="true"><span class="lab-sc-hint-arrows">← →</span> Drag to look around</div>';
+            '</svg></div></div>' +
+            '<div class="lab-sc-hint" aria-hidden="true"><span class="lab-sc-hint-arrows">← →</span> ' + (coarse ? 'Swipe' : 'Drag') + ' to walk the lab</div>' +
+            // Pan mode only (the room is wider than the screen): soft edges with a chevron that
+            // walks one room along, and a strip of the six rooms under the floor.
+            '<div class="lab-sc-edge lab-sc-edge-l" aria-hidden="true"></div><div class="lab-sc-edge lab-sc-edge-r" aria-hidden="true"></div>' +
+            '<button type="button" class="lab-sc-chev lab-sc-chev-l" aria-label="Previous room"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
+            '<button type="button" class="lab-sc-chev lab-sc-chev-r" aria-label="Next room"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>' +
+            '<nav class="lab-sc-strip" aria-label="Rooms in the lab"><div class="lab-sc-strip-track" aria-hidden="true"><div class="lab-sc-strip-thumb"></div></div>' +
+            ZONES.map(function (z, i) {
+                return '<button type="button" class="lab-sc-stop" data-stop="' + z.key + '" aria-label="Walk to room ' + (i + 1) + ': ' + z.name + '">' +
+                    '<span class="lab-sc-stop-n">0' + (i + 1) + '</span><span class="lab-sc-stop-t">' + z.short + '</span></button>';
+            }).join('') + '</nav>';
         container.appendChild(root);
-        var svg = root.querySelector('svg');
+        var svg = root.querySelector('svg'), camEl = root.querySelector('.lab-sc-cam'), scroller = root.querySelector('.lab-sc-scroll');
+        var snaps = Array.prototype.slice.call(root.querySelectorAll('.lab-sc-snap'));
         var hint = root.querySelector('.lab-sc-hint');
         function q(sel) { return root.querySelector(sel); }
         function qa(sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); }
@@ -954,16 +973,53 @@
         var cam = { s: 1, tx: 0, ty: 0 }, base = 0;
         var mode = { focus: null, inset: null, obj: null }, panning = false, panCx = 350;      // phones start at Reception, where the CV begins
         var anim = null, momentum = null;
-        function dims() { return { W: root.clientWidth || 1, H: root.clientHeight || 1 }; }
-        function applyCam() { svg.style.transform = 'translate(' + cam.tx + 'px,' + cam.ty + 'px) scale(' + (cam.s / base) + ')'; }
+        // The stage size, cached: reading clientWidth right after a camera write would force a
+        // style recalc and layout on every frame of a drag. Refreshed by the resize observer.
+        var dimCache = null;
+        function measure() { dimCache = { W: root.clientWidth || 1, H: root.clientHeight || 1 }; return dimCache; }
+        function dims() { return dimCache || measure(); }
+        // Two ways to place the camera. Zoomed (a room open, or the whole room fits) it is a
+        // transform on .lab-sc-cam. Panning the room at rest scale it is the native scroll
+        // offset of .lab-sc-scroll: the compositor scrolls it, with the platform's own touch
+        // momentum, and nothing in the drawing is re-laid-out or re-layerised per frame.
+        // (A per-frame transform write cost ~10ms of Layerize per frame on a 4x-throttled
+        // phone, because the drawing has thousands of paint chunks; scrollLeft costs none.)
+        var scrollMode = false, curLeft = 0, lastSet = -1, camW = '', camT = '';
+        function applyCam() {
+            var t, k = cam.s / base;
+            if (scrollMode) {
+                var w = Math.ceil(SW * cam.s) + 'px';
+                if (w !== camW) {
+                    camW = w; camEl.style.width = w;
+                    snaps.forEach(function (sp, i) { sp.style.left = Math.round((ZONES[i].x0 + ZONES[i].x1) / 2 * cam.s) + 'px'; });
+                }
+                t = 'translate(0px,' + cam.ty + 'px) scale(' + k + ')';
+                if (t !== camT) { camT = t; camEl.style.transform = t; }
+                var left = Math.max(0, -cam.tx);
+                if (Math.abs(left - curLeft) > 0.5) { curLeft = lastSet = left; scroller.scrollLeft = left; }
+            } else {
+                t = 'translate(' + cam.tx + 'px,' + cam.ty + 'px) scale(' + k + ')';
+                if (t !== camT) { camT = t; camEl.style.transform = t; }
+            }
+        }
+        function setScrollMode(on) {
+            if (on === scrollMode) return;
+            scrollMode = on;
+            root.classList.toggle('lab-sc-scrollmode', on);
+            if (!on) { scroller.scrollLeft = 0; curLeft = 0; camW = ''; camEl.style.width = ''; }
+            camT = '';
+            applyCam();
+        }
+        function wantScroll() { return panning && !mode.focus; }
         function rebase() {
             base = cam.s;
             svg.setAttribute('width', Math.round(SW * base));
             svg.setAttribute('height', Math.round(SH * base));
-            svg.style.setProperty('--lab-sc-k', String(1 / base));
+            root.style.setProperty('--lab-sc-k', String(1 / base));
             applyCam();
             layoutUI();
             fitToyHits();
+            navSync();
         }
         // Toy tap targets: at least 44 CSS px at the current scale (they are about 33px when the
         // room is panned on a phone). The invisible hit rect grows around the toy, but never past
@@ -1000,9 +1056,10 @@
             var dm = dims(), fs = Math.min(dm.W / SW, dm.H / SH);
             if (fs >= 0.27) { panning = false; return { s: fs, tx: (dm.W - SW * fs) / 2, ty: (dm.H - SH * fs) / 2 }; }
             panning = true;
-            var s = Math.max(dm.H / 1130, fs);
+            var h = dm.H - STRIP_H;                     // the room strip sits under the floor
+            var s = Math.max(h / 1130, fs);
             var tx = dm.W / 2 - panCx * s;
-            return { s: s, tx: clampTx(tx, s), ty: (dm.H - 1130 * s) / 2 - 62 * s };
+            return { s: s, tx: clampTx(tx, s), ty: (h - 1130 * s) / 2 - 62 * s };
         }
         function clampTx(tx, s) { var dm = dims(); return Math.min(0, Math.max(dm.W - SW * s, tx)); }
         function zoneTarget(key, inset) {
@@ -1038,26 +1095,50 @@
         function zoneBy(key) { for (var i = 0; i < ZONES.length; i++) if (ZONES[i].key === key) return ZONES[i]; return null; }
         function ease(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
         function stopAnims() {
-            if (anim) { cancelAnimationFrame(anim); anim = null; }
-            if (momentum) { cancelAnimationFrame(momentum); momentum = null; }
+            if (anim) { cancelAnimationFrame(anim); anim = null; setMoving('fly', false); }
+            if (momentum) { cancelAnimationFrame(momentum); momentum = null; setMoving('glide', false); }
+            if (peekAnim) { cancelAnimationFrame(peekAnim); peekAnim = null; setMoving('peek', false); }
         }
         function flyTo(t, dur) {
             stopAnims();
-            if (reduced || !dur || !base) { cam = { s: t.s, tx: t.tx, ty: t.ty }; rebase(); return; }
+            if (reduced || !dur || !base) {
+                cam = { s: t.s, tx: t.tx, ty: t.ty };
+                if (!wantScroll()) setScrollMode(false);
+                rebase();
+                if (wantScroll()) setScrollMode(true);
+                return;
+            }
+            if (scrollMode && wantScroll() && Math.abs(t.s - cam.s) < 1e-6 && Math.abs(t.ty - cam.ty) < 0.5) {
+                // a walk along the room: the browser's own smooth scroll
+                lastSet = Math.max(0, -t.tx);
+                setMoving('fly', true);
+                flyEnd();
+                scroller.scrollTo({ left: lastSet, behavior: 'smooth' });
+                return;
+            }
+            setScrollMode(false);
             var dm = dims(), from = { s: cam.s, tx: cam.tx, ty: cam.ty };
             var c0x = (dm.W / 2 - from.tx) / from.s, c0y = (dm.H / 2 - from.ty) / from.s;
             var c1x = (dm.W / 2 - t.tx) / t.s, c1y = (dm.H / 2 - t.ty) / t.s;
-            var t0 = performance.now();
-            svg.style.willChange = 'transform';
+            var t0 = performance.now(), pure = Math.abs(t.s - from.s) < 1e-6;
+            if (!pure) camEl.style.willChange = 'transform';
             hideTag();
+            setMoving('fly', true);
             function step(now) {
                 var p = Math.min(1, (now - t0) / dur), e = ease(p);
                 var s = from.s * Math.pow(t.s / from.s, e);
                 var cx = c0x + (c1x - c0x) * e, cy = c0y + (c1y - c0y) * e;
                 cam = { s: s, tx: dm.W / 2 - cx * s, ty: dm.H / 2 - cy * s };
                 applyCam();
+                if (pure) navSync();
                 if (p < 1) anim = requestAnimationFrame(step);
-                else { anim = null; cam = { s: t.s, tx: t.tx, ty: t.ty }; svg.style.willChange = ''; rebase(); }
+                else {
+                    anim = null; cam = { s: t.s, tx: t.tx, ty: t.ty }; camEl.style.willChange = '';
+                    // a pure pan keeps the scale, so beacons and toy hit areas need no re-layout
+                    if (pure) { applyCam(); navSync(); } else rebase();
+                    if (wantScroll()) setScrollMode(true);
+                    setMoving('fly', false);
+                }
             }
             anim = requestAnimationFrame(step);
         }
@@ -1067,31 +1148,69 @@
             else root.classList.remove('lab-sc-panmode');
             root.classList.toggle('lab-sc-focused', !!mode.focus);
             flyTo(t, dur);
+            navSync();
+        }
+        // Moving the camera by hand. While the room is being dragged, gliding, peeking or
+        // flying, every idle animation in it is paused (lab-sc-moving): the SVG is then a
+        // still picture on its own compositor layer (will-change in pan mode), so a pan is
+        // a pure translate instead of a re-raster of a 3000px-wide layer every frame.
+        var moving = {}, movingOn = false, peekAnim = null;
+        function setMoving(why, on) {
+            if (on) moving[why] = true; else delete moving[why];
+            var now = false;
+            for (var k in moving) if (moving[k]) { now = true; break; }
+            root.classList.toggle('lab-sc-nosnap', !!(moving.drag || moving.glide || moving.peek));
+            if (now === movingOn) return;
+            movingOn = now;
+            root.classList.toggle('lab-sc-moving', now);
+        }
+        // a native smooth scroll has no end callback everywhere: settle 'fly' on scrollend or quiet
+        var flyT = null;
+        function flyEnd() { clearTimeout(flyT); flyT = setTimeout(function () { setMoving('fly', false); }, 900); }
+        function setPanX(tx) {
+            cam.tx = clampTx(tx, cam.s);
+            panCx = (dims().W / 2 - cam.tx) / cam.s;
+            applyCam();
+            navSync();
         }
         function panBy(dx) {
-            if (!panning || mode.focus) return;
-            cam.tx = clampTx(cam.tx + dx, cam.s);
-            var dm = dims();
-            panCx = (dm.W / 2 - cam.tx) / cam.s;
-            applyCam();
+            if (!panning || mode.focus) return false;
+            var before = cam.tx;
+            setPanX(cam.tx + dx);
+            return cam.tx !== before;
         }
-        function panToX(x) {
+        function panToX(x, dur) {
             var dm = dims();
             panCx = x;
-            flyTo({ s: cam.s, tx: clampTx(dm.W / 2 - x * cam.s, cam.s), ty: cam.ty }, 450);
+            flyTo({ s: cam.s, tx: clampTx(dm.W / 2 - x * cam.s, cam.s), ty: cam.ty }, dur == null ? 450 : dur);
         }
 
         // ---------------- dragging ----------------
-        var drag = null, suppressClick = false, interacted = false;
+        // Finger tracking is 1:1 and written once per frame; velocity comes from the last
+        // ~100ms of (coalesced) samples; the glide decays like a native scroller and stops
+        // dead at either end of the room.
+        var drag = null, suppressClick = false, interacted = false, moveRaf = null, wheelT = null;
+        var TAU = 380, VMAX = 4.5;                          // glide time constant (ms), top speed (px/ms)
         function firstInput() {
             if (interacted) return;
             interacted = true;
             hint.classList.add('is-gone');
+            try { sessionStorage.setItem('lab-sc-panned', '1'); } catch (e) { /* ignore */ }
+        }
+        function moveFrame() {
+            moveRaf = null;
+            if (drag && drag.on) setPanX(drag.tx + (drag.cx - drag.x));
         }
         root.addEventListener('pointerdown', function (ev) {
-            if (!panning || mode.focus || ev.button > 0) return;
-            if (momentum) { cancelAnimationFrame(momentum); momentum = null; }
-            drag = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, tx: cam.tx, on: false, lx: ev.clientX, lt: performance.now(), v: 0 };
+            if (!panning || mode.focus) return;
+            touched = true;
+            if (peekAnim) stopAnims();
+            // touch pans natively (the scroller); a mouse or pen drags the room by hand
+            if (ev.pointerType === 'touch' || ev.button > 0) return;
+            if (ev.target.closest && ev.target.closest('.lab-sc-strip, .lab-sc-chev')) return;
+            // a touch during a glide (or the peek) catches it, and is not also a tap
+            if (momentum || peekAnim) { stopAnims(); suppressClick = true; setTimeout(function () { suppressClick = false; }, 350); }
+            drag = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, cx: ev.clientX, tx: cam.tx, on: false, pts: [[ev.timeStamp || performance.now(), ev.clientX]] };
         });
         root.addEventListener('pointermove', function (ev) {
             if (!drag || ev.pointerId !== drag.id) return;
@@ -1099,56 +1218,197 @@
             if (!drag.on) {
                 if (Math.abs(dx) > 7 && Math.abs(dx) > Math.abs(dy)) {
                     drag.on = true;
+                    // start from where the finger is now, so engaging the drag never jumps
+                    drag.x = ev.clientX; drag.tx = cam.tx;
                     firstInput();
                     hideTag();
                     try { root.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ }
                     root.classList.add('is-dragging');
-                    svg.style.willChange = 'transform';
+                    setMoving('drag', true);
                 } else if (Math.abs(dy) > 10) { drag = null; return; } else return;
             }
-            var now = performance.now(), dt = Math.max(1, now - drag.lt);
-            drag.v = 0.8 * ((ev.clientX - drag.lx) / dt) + 0.2 * drag.v;
-            drag.lx = ev.clientX; drag.lt = now;
-            cam.tx = clampTx(drag.tx + dx, cam.s);
-            panCx = (dims().W / 2 - cam.tx) / cam.s;
-            applyCam();
+            var evs = (ev.getCoalescedEvents && ev.getCoalescedEvents()) || [];
+            if (!evs.length) evs = [ev];
+            for (var i = 0; i < evs.length; i++) drag.pts.push([evs[i].timeStamp || performance.now(), evs[i].clientX]);
+            if (drag.pts.length > 24) drag.pts.splice(0, drag.pts.length - 24);
+            drag.cx = ev.clientX;
+            if (!moveRaf) moveRaf = requestAnimationFrame(moveFrame);
         });
+        function velocity(pts, now) {
+            // px/ms over the samples in the last 100ms; 0 if the finger rested before lifting
+            var last = pts[pts.length - 1];
+            if (!last || now - last[0] > 90) return 0;
+            var j = pts.length - 1;
+            while (j > 0 && last[0] - pts[j - 1][0] <= 100) j--;
+            var first = pts[j], dt = last[0] - first[0];
+            if (dt < 8) return 0;
+            return Math.max(-VMAX, Math.min(VMAX, (last[1] - first[1]) / dt));
+        }
         function endDrag(ev) {
             if (!drag || (ev && ev.pointerId !== drag.id)) return;
-            var was = drag.on, v = Math.max(-2.5, Math.min(2.5, drag.v));
-            if (performance.now() - drag.lt > 80) v = 0;
+            var d0 = drag, was = d0.on;
             drag = null;
-            root.classList.remove('is-dragging');
             if (!was) return;
+            if (moveRaf) { cancelAnimationFrame(moveRaf); moveRaf = null; }
+            setPanX(d0.tx + (d0.cx - d0.x));
+            root.classList.remove('is-dragging');
             suppressClick = true;
             setTimeout(function () { suppressClick = false; }, 60);
-            if (reduced || Math.abs(v) < 0.05) { svg.style.willChange = ''; return; }
+            var v = velocity(d0.pts, (ev && ev.timeStamp) || performance.now());
+            if (reduced || Math.abs(v) < 0.08) { setMoving('drag', false); return; }
+            setMoving('glide', true);
+            setMoving('drag', false);
             var last = performance.now();
             function glide(now) {
-                var dt = now - last; last = now;
-                panBy(v * dt);
-                v *= Math.pow(0.94, dt / 16);
-                if (Math.abs(v) > 0.02) momentum = requestAnimationFrame(glide);
-                else { momentum = null; svg.style.willChange = ''; }
+                var dt = Math.min(48, now - last); last = now;
+                var dx = v * TAU * (1 - Math.exp(-dt / TAU));   // exact integral of the decay over dt
+                v *= Math.exp(-dt / TAU);
+                var moved = panBy(dx);
+                if (moved && Math.abs(v) > 0.015) momentum = requestAnimationFrame(glide);
+                else { momentum = null; setMoving('glide', false); }
             }
             momentum = requestAnimationFrame(glide);
         }
         root.addEventListener('pointerup', endDrag);
-        root.addEventListener('pointercancel', function (ev) { if (drag && ev.pointerId === drag.id) { drag = null; root.classList.remove('is-dragging'); } });
+        root.addEventListener('pointercancel', function (ev) {
+            if (!drag || ev.pointerId !== drag.id) return;
+            drag = null;
+            if (moveRaf) { cancelAnimationFrame(moveRaf); moveRaf = null; }
+            root.classList.remove('is-dragging');
+            setMoving('drag', false);
+        });
         root.addEventListener('click', function (ev) {
             if (suppressClick) { ev.preventDefault(); ev.stopPropagation(); suppressClick = false; }
         }, true);
         root.addEventListener('dragstart', function (ev) { ev.preventDefault(); });
-        root.addEventListener('wheel', function (ev) {
-            if (!panning || mode.focus) return;
-            var dx = Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? ev.deltaX : (ev.shiftKey ? ev.deltaY : 0);
-            if (!dx) return;
-            ev.preventDefault();
+        // Horizontal wheels and trackpads scroll the room natively in pan mode. Native
+        // scrolling (touch, wheel, keyboard, the strip's smooth walks) all land here.
+        var scrollT = null, navRaf = null;
+        function onScrollQuiet() { setMoving('scroll', false); setMoving('fly', false); }
+        scroller.addEventListener('scroll', function () {
+            if (!scrollMode) return;
+            curLeft = scroller.scrollLeft;
+            cam.tx = -curLeft;
+            panCx = (dims().W / 2 + curLeft) / cam.s;
+            if (Math.abs(curLeft - lastSet) > 1.5 && !peekAnim && !drag) { firstInput(); hideTag(); }
+            if (!peekAnim && !(drag && drag.on) && !momentum) {
+                setMoving('scroll', true);
+                clearTimeout(scrollT);
+                scrollT = setTimeout(onScrollQuiet, 160);
+            }
+            if (!navRaf) navRaf = requestAnimationFrame(function () { navRaf = null; navSync(); });
+        }, { passive: true });
+        scroller.addEventListener('scrollend', function () { clearTimeout(scrollT); onScrollQuiet(); });
+        root.addEventListener('touchstart', function () { touched = true; if (peekAnim) stopAnims(); }, { passive: true });
+
+        // ---------------- way-finding in pan mode: strip, edges, peek ----------------
+        var strip = q('.lab-sc-strip'), thumb = q('.lab-sc-strip-thumb'), stops = qa('.lab-sc-stop');
+        var navState = { cur: -1, l: null, r: null, a: -1, b: -1 }, touched = false;
+        // scene x -> strip fraction, piecewise per room so the thumb lines up with the six equal stops
+        function stripFrac(x) {
+            for (var i = 0; i < ZONES.length; i++) {
+                var z = ZONES[i];
+                if (x <= z.x1 || i === ZONES.length - 1) return (i + Math.max(0, Math.min(1, (x - z.x0) / (z.x1 - z.x0)))) / ZONES.length;
+            }
+            return 1;
+        }
+        function viewX() { var dm = dims(); return [-cam.tx / cam.s, (dm.W - cam.tx) / cam.s]; }
+        function curZone() {
+            var v = viewX(), c = (v[0] + v[1]) / 2;
+            for (var i = 0; i < ZONES.length; i++) if (c < ZONES[i].x1) return i;
+            return ZONES.length - 1;
+        }
+        // The thumb follows the scroll on the compositor where the browser has scroll-driven
+        // animations: a JS transform write per frame would re-layerise the whole drawing.
+        var thumbAnim = null, thumbKey = '';
+        function thumbFor(L, s, W) {
+            var a = stripFrac(Math.max(0, L / s)), b = stripFrac(Math.min(SW, (L + W) / s));
+            return 'translateX(' + (a * 100).toFixed(3) + '%) scaleX(' + Math.max(0.02, b - a).toFixed(4) + ')';
+        }
+        function syncThumbTimeline() {
+            if (!scrollMode || typeof window.ScrollTimeline !== 'function' || !thumb.animate) return;
+            var dm = dims(), maxL = Math.ceil(SW * cam.s) - dm.W, key = maxL + ':' + cam.s;
+            if (maxL <= 0 || key === thumbKey) return;
+            thumbKey = key;
+            if (thumbAnim) thumbAnim.cancel();
+            var kf = [], N = 48;
+            for (var i = 0; i <= N; i++) kf.push({ offset: i / N, transform: thumbFor(maxL * i / N, cam.s, dm.W) });
+            try {
+                thumbAnim = thumb.animate(kf, { timeline: new window.ScrollTimeline({ source: scroller, axis: 'x' }), fill: 'both' });
+            } catch (e) { thumbAnim = null; thumbKey = ''; }
+        }
+        function navSync() {
+            if (!panning || mode.focus || !base) return;
+            var v = viewX(), dm = dims();
+            if (scrollMode) syncThumbTimeline();
+            var a = stripFrac(Math.max(0, v[0])), b = stripFrac(Math.min(SW, v[1]));
+            if (!(scrollMode && thumbAnim) && (Math.abs(a - navState.a) > 0.0005 || Math.abs(b - navState.b) > 0.0005)) {
+                navState.a = a; navState.b = b;
+                thumb.style.transform = 'translateX(' + (a * 100).toFixed(3) + '%) scaleX(' + Math.max(0.02, b - a).toFixed(4) + ')';
+            }
+            var cur = curZone();
+            if (cur !== navState.cur) {
+                navState.cur = cur;
+                stops.forEach(function (el, i) {
+                    el.classList.toggle('is-here', i === cur);
+                    if (i === cur) el.setAttribute('aria-current', 'location'); else el.removeAttribute('aria-current');
+                });
+            }
+            var l = cam.tx < -1, r = cam.tx > dm.W - SW * cam.s + 1;
+            if (l !== navState.l) { navState.l = l; root.classList.toggle('lab-sc-more-l', l); }
+            if (r !== navState.r) { navState.r = r; root.classList.toggle('lab-sc-more-r', r); }
+        }
+        function panTo(key) {
+            var z = zoneBy(key);
+            if (!z || !panning || mode.focus) return false;
             firstInput();
-            hideTag();
-            if (momentum) { cancelAnimationFrame(momentum); momentum = null; }
-            panBy(-dx * (ev.deltaMode === 1 ? 16 : 1));
-        }, { passive: false });
+            panToX((z.x0 + z.x1) / 2, reduced ? 0 : 650);
+            return true;
+        }
+        // the next room along: the first whose centre is clearly past the middle of the view
+        function stepRoom(dir) {
+            var v = viewX(), c = (v[0] + v[1]) / 2, i;
+            if (dir > 0) { for (i = 0; i < ZONES.length; i++) if ((ZONES[i].x0 + ZONES[i].x1) / 2 > c + 40) return panTo(ZONES[i].key); }
+            else { for (i = ZONES.length - 1; i >= 0; i--) if ((ZONES[i].x0 + ZONES[i].x1) / 2 < c - 40) return panTo(ZONES[i].key); }
+            return false;
+        }
+        stops.forEach(function (el) { el.addEventListener('click', function () { panTo(el.getAttribute('data-stop')); }); });
+        q('.lab-sc-chev-l').addEventListener('click', function () { stepRoom(-1); });
+        q('.lab-sc-chev-r').addEventListener('click', function () { stepRoom(1); });
+        // One gentle peek on first load: the room slides ~70px toward the next room and
+        // back, so the eye sees there is more. Once per visit, never under reduced motion,
+        // never once the visitor has touched the scene.
+        var peeked = false;
+        try { peeked = sessionStorage.getItem('lab-sc-panned') === '1' || sessionStorage.getItem('lab-sc-peeked') === '1'; } catch (e) { /* ignore */ }
+        function peek() {
+            if (peeked || reduced || touched || interacted || !panning || mode.focus || anim || momentum || drag) return;
+            if (document.documentElement.classList.contains('lab-open')) return;
+            peeked = true;
+            try { sessionStorage.setItem('lab-sc-peeked', '1'); } catch (e) { /* ignore */ }
+            var dm = dims(), base0 = cam.tx, room = dm.W - SW * cam.s;
+            var dist = base0 - 70 >= room ? 70 : -70;       // toward the next room (back, at the far end)
+            var t0 = performance.now(), D = 1300;
+            setMoving('peek', true);
+            function step(now) {
+                var p = Math.min(1, (now - t0) / D);
+                var e = Math.sin(Math.PI * p);                 // out and back
+                e = e * e * (3 - 2 * e);
+                setPanX(base0 - dist * e);
+                if (p < 1) peekAnim = requestAnimationFrame(step);
+                else { peekAnim = null; setPanX(base0); setMoving('peek', false); }
+            }
+            peekAnim = requestAnimationFrame(step);
+        }
+        var peekT = null;
+        if (!peeked && !reduced && 'IntersectionObserver' in window) {
+            var pio = new IntersectionObserver(function (es) {
+                var e = es[es.length - 1];
+                clearTimeout(peekT);
+                if (e.intersectionRatio >= 0.6 && !peeked) peekT = setTimeout(peek, 1100);
+                if (peeked) pio.disconnect();
+            }, { threshold: [0, 0.6] });
+            pio.observe(root);
+        }
 
         // ---------------- hover rings, beacons and their names ----------------
         var hotById = {}, hovered = null, seen = {};
@@ -1444,18 +1704,19 @@
             shd.setAttribute('transform', 'rotate(' + (s * 6) + ' 1626 244)');
         }
         tickClock();
-        var clockTimer = setInterval(function () { if (active || Date.now() % 30000 < 1000) tickClock(); }, 1000);
+        var clockTimer = setInterval(function () { if (!movingOn && (active || Date.now() % 30000 < 1000)) tickClock(); }, 1000);
 
         // ---------------- idle life ----------------
         var want = true, visible = true, active = false, flickT = null, barsT = null;
         function scheduleFlicker() {
             flickT = setTimeout(function () {
-                if (lampOn && !dayOn) pulse(root, 'lab-sc-flick', 450);
+                if (lampOn && !dayOn && !movingOn) pulse(root, 'lab-sc-flick', 450);
                 scheduleFlicker();
             }, 7000 + Math.random() * 14000);
         }
         function scheduleBars() {
             barsT = setTimeout(function () {
+                if (movingOn) { scheduleBars(); return; }
                 root.classList.add('lab-sc-barsreset');
                 setTimeout(function () { root.classList.remove('lab-sc-barsreset'); }, 700);
                 scheduleBars();
@@ -1479,7 +1740,7 @@
         // ---------------- sizing ----------------
         var lastW = 0, lastH = 0;
         function onResize() {
-            var dm = dims();
+            var dm = measure();
             if (dm.W === lastW && dm.H === lastH) return;
             lastW = dm.W; lastH = dm.H;
             settle(0);
@@ -1545,6 +1806,7 @@
                 qa('.lab-sc-zone').forEach(function (g) { g.classList.toggle('is-marked', g.getAttribute('data-zone') === marked); });
             },
             visited: markVisited,
+            panTo: panTo,
             play: function (on) { want = !!on; update(); }
         };
     }
