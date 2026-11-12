@@ -1299,7 +1299,19 @@
             if (!navRaf) navRaf = requestAnimationFrame(function () { navRaf = null; navSync(); });
         }, { passive: true });
         scroller.addEventListener('scrollend', function () { clearTimeout(scrollT); onScrollQuiet(); });
-        root.addEventListener('touchstart', function () { touched = true; if (peekAnim) stopAnims(); }, { passive: true });
+        // A finger on the room pauses the idle animations at once, before the first scroll
+        // frame, and keeps them paused a moment after it lifts so a fling takes over cleanly.
+        var touchT = null;
+        root.addEventListener('touchstart', function () {
+            touched = true;
+            if (peekAnim) stopAnims();
+            if (!scrollMode) return;
+            clearTimeout(touchT);
+            setMoving('touch', true);
+        }, { passive: true });
+        function touchUp() { clearTimeout(touchT); touchT = setTimeout(function () { setMoving('touch', false); }, 220); }
+        root.addEventListener('touchend', touchUp, { passive: true });
+        root.addEventListener('touchcancel', touchUp, { passive: true });
 
         // ---------------- way-finding in pan mode: strip, edges, peek ----------------
         var strip = q('.lab-sc-strip'), thumb = q('.lab-sc-strip-thumb'), stops = qa('.lab-sc-stop');
@@ -1354,6 +1366,7 @@
                     if (i === cur) el.setAttribute('aria-current', 'location'); else el.removeAttribute('aria-current');
                 });
             }
+            if (peekAnim) return;                 // the peek is a hint, not a move: edges stay as they were
             var l = cam.tx < -1, r = cam.tx > dm.W - SW * cam.s + 1;
             if (l !== navState.l) { navState.l = l; root.classList.toggle('lab-sc-more-l', l); }
             if (r !== navState.r) { navState.r = r; root.classList.toggle('lab-sc-more-r', r); }
