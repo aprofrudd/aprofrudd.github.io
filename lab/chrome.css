@@ -1,3 +1,663 @@
 /* lab/chrome.css: the page furniture around the lab (top nav, name plate,
    footer) dressed to belong to the night-time room. Loaded after every
-   other stylesheet. Scope every rule under .lab-live inside @media screen. */
+   other stylesheet. Scope every rule under .lab-live inside @media screen.
+
+   What each piece becomes:
+     .navbar        the dark cable rail along the top of the room (the same
+                    rail as the drawer's sticky bar in lab/skin.css); rooms are
+                    engraved mono plates, the current one backlit amber; "AR"
+                    is a navy enamel badge in a brass rim.
+     .nav-menu      (phone) a black letter-board directory in an aluminium
+                    frame, hung over the dimmed page.
+     .hero          the lab's ceiling carried on up the page: same paint, same
+                    night veil, the same ceiling joints (lab/chrome.js draws
+                    them from the scene's camera so they line up). On it: the
+                    name as halo-lit letters, post-nominals on a brass strip,
+                    the three role lines on a screwed graphite door plate, the
+                    metrics on an amber LED strip like the Reception scoreboard,
+                    a framed staff portrait, and the two links as a lightbox
+                    sign and an enamel plate.
+     .lab-plan-bar  the floor running toward you under the scene.
+     .footer        the near edge of that floor.
+
+   Colours sampled from the rendered scene (Chromium, 1440x900, overview):
+     top row of .lab-stage  #353b4d centre, #303547 at the edges (ceiling
+                            #7a7b7e under the #0b1430 @ .6 night veil, plus
+                            the scene's vignette)
+     bottom row of .lab-stage  #2b3341 centre, #262d3a at the edges (floor)
+   Below ~1220px the scene pans and its top row is the ceiling/wall joint
+   (#1a2133); the header still ends in ceiling paint, so the joint reads as
+   the scene's own ceiling line, which it is.
+
+   Light, as in lab/skin.css: the desk lamp is off to the right, so lit edges
+   are top-right and cast shadows fall down and to the left. */
+
+@media screen {
+
+/* ---- tokens: the --sk-* set from lab/skin.css (.lab-drawer[data-skin]),
+        same values, re-declared here because the drawer is not an ancestor
+        of the nav, header or footer --------------------------------------- */
+.lab-live .navbar,
+.lab-live .hero,
+.lab-live .lab-plan,
+.lab-live .footer {
+    --sk-cream: #f1ead9;
+    --sk-cream-dim: #ded8ca;
+    --sk-amber: #ffb347;
+    --sk-amber-ink: #f0b870;
+    --sk-lamp: 255 196 120;
+    --sk-shadow: -12px 18px 30px rgb(6 9 20 / 0.5), -3px 5px 8px rgb(6 9 20 / 0.35);
+    --sk-focus: #ffd58a;
+    --sk-floor: #2b3240;
+    --sk-floor-lo: #222834;
+    --sk-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --sk-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    /* chrome-only: sampled from the scene (see the header comment) */
+    --ch-ceiling: #353b4d;
+    --ch-ceiling-hi: #282d3d;
+    --ch-ceiling-top: #171b27;
+    --ch-floor-top: #2b3341;
+    /* graphite plate, as .lab-room-plate in lab/skin.css */
+    --ch-plate: linear-gradient(#2c323d, #22272f);
+}
+
+/* ======================================================================
+   1. The rail (top nav)
+   ====================================================================== */
+.lab-live .navbar {
+    color-scheme: dark;
+    background:
+        /* rivets along the lower lip of the rail */
+        radial-gradient(circle, #4d535d 0 1px, #15171c 1.5px, transparent 2px) 14px calc(100% - 5px) / 112px 5px repeat-x,
+        linear-gradient(rgb(255 255 255 / 0.07), rgb(255 255 255 / 0) 42%),
+        linear-gradient(#262a34, #1a1d25 70%, #15171d);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom: 1px solid #07080b;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.05), 0 10px 18px -10px rgb(0 0 0 / 0.75);
+}
+.lab-live .nav-container {
+    max-width: 1280px;
+    padding: 0.6rem 1.5rem 0.7rem;
+}
+
+/* "AR": an enamel badge in a brass rim, screwed to the left end of the rail */
+.lab-live .nav-logo {
+    display: grid;
+    place-items: center;
+    width: 2.45rem;
+    height: 2.45rem;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 68% 28%, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0) 45%) padding-box,
+        linear-gradient(160deg, #27497a, #1a3256 70%) padding-box,
+        linear-gradient(225deg, #f5dc9a, #b38a42 38%, #e6c57b 62%, #7f5c24) border-box;
+    box-shadow: -2px 3px 5px rgb(0 0 0 / 0.55), inset 0 1px 3px rgb(0 0 0 / 0.55);
+    color: var(--sk-cream);
+    font-family: var(--sk-sans);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-indent: 0.06em;
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.55);
+}
+.lab-live .nav-logo:hover { color: #fff; }
+
+/* the rooms: engraved plates on the rail */
+.lab-live .nav-menu.lab-nav {
+    gap: 0.4rem;
+    align-items: center;
+}
+.lab-live .nav-menu.lab-nav a {
+    display: block;
+    padding: 0.42rem 0.72rem 0.44rem;
+    border-radius: 3px;
+    background:
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.07), transparent 50%),
+        var(--ch-plate);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.09),
+        inset 0 -1px 0 rgb(0 0 0 / 0.55),
+        -1px 2px 3px rgb(0 0 0 / 0.5);
+    color: var(--sk-cream-dim);
+    font-family: var(--sk-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+    /* engraved: a dark cut above */
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.6);
+    transition: color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+/* the old underline becomes the backlight leaking under the plate */
+.lab-live .nav-menu.lab-nav a::after {
+    left: 0.55rem;
+    right: 0.55rem;
+    bottom: 2px;
+    height: 1px;
+    background: var(--sk-amber);
+    box-shadow: 0 0 6px 1px rgb(255 179 71 / 0.7);
+}
+.lab-live .nav-menu.lab-nav a:hover {
+    color: var(--sk-amber-ink);
+}
+.lab-live .nav-menu.lab-nav a.is-current {
+    color: #ffe3b3;
+    background:
+        radial-gradient(130% 120% at 50% 110%, rgb(255 179 71 / 0.32), rgb(255 179 71 / 0) 70%),
+        linear-gradient(#3a3226, #29231b);
+    box-shadow:
+        inset 0 0 0 1px rgb(255 179 71 / 0.5),
+        inset 0 1px 0 rgb(255 230 180 / 0.18),
+        0 0 14px rgb(255 179 71 / 0.25),
+        -1px 2px 3px rgb(0 0 0 / 0.5);
+    text-shadow: 0 0 8px rgb(255 179 71 / 0.55);
+}
+.lab-live .navbar :focus-visible {
+    outline: 2px solid var(--sk-focus);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+.lab-live .nav-logo:focus-visible { border-radius: 50%; }
+
+/* the hamburger: a small switch plate on the rail */
+.lab-live .nav-toggle {
+    padding: 0.55rem 0.6rem;
+    border-radius: 4px;
+    background: linear-gradient(225deg, rgb(var(--sk-lamp) / 0.07), transparent 50%), var(--ch-plate);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.09), inset 0 -1px 0 rgb(0 0 0 / 0.55), -1px 2px 3px rgb(0 0 0 / 0.5);
+}
+.lab-live .nav-toggle span {
+    width: 20px;
+    margin: 4px 0;
+    background: var(--sk-cream);
+    box-shadow: 0 -1px 0 rgb(0 0 0 / 0.5);
+}
+.lab-live .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+.lab-live .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+/* phone menu: a letter-board directory hung over the dimmed room */
+@media (max-width: 1024px) {
+    .lab-live .nav-menu.lab-nav {
+        top: calc(var(--lab-nav-h, 58px) + 0.9rem);
+        left: 0;
+        right: 0;
+        bottom: auto;
+        width: min(24rem, calc(100vw - 2rem));
+        height: auto;
+        max-height: calc(100vh - var(--lab-nav-h, 58px) - 1.8rem);
+        max-height: calc(100dvh - var(--lab-nav-h, 58px) - 1.8rem);
+        margin: 0 auto;
+        padding: 0.7rem 0.9rem;
+        gap: 0;
+        align-items: stretch;
+        justify-content: flex-start;
+        border: 9px solid #9aa0a8;
+        border-image: linear-gradient(145deg, #d3d8de, #7c838c 35%, #b9bfc7 65%, #646a73) 1;
+        background:
+            /* the felt's grooves, where the letters slot in */
+            repeating-linear-gradient(#17191d 0 7px, #0e0f12 7px 8px),
+            #15171a;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        box-shadow:
+            0 0 0 100vmax rgb(7 9 16 / 0.8),
+            -14px 22px 40px rgb(0 0 0 / 0.6);
+    }
+    .lab-live .nav-menu.lab-nav li { list-style: none; }
+    .lab-live .nav-menu.lab-nav a {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 3rem;
+        padding: 0.5rem 2.2rem 0.5rem 0.4rem;
+        border-radius: 0;
+        border-bottom: 1px solid rgb(255 255 255 / 0.06);
+        background: none;
+        box-shadow: none;
+        color: var(--sk-cream);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        /* white plastic letters sitting proud of the felt */
+        text-shadow: 0 1px 0 rgb(0 0 0 / 0.8), 0 0 1px rgb(255 255 255 / 0.2);
+    }
+    .lab-live .nav-menu.lab-nav li:last-child a { border-bottom: 0; }
+    .lab-live .nav-menu.lab-nav a:hover { color: var(--sk-amber); }
+    /* "you are here": a lit amber pip at the end of the row */
+    .lab-live .nav-menu.lab-nav a::after {
+        left: auto;
+        right: 0.6rem;
+        top: 50%;
+        bottom: auto;
+        width: 0.5rem;
+        height: 0.5rem;
+        margin-top: -0.25rem;
+        border-radius: 50%;
+        transform: scale(0);
+    }
+    .lab-live .nav-menu.lab-nav a.is-current {
+        color: var(--sk-amber);
+        background: linear-gradient(90deg, rgb(255 179 71 / 0.1), rgb(255 179 71 / 0) 70%);
+        box-shadow: none;
+        text-shadow: 0 0 10px rgb(255 179 71 / 0.45);
+    }
+    .lab-live .nav-menu.lab-nav a.is-current::after { transform: scale(1); }
+    .lab-live .nav-menu.lab-nav a:focus-visible { outline-offset: -3px; }
+}
+
+/* ======================================================================
+   2. The name plate: the ceiling of the lab, carried up the page
+   ====================================================================== */
+.lab-live .hero {
+    position: relative;
+    padding: calc(var(--lab-nav-h, 58px) + 1.15rem) 1.5rem 1.35rem;
+    color: var(--sk-cream);
+    color-scheme: dark;
+    background:
+        /* the scene's ceiling joints and duct, placed by lab/chrome.js */
+        var(--ch-joints, linear-gradient(transparent, transparent)),
+        /* the scene's vignette, carried on up */
+        linear-gradient(90deg, rgb(6 8 16 / 0.1), rgb(6 8 16 / 0) 12%, rgb(6 8 16 / 0) 88%, rgb(6 8 16 / 0.1)),
+        /* a little warmth from the lamp, off to the right */
+        radial-gradient(45% 90% at 88% 100%, rgb(var(--sk-lamp) / 0.06), rgb(var(--sk-lamp) / 0) 70%),
+        linear-gradient(var(--ch-ceiling-top), var(--ch-ceiling-hi) 45%, var(--ch-ceiling) 92%, var(--ch-ceiling));
+}
+
+.lab-live .hero-content {
+    position: relative;
+    width: min(1280px, 100%);
+    grid-template-columns: auto fit-content(54rem) minmax(0, 1fr) auto;
+    grid-template-rows: auto auto auto auto auto auto;
+    column-gap: 1.75rem;
+    row-gap: 0;
+    align-items: start;
+}
+
+/* the staff portrait, framed like the certificates on the scene's wall */
+.lab-live .hero-image {
+    position: relative;
+    grid-column: 1;
+    grid-row: 1 / span 6;
+    align-self: center;
+    padding: 5px;
+    border-radius: 2px;
+    background:
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.22), rgb(var(--sk-lamp) / 0) 40%),
+        linear-gradient(#2b2520, #1a1612);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        inset 0 0 0 1px rgb(0 0 0 / 0.6),
+        var(--sk-shadow);
+}
+.lab-live .hero-image::after {
+    /* glass */
+    content: "";
+    position: absolute;
+    inset: 5px;
+    background: linear-gradient(125deg, rgb(255 255 255 / 0) 42%, rgb(255 255 255 / 0.1) 50%, rgb(255 255 255 / 0) 58%);
+    pointer-events: none;
+}
+.lab-live .profile-image {
+    display: block;
+    width: 116px;
+    height: 116px;
+    border: 7px solid #d9d1bd;
+    border-radius: 0;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.2);
+    /* the photo sits in the same dim room as everything else */
+    filter: brightness(0.9) saturate(0.92);
+}
+
+/* the name: halo-lit letters standing off the ceiling bulkhead */
+/* (selector outweighs lab.css's ".hero-content > :not(.hero-image):not(.hero-cta)") */
+.lab-live .hero > .hero-content > h1:not(.hero-image),
+.lab-live .hero > .hero-content > .hero-metrics:not(.hero-image) {
+    grid-column: 2 / 4;
+}
+.lab-live .hero h1 {
+    grid-row: 1;
+    justify-self: start;
+    margin: 0 0 0.35rem;
+    color: var(--sk-cream);
+    font-family: var(--sk-sans);
+    font-size: 2.55rem;
+    font-weight: 700;
+    letter-spacing: 0.005em;
+    line-height: 1.1;
+    text-shadow:
+        -2px 3px 2px rgb(4 6 14 / 0.7),
+        0 0 22px rgb(var(--sk-lamp) / 0.22);
+}
+
+/* post-nominals: engraved on a brass strip */
+.lab-live .hero-subtitle {
+    grid-row: 2;
+    justify-self: start;
+    margin: 0 0 0.75rem;
+    padding: 0.14rem 1.05rem 0.16rem;
+    border-radius: 2px;
+    background:
+        radial-gradient(circle at 0.45rem 50%, #6d5220 0 1.4px, rgb(0 0 0 / 0) 2px),
+        radial-gradient(circle at calc(100% - 0.45rem) 50%, #6d5220 0 1.4px, rgb(0 0 0 / 0) 2px),
+        linear-gradient(200deg, rgb(255 240 200 / 0.55), rgb(255 240 200 / 0) 45%),
+        linear-gradient(#dbbb76, #c09a52 55%, #b08a44);
+    box-shadow:
+        inset 0 1px 0 rgb(255 248 222 / 0.6),
+        inset 0 -1px 0 rgb(80 55 15 / 0.55),
+        -3px 4px 6px rgb(4 6 14 / 0.55);
+    color: #1d1304;
+    font-family: var(--sk-mono);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.5;
+    text-shadow: 0 1px 0 rgb(255 240 200 / 0.4);
+}
+
+/* the door plate: graphite, four screws, lamp on the top-right corner.
+   Drawn by the grid container's ::before so the three lines share one plate. */
+.lab-live .hero-content::before {
+    content: "";
+    grid-column: 2;
+    grid-row: 3 / span 3;
+    align-self: stretch;
+    justify-self: stretch;
+    border-radius: 4px;
+    background:
+        radial-gradient(circle at 9px 9px, #9aa1aa 0 1.8px, #3a3f48 2.3px, transparent 3.2px),
+        radial-gradient(circle at calc(100% - 9px) 9px, #9aa1aa 0 1.8px, #3a3f48 2.3px, transparent 3.2px),
+        radial-gradient(circle at 9px calc(100% - 9px), #9aa1aa 0 1.8px, #3a3f48 2.3px, transparent 3.2px),
+        radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), #9aa1aa 0 1.8px, #3a3f48 2.3px, transparent 3.2px),
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.13), rgb(var(--sk-lamp) / 0) 42%),
+        /* brushed */
+        repeating-linear-gradient(90deg, rgb(255 255 255 / 0.018) 0 1px, rgb(255 255 255 / 0) 1px 3px),
+        linear-gradient(#323844, #262b34);
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.13),
+        inset 0 -1px 0 rgb(0 0 0 / 0.55),
+        inset 0 0 0 1px rgb(0 0 0 / 0.25),
+        var(--sk-shadow);
+}
+.lab-live .hero-positioning,
+.lab-live .hero-title,
+.lab-live .hero-tagline {
+    position: relative;
+    z-index: 1;
+    max-width: none;
+    margin: 0;
+    padding: 0 1.4rem;
+    font-family: var(--sk-sans);
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.55);
+}
+.lab-live .hero-positioning {
+    grid-row: 3;
+    padding-top: 0.75rem;
+    color: var(--sk-cream-dim);
+    font-size: 0.98rem;
+    line-height: 1.45;
+}
+.lab-live .hero-title {
+    grid-row: 4;
+    padding-top: 0.12rem;
+    color: var(--sk-cream);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+.lab-live .hero-tagline {
+    grid-row: 5;
+    padding-top: 0.12rem;
+    padding-bottom: 0.8rem;
+    color: var(--sk-cream-dim);
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+/* the metrics: an amber LED strip, like the scoreboard in Reception */
+.lab-live .hero-metrics {
+    grid-row: 6;
+    justify-self: start;
+    margin: 0.85rem 0 0 !important;
+    padding: 0.3rem 0.75rem 0.32rem;
+    border-radius: 3px;
+    background:
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0.35) 0 1px, rgb(0 0 0 / 0) 1px 3px),
+        linear-gradient(#0c0e11, #121418);
+    box-shadow:
+        inset 0 2px 6px rgb(0 0 0 / 0.85),
+        0 0 0 3px #2a2e36,
+        0 0 0 4px rgb(255 255 255 / 0.07),
+        -4px 6px 9px rgb(4 6 14 / 0.5);
+    color: var(--sk-amber) !important;
+    font-family: var(--sk-mono);
+    font-size: 0.74rem !important;
+    letter-spacing: 0.03em;
+    line-height: 1.5;
+    text-shadow: 0 0 6px rgb(255 179 71 / 0.55);
+}
+
+/* the two links: a lightbox sign and an enamel plate */
+.lab-live .hero-cta {
+    grid-column: 4;
+    grid-row: 1 / span 6;
+    align-self: center;
+    gap: 0.85rem;
+    min-width: 12.5rem;
+}
+.lab-live .hero-cta .btn {
+    position: relative;
+    padding: 0.72rem 1.4rem;
+    border: 0;
+    border-radius: 4px;
+    font-family: var(--sk-sans);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    transform: none;
+    transition: box-shadow 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.lab-live .hero-cta .btn-primary {
+    background:
+        radial-gradient(120% 140% at 60% 30%, #fff9ea, #f3e4bf 70%, #e6d2a2);
+    color: #1d1f24;
+    box-shadow:
+        0 0 0 3px #22262e,
+        0 0 0 4px rgb(255 255 255 / 0.08),
+        0 0 26px rgb(var(--sk-lamp) / 0.32),
+        -5px 7px 12px rgb(4 6 14 / 0.55);
+}
+.lab-live .hero-cta .btn-primary:hover {
+    background: radial-gradient(120% 140% at 60% 30%, #ffffff, #f8ebc8 70%, #ecd9aa);
+    color: #000;
+    box-shadow:
+        0 0 0 3px #22262e,
+        0 0 0 4px rgb(255 255 255 / 0.1),
+        0 0 34px rgb(var(--sk-lamp) / 0.5),
+        -5px 7px 12px rgb(4 6 14 / 0.55);
+}
+.lab-live .hero-cta .btn-secondary {
+    background:
+        radial-gradient(circle at 8px 50%, #9aa1aa 0 1.5px, #3a3f48 2px, transparent 2.8px),
+        radial-gradient(circle at calc(100% - 8px) 50%, #9aa1aa 0 1.5px, #3a3f48 2px, transparent 2.8px),
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.13), rgb(var(--sk-lamp) / 0) 45%),
+        var(--ch-plate);
+    color: var(--sk-cream);
+    box-shadow:
+        inset 0 0 0 1px rgb(214 182 112 / 0.55),
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        -5px 7px 12px rgb(4 6 14 / 0.55);
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.6);
+}
+.lab-live .hero-cta .btn-secondary:hover {
+    color: var(--sk-amber);
+    box-shadow:
+        inset 0 0 0 1px rgb(255 179 71 / 0.8),
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        -5px 7px 12px rgb(4 6 14 / 0.55);
+}
+.lab-live .hero :focus-visible {
+    outline: 2px solid var(--sk-focus);
+    outline-offset: 4px;
+}
+
+/* tablet: the lab.css layout drops the CTA under the text */
+@media (max-width: 900px) {
+    .lab-live .hero-content {
+        grid-template-columns: auto fit-content(54rem) minmax(0, 1fr);
+    }
+    .lab-live .hero-cta {
+        grid-column: 1 / -1;
+        grid-row: 7;
+        flex-direction: row;
+        min-width: 0;
+        margin-top: 1.15rem;
+    }
+    .lab-live .hero-cta .btn { flex: 0 1 auto; }
+}
+
+/* phone: portrait beside the name, plate and strip full width */
+@media (max-width: 760px) {
+    .lab-live .hero { padding: calc(var(--lab-nav-h, 58px) + 0.9rem) 1rem 1.15rem; }
+    .lab-live .hero-content {
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 0.9rem;
+    }
+    .lab-live .hero-image {
+        grid-row: 1 / span 2;
+        align-self: center;
+        padding: 3px;
+    }
+    .lab-live .hero-image::after { inset: 3px; }
+    .lab-live .profile-image { width: 62px; height: 62px; border-width: 4px; }
+    .lab-live .hero > .hero-content > h1:not(.hero-image) { grid-column: 2; }
+    .lab-live .hero h1 {
+        align-self: end;
+        font-size: 1.75rem;
+        margin-bottom: 0.3rem;
+    }
+    .lab-live .hero-content > .hero-subtitle {
+        grid-column: 2 !important;
+        align-self: start;
+        margin-bottom: 0;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        padding: 0.08rem 0.9rem 0.1rem;
+    }
+    .lab-live .hero-content::before {
+        grid-column: 1 / -1;
+        margin-top: 0.85rem;
+    }
+    .lab-live .hero-content > .hero-positioning,
+    .lab-live .hero-content > .hero-title,
+    .lab-live .hero-content > .hero-tagline,
+    .lab-live .hero-content > .hero-metrics { grid-column: 1 / -1 !important; }
+    .lab-live .hero-positioning,
+    .lab-live .hero-title,
+    .lab-live .hero-tagline { padding-left: 0.95rem; padding-right: 0.95rem; }
+    .lab-live .hero-positioning { margin-top: 0.85rem; padding-top: 0.55rem; font-size: 0.86rem; line-height: 1.4; }
+    .lab-live .hero-title { font-size: 0.86rem; line-height: 1.4; }
+    .lab-live .hero-tagline { font-size: 0.78rem; line-height: 1.4; padding-bottom: 0.6rem; }
+    .lab-live .hero-metrics {
+        margin-top: 0.75rem !important;
+        font-size: 0.66rem !important;
+        letter-spacing: 0.01em;
+        padding: 0.22rem 0.55rem;
+    }
+    .lab-live .hero-cta { margin-top: 0.85rem; gap: 0.6rem; }
+    .lab-live .hero-cta .btn {
+        flex: 1;
+        width: auto;
+        padding: 0.6rem 0.4rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-align: center;
+    }
+}
+
+/* ======================================================================
+   3. The floor: the control bar under the scene, then the footer
+   ====================================================================== */
+.lab-live .lab-plan-bar {
+    border-top: 0;
+    background:
+        linear-gradient(var(--ch-floor-top), #222935);
+    color: var(--sk-cream-dim);
+}
+.lab-live .lab-plan-kicker { color: var(--sk-cream); }
+.lab-live .lab-plan-kicker i { background: var(--sk-amber); box-shadow: 0 0 6px rgb(255 179 71 / 0.7); }
+.lab-live .lab-plan-hint { color: #b9b4a8; }
+.lab-live .lab-pill {
+    border: 0;
+    border-radius: 3px;
+    background: linear-gradient(225deg, rgb(var(--sk-lamp) / 0.07), transparent 50%), var(--ch-plate);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.09), inset 0 -1px 0 rgb(0 0 0 / 0.55), -1px 2px 3px rgb(0 0 0 / 0.45);
+    color: var(--sk-cream);
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.6);
+}
+.lab-live .lab-pill#lab-sound[aria-pressed="false"] { color: #b9b4a8; }
+.lab-live .lab-pill:hover { background: var(--ch-plate); color: var(--sk-amber); }
+.lab-live .lab-pill.lab-all-toggle[aria-pressed="true"] {
+    background: radial-gradient(130% 120% at 50% 110%, rgb(255 179 71 / 0.3), rgb(255 179 71 / 0) 70%), linear-gradient(#3a3226, #29231b);
+    box-shadow: inset 0 0 0 1px rgb(255 179 71 / 0.5), 0 0 12px rgb(255 179 71 / 0.22), -1px 2px 3px rgb(0 0 0 / 0.45);
+    color: #ffe3b3;
+    text-shadow: 0 0 8px rgb(255 179 71 / 0.5);
+}
+.lab-live .lab-plan-bar :focus-visible {
+    outline: 2px solid var(--sk-focus);
+    outline-offset: 3px;
+}
+
+/* "Read as one page": the room stays on top and the plain CV follows.
+   Where they meet is a door threshold: a brass strip on the floor, and the
+   paper starts under it. */
+.lab-live.lab-linear .lab-plan {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 10px 18px -6px rgb(6 8 16 / 0.45);
+}
+.lab-live.lab-linear .lab-plan-bar {
+    padding-bottom: calc(0.7rem + 7px);
+    background:
+        linear-gradient(#f1dba0, #c49b4e 30%, #9c7633 75%, #5a4115) 0 100% / 100% 7px no-repeat,
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0.22) 0 1px, rgb(0 0 0 / 0) 1px 5px) 0 100% / 100% 7px no-repeat,
+        linear-gradient(var(--ch-floor-top), #222935);
+}
+
+/* the footer: the near edge of the floor, quiet */
+.lab-live .footer {
+    /* the links carry inline colour var(--text-light) */
+    --text-light: #c9c3b5;
+    padding: 2.25rem 0 2.5rem;
+    border-top: 1px solid #0b0d12;
+    background:
+        linear-gradient(#1c212b, #11141a);
+    color: #b9b4a8;
+}
+.lab-live.lab-linear .footer {
+    box-shadow: inset 0 7px 0 #0b0d12, inset 0 8px 0 rgb(255 255 255 / 0.05);
+    padding-top: 2.75rem;
+}
+.lab-live .footer a:hover { color: var(--sk-amber) !important; }
+.lab-live .footer a:focus-visible {
+    outline: 2px solid var(--sk-focus);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+/* ---- no motion ---------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .lab-live .nav-menu.lab-nav a,
+    .lab-live .nav-menu.lab-nav a::after,
+    .lab-live .nav-toggle span,
+    .lab-live .hero-cta .btn,
+    .lab-live .lab-pill { transition: none; }
+}
+
+} /* @media screen */
