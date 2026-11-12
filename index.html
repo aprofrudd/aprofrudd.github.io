@@ -20,6 +20,24 @@
     <meta name="twitter:description" content="Applied performance science for elite boxing, endurance running and heat | Boxing Science Co-Founder">
     <meta name="twitter:image" content="https://alanruddock.com/alan-ruddock-sport-physiologist.jpg">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Stops the plain page flashing up before the lab scripts at the end of
+         <body> have run. Only applies when JavaScript is on; lifted as soon as
+         the page has been parsed, or after 4s whatever happens. -->
+    <script>
+        (function () {
+            var root = document.documentElement;
+            root.className += ' lab-boot';
+            function lift() { root.className = root.className.replace(/\blab-boot\b/g, ''); }
+            document.addEventListener('DOMContentLoaded', lift);
+            setTimeout(lift, 4000);
+        })();
+    </script>
+    <style>
+        @media screen {
+            html.lab-boot { background: #1a2133; }
+            html.lab-boot body { visibility: hidden; }
+        }
+    </style>
     <link rel="stylesheet" href="styles.css?v=20260903">
     <link rel="stylesheet" href="lab.css?v=20261112">
     <link rel="stylesheet" href="lab/scene.css?v=20261112">
