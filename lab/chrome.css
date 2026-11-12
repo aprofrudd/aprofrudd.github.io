@@ -652,6 +652,134 @@
     border-radius: 2px;
 }
 
+/* ======================================================================
+   4. "Read as one page": the printed CV that belongs to this lab
+   ----------------------------------------------------------------------
+   Still the plain, fast CV: same layout, same DOM, no objects or textures
+   behind text. It is re-tinted by re-pointing styles.css's own tokens on
+   the article, so every section follows: warm paper instead of white,
+   ink instead of Apple black, the lab's navy (the ID card band in
+   lab/skin-reception.css) for links, and brass for the rules and accents.
+   Numerals take a deep amber-brown: bright amber fails on paper as text.
+   The room heads become the live lab's door plate on a strip of night wall.
+   ====================================================================== */
+.lab-live.lab-linear .lab-drawer {
+    --primary-color: #1f3a5f;      /* navy: 11.0:1 on paper */
+    --primary-dark: #16304f;
+    --primary-light: #2e5283;
+    --secondary-color: #26221c;    /* ink */
+    --text-primary: #26221c;       /* 14.8:1 on paper */
+    --text-secondary: #5a5345;     /* 7.0:1 on paper, 6.3:1 on the band */
+    --text-light: #6b6356;         /* 5.3:1 on paper, 4.8:1 on the band */
+    --background: #fbf7ee;         /* paper */
+    --background-alt: #f2ebdc;     /* the deeper band */
+    --border-color: #dcd1bb;
+    --shadow-sm: 0 1px 3px 0 rgb(60 40 10 / 0.06);
+    --shadow: 0 4px 12px -1px rgb(60 40 10 / 0.08), 0 2px 4px -2px rgb(60 40 10 / 0.05);
+    --shadow-lg: 0 12px 24px -4px rgb(60 40 10 / 0.12), 0 4px 8px -4px rgb(60 40 10 / 0.06);
+    --ch-brass: #b08a44;           /* rules and markers: decoration, not text */
+    --ch-numeral: #874a10;         /* 6.6:1 on paper, 5.9:1 on the band */
+    --sk-cream: #f1ead9;
+    --sk-amber-ink: #f0b870;
+    --sk-lamp: 255 196 120;
+    --sk-shadow: -12px 18px 30px rgb(6 9 20 / 0.5), -3px 5px 8px rgb(6 9 20 / 0.35);
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+/* brass for the rules, bars and bullets that were Apple blue */
+.lab-live.lab-linear .lab-drawer .section-title::after,
+.lab-live.lab-linear .lab-drawer .now-list li::before,
+.lab-live.lab-linear .lab-drawer .experience-list li::before,
+.lab-live.lab-linear .lab-drawer .timeline-marker {
+    background: var(--ch-brass);
+}
+.lab-live.lab-linear .lab-drawer :is(.talk-item, .grant-item, .publication-item, .media-item, .project-item, .faq-item) {
+    border-left-color: var(--ch-brass);
+}
+/* numerals in amber-brown */
+.lab-live.lab-linear .lab-drawer :is(.glance-number, .stat-number, .grant-amount) {
+    color: var(--ch-numeral);
+}
+
+/* running prose set in the paper serif Reception uses (lab/skin-reception.css
+   --rc-serif): it reads as print on the paper tone; labels, cards, headings
+   and lists of facts stay in the system sans */
+.lab-live.lab-linear .lab-drawer :is(.about-content p, .faq-answer, .contact-intro, .collab-intro, .media-intro, .project-beats dd) {
+    font-family: 'Iowan Old Style', 'Charter', 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
+}
+
+/* ---- each room opens with the live lab's door plate on the night wall --- */
+.lab-live.lab-linear .lab-room-head {
+    position: relative;
+    color: var(--sk-cream);
+    /* the wall from lab/skin.css, lamp from the upper right; the dado rail
+       along its foot, and the wall's shadow falling on the paper */
+    background:
+        linear-gradient(#5e626c, #5e626c) 0 100% / 100% 4px no-repeat,
+        radial-gradient(60% 120% at 100% 0%, rgb(var(--sk-lamp) / 0.13), rgb(var(--sk-lamp) / 0) 70%),
+        linear-gradient(#42464f, #4b4f5c 60%, #545866);
+    box-shadow: 0 8px 14px -8px rgb(30 20 5 / 0.45);
+    z-index: 1;
+}
+.lab-live.lab-linear .lab-room-head-in {
+    padding-top: 1.6rem;
+    padding-bottom: 1.85rem;
+    align-items: center;
+}
+.lab-live.lab-linear .lab-room-plate {
+    position: relative;
+    padding: 0.85rem 1.6rem 0.95rem;
+    border-radius: 4px;
+    background:
+        radial-gradient(circle at 10px 10px, #9aa1aa 0 2px, #3a3f48 2.5px, transparent 3.5px),
+        radial-gradient(circle at calc(100% - 10px) 10px, #9aa1aa 0 2px, #3a3f48 2.5px, transparent 3.5px),
+        radial-gradient(circle at 10px calc(100% - 10px), #9aa1aa 0 2px, #3a3f48 2.5px, transparent 3.5px),
+        radial-gradient(circle at calc(100% - 10px) calc(100% - 10px), #9aa1aa 0 2px, #3a3f48 2.5px, transparent 3.5px),
+        linear-gradient(225deg, rgb(var(--sk-lamp) / 0.16), transparent 45%),
+        linear-gradient(#2a303b, #20252e);
+    /* a tighter shadow than the drawer's, so it stays on the strip of wall */
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        inset 0 -1px 0 rgb(0 0 0 / 0.5),
+        -6px 9px 14px rgb(6 9 20 / 0.45), -2px 3px 5px rgb(6 9 20 / 0.3);
+}
+.lab-live.lab-linear .lab-room-num {
+    color: var(--sk-amber-ink);
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+}
+.lab-live.lab-linear .lab-room-name {
+    color: var(--sk-cream);
+    font-size: 2.1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.1);
+}
+
+/* ---- the foot of each room: a quiet ruled line on the paper ------------- */
+.lab-live.lab-linear .lab-room-foot {
+    border-top: 0;
+    background:
+        linear-gradient(var(--ch-brass), var(--ch-brass)) 50% 0 / min(1100px, calc(100% - 3rem)) 1px no-repeat,
+        var(--background);
+}
+.lab-live.lab-linear .lab-door { color: var(--primary-color); }
+.lab-live.lab-linear .lab-door:hover { color: var(--ch-numeral); }
+.lab-live.lab-linear .lab-drawer :focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+}
+.lab-live.lab-linear .lab-room-head :focus-visible { outline-color: #ffd58a; }
+
+@media (max-width: 900px) {
+    .lab-live.lab-linear .lab-room-head-in { align-items: flex-start; }
+}
+@media (max-width: 760px) {
+    .lab-live.lab-linear .lab-room-name { font-size: 1.7rem; }
+    .lab-live.lab-linear .lab-room-head-in { padding-top: 1.25rem; padding-bottom: 1.5rem; }
+}
+
 /* ---- no motion ---------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
     .lab-live .nav-logo,
