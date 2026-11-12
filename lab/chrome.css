@@ -1,0 +1,3 @@
+/* lab/chrome.css: the page furniture around the lab (top nav, name plate,
+   footer) dressed to belong to the night-time room. Loaded after every
+   other stylesheet. Scope every rule under .lab-live inside @media screen. */
