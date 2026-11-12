@@ -84,12 +84,27 @@
         });
         // tile joints, fading as they come toward the viewer
         JOINTS.forEach(function (y, i) {
-            var a = Math.max(0, 0.16 - i * 0.012) * 0.9;
+            var a = Math.max(0, 0.16 - i * 0.012) * 0.9 * Math.min(1, 2 * k);
             if (a <= 0.004 || y + 1 >= yTop) return;
             var bottom = (yTop - (y + 1)) * k;
             if (bottom > hr.height) return;
             out.push(layer('rgb(0 0 0 / ' + a.toFixed(3) + ')', null, null, bottom, Math.max(2 * k, 1)));
         });
+
+        // the tile joints that run front to back: straight lines in this
+        // front-on view, every 240 units, fading out toward the top of the page
+        if (yTop > -600) {
+            var vb = Math.max(0, (yTop - 56) * k), vh = hr.height - vb;
+            if (vh > 0) {
+                var va = (0.09 * 0.9 * Math.min(1, 2 * k)).toFixed(3);
+                for (var cx = 80; cx < SW; cx += 240) {
+                    var lx = x0 + cx * k;
+                    if (lx < -2 || lx > hr.width + 2) continue;
+                    out.push('linear-gradient(to top, rgb(0 0 0 / ' + va + '), rgb(0 0 0 / ' + va + ') 35%, rgb(0 0 0 / 0)) ' +
+                        px(lx) + ' calc(100% - ' + px(vb) + ') / ' + px(Math.max(2 * k, 1)) + ' ' + px(vh) + ' no-repeat');
+                }
+            }
+        }
 
         var value = out.length ? out.join(',') : '';
         if (value === last) return;
@@ -117,6 +132,20 @@
             new MutationObserver(queue).observe(svg, { attributes: true, attributeFilter: ['style', 'width', 'height'] });
             new MutationObserver(queue).observe(root, { attributes: true, attributeFilter: ['class'] });
         }
+        // lab.js measures the rail into --lab-nav-h the instant lab-live is
+        // set; if anything was still settling then (fonts, a transition),
+        // correct it once things are still, so the drawer tucks under exactly.
+        function navFit() {
+            var nav = document.querySelector('.navbar');
+            if (!nav) return;
+            var h = nav.getBoundingClientRect().height;
+            var cur = parseFloat(root.style.getPropertyValue('--lab-nav-h'));
+            if (h && Math.abs(h - cur) > 0.5) root.style.setProperty('--lab-nav-h', h + 'px');
+        }
+        window.addEventListener('load', navFit);
+        setTimeout(navFit, 450);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(navFit);
+
         // fonts and late layout can move the header
         window.addEventListener('load', queue);
         setTimeout(queue, 600);
