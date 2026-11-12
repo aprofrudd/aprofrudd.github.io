@@ -683,6 +683,8 @@
     .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .available-grid { grid-template-columns: 1fr; padding: 1.5rem 1rem 1.6rem; gap: 1.6rem; }
     .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq .section-title { padding: 1.2rem 1rem 1.1rem 5.3rem; font-size: 1.3rem; min-height: 4.8rem; }
     .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq .section-title::before { width: 3rem; height: 3rem; font-size: 2.1rem; left: 1.1rem; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq > .container::before { left: -6px; }
+    .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] #faq > .container::after { right: -6px; }
     .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-item { padding: 1.25rem 1.15rem 1.2rem; }
     .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-question { font-size: 1.05rem; }
     .lab-live:not(.lab-linear) .lab-drawer[data-skin][data-current="desk"] .faq-answer { font-size: 1.02rem; }

@@ -311,17 +311,31 @@
     var settleToken = 0;
     function settle(el) {
         var mine = ++settleToken;
-        function cancel() { settleToken++; }
+        var room = el.closest('.lab-room');
+        var watcher = null;
+        function done() {
+            if (watcher) { watcher.disconnect(); watcher = null; }
+        }
+        function cancel() { if (mine === settleToken) settleToken++; done(); }
+        function align() {
+            if (mine !== settleToken || !isOpen || linear) { done(); return; }
+            var pad = parseFloat(getComputedStyle(article).scrollPaddingTop) || 0;
+            var off = el.getBoundingClientRect().top - article.getBoundingClientRect().top - pad;
+            if (Math.abs(off) > 4) article.scrollTop += off;
+        }
         article.addEventListener('wheel', cancel, { passive: true, once: true });
         article.addEventListener('touchmove', cancel, { passive: true, once: true });
-        [350, 1100].forEach(function (ms) {
-            setTimeout(function () {
-                if (mine !== settleToken || !isOpen || linear) return;
-                var pad = parseFloat(getComputedStyle(article).scrollPaddingTop) || 0;
-                var off = el.getBoundingClientRect().top - article.getBoundingClientRect().top - pad;
-                if (Math.abs(off) > 4) article.scrollTop += off;
-            }, ms);
-        });
+        article.addEventListener('keydown', cancel, { once: true });
+        // Sections above the target keep changing height for a while (fonts,
+        // decorations, the collaboration figure arriving from the network),
+        // so follow every resize of the room for a few seconds.
+        if (window.ResizeObserver && room) {
+            watcher = new ResizeObserver(align);
+            watcher.observe(room);
+            Array.prototype.forEach.call(room.children, function (child) { watcher.observe(child); });
+        }
+        [120, 350, 1100, 2000].forEach(function (ms) { setTimeout(align, ms); });
+        setTimeout(function () { if (mine === settleToken) done(); }, 4000);
     }
 
     // Open whichever room holds #id and scroll to it. False when the id is
