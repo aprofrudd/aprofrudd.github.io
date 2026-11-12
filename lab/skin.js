@@ -25,7 +25,7 @@
     'use strict';
 
     // room key -> skin name. The shell (lab/skin.css) is shared by every skin.
-    var SKINS = { reception: 'night', lab: 'night', ergo: 'night', office: 'night',
+    var SKINS = { reception: 'night', lab: 'night', office: 'night',
                   print: 'night', seminar: 'night', desk: 'night' };
 
     function el(tag, cls) {

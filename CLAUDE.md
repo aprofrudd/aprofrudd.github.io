@@ -160,11 +160,11 @@ Both generated files carry their queries and fetch date in the header, so any nu
 
 ### The lab layout (`lab.js`, `lab.css`, `lab/`)
 
-The homepage is "the lab, after hours": a compact name plate, then one wide illustrated room seen front-on in the evening (door, treadmill and gas cart, heavy bag, ergometer with a BBC Micro and dot matrix printer, desk and lamp, rainy window, shelves, seminar corner, front desk). The kit is the navigation: each object links to a CV section, and clicking one flies the camera to that bay and slides the room's sections in as a drawer beside it. Eleven props are toys that answer a click with a small motion and a sound (lamp, wall switch, treadmill, heavy bag, bell, mug and so on). The idea is borrowed from felixrieseberg.com (one coherent place, content in objects, a plain-version switch); none of its code or art is.
+The homepage is "the lab, after hours": a compact name plate, then one wide illustrated room seen front-on in the evening (door, treadmill and gas cart, heavy bag, ergometer with a BBC Micro (furniture and a toy, not a CV hotspot), desk and lamp, rainy window, shelves, seminar corner, front desk). The kit is the navigation: each object links to a CV section, and clicking one flies the camera to that bay and slides the room's sections in as a drawer beside it. Eleven props are toys that answer a click with a small motion and a sound (lamp, wall switch, treadmill, heavy bag, bell, mug and so on). The idea is borrowed from felixrieseberg.com (one coherent place, content in objects, a plain-version switch); none of its code or art is.
 
 ```
-lab.js            rooms, drawer, routing, the Wingate test. Classic script, loaded last.
-lab.css           name plate, stage, drawer, room headers, Wingate bay
+lab.js            rooms, drawer, routing. Classic script, loaded last.
+lab.css           name plate, stage, drawer, room headers
 lab/scene.js      window.LabScene: the illustration, camera, toys, idle motion (hand-built SVG)
 lab/scene.css     its styles; everything prefixed lab-sc-, palette scoped to .lab-sc
 lab/sfx.js        window.LabSfx: synthesised WebAudio effects and a quiet rain bed. No audio files.
@@ -172,7 +172,7 @@ lab/exhibits.js   window.LabExhibits: entrance effects for section content (coun
 lab/exhibits.css  its styles; everything prefixed lab-ex-
 lab/skin.js       window.LabSkin: marks the drawer `data-skin` for rooms listed in SKINS, adds aria-hidden decor
 lab/skin.css      the shell every skinned room shares: night wall, door-plate header, dark rail, --sk-* tokens
-lab/skin-<key>.css  one room's content redrawn as the objects it lives in (all seven rooms)
+lab/skin-<key>.css  one room's content redrawn as the objects it lives in (all six rooms)
 lab/skin-<key>.js   that room's decorative extras, registered with LabSkin.decor(key, builder); may be an empty stub
 lab/fonts/        Caveat (OFL, vendored) for the whiteboard handwriting
 ```
@@ -186,10 +186,9 @@ lab/fonts/        Caveat (OFL, vendored) for the whiteboard handwriting
 - **Closed rooms use `hidden="until-found"`**, so find-in-page still reaches them (`beforematch` opens the drawer). Do not add a `display` rule to `.lab-room`. Every `#section` link, including the ones inside the scene, is routed through `go()` by one document click handler.
 - **Scene contract:** `LabScene.mount(el, {sfx, reduced, onPick})` returns `focus(zoneKey|null, {right, bottom})`, `mark(zoneKey|null)`, `focusOn(sectionId, inset)`, `markObject(sectionId|null)`, `play(bool)`, `zones` and `objects`. Zone keys are the room keys in `ROOMS`. Below about 1220px wide the whole room does not fit and the scene pans by drag instead.
 - **The scoreboard in the scene hardcodes 38 / 15 / 7** (papers, title fights, funded projects). It is a fourth place those figures live, after `index.html`, `resume.json` and `llms.txt`; update it with them.
-- **Sound never starts on its own.** `LabSfx` creates its AudioContext only after a gesture; the rain bed starts only once the visitor has touched the scene, and the "Sound" pill stops everything. The Wingate printer has its own separate toggle.
-- **Two clocks on purpose.** The scene and effects use `requestAnimationFrame`/CSS because they are decoration and should stop in a hidden tab. The Wingate test uses `setInterval`/`Date.now()` so a backgrounded tab still finishes the test and the printout. Do not merge them.
+- **Sound never starts on its own.** `LabSfx` creates its AudioContext only after a gesture; the rain bed starts only once the visitor has touched the scene, and the "Sound" pill stops everything.
+- The scene and effects use `requestAnimationFrame`/CSS because they are decoration and should stop in a hidden tab.
 - The readouts in the scene (temperature, treadmill speed, lactate) are set dressing, not data.
-- Wingate keys (Z, X, Space) are claimed only while a test is running, and Escape cancels the test before it closes the drawer. The watts are Monark arithmetic on tap cadence and the page says plainly that it is not a calibrated test; the demo trace is simulated and labelled as such on screen and on the printout.
 - `LabExhibits.enter(el)` must never leave content hidden: effects are CSS animations from a class, with a safety timeout that clears them, and counted numbers always end on their original text.
 
 The comment block at the top of `index.html` is a manual off-site checklist (LinkedIn, ORCID, Scholar). It is a to-do list for the user, not instructions for you.

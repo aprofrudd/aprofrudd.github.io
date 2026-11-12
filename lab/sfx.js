@@ -7,7 +7,7 @@
  *   LabSfx.ambient(b)       a very quiet bed of rain on a window
  *
  * The AudioContext is never created before a pointerdown or keydown.
- * Same approach as the Wingate printer in lab.js (one master gain, one shared
+ * One master gain, one shared
  * noise buffer, oscillators and filtered noise), but a separate context and toggle.
  */
 (function () {

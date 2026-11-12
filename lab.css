@@ -1,6 +1,5 @@
-/* The lab: floor plan, room headers and the Wingate bay.
-   Loaded after styles.css and built entirely from its tokens, except for the
-   BBC Micro and the printer, which are objects and keep their own colours.
+/* The lab: floor plan and room headers.
+   Loaded after styles.css and built entirely from its tokens.
    Every element styled here is created by lab.js. */
 
 :root {
@@ -266,217 +265,6 @@
 }
 .lab-door:hover { color: var(--primary-color); }
 
-/* ---- Wingate bay --------------------------------------------------------- */
-.lab-wg-intro,
-.lab-wg-note {
-    max-width: 44rem;
-    margin: 0 auto 2.5rem;
-    text-align: center;
-    color: var(--text-secondary);
-}
-.lab-wg-note { margin: 2.5rem auto 0; font-size: 0.9rem; }
-
-.lab-wg-bench {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: 2rem;
-    align-items: start;
-}
-
-/* The Micro: beige case, black tube, and the row of red function keys. */
-.lab-wg-monitor {
-    padding: 1.1rem 1.1rem 1.4rem;
-    border-radius: 14px 14px 6px 6px;
-    background: linear-gradient(#e6dfcd, #d6cdb6);
-    box-shadow: inset 0 -6px 0 rgb(0 0 0 / 0.08), var(--shadow-lg);
-}
-.lab-wg-tube {
-    position: relative;
-    padding: 5% 6%;
-    border-radius: 18px / 14px;
-    background: #050505;
-    box-shadow: inset 0 0 0 3px #1c1c1c, inset 0 0 40px rgb(255 255 255 / 0.05);
-    container-type: inline-size;
-    overflow: hidden;
-}
-/* scanlines */
-.lab-wg-tube::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(rgb(0 0 0 / 0) 0 2px, rgb(0 0 0 / 0.28) 2px 3px);
-    pointer-events: none;
-}
-.lab-wg-screen {
-    /* 40 columns, as MODE 7 had. A monospace glyph is 0.6em wide (0.602 in
-       Menlo), so 40 of them fill 100cqw at 100/24.1; /24.6 leaves a margin. */
-    font-family: var(--lab-mono);
-    font-size: 13px;
-    font-size: calc(100cqw / 24.6);
-    font-weight: 700;
-    line-height: 1.24;
-    white-space: pre;
-    color: #fff;
-    text-shadow: 0 0 6px currentColor;
-    min-height: calc(1.24em * 17);
-    overflow: hidden;
-}
-.lab-wg-screen .t-w { color: #f5f5f5; }
-.lab-wg-screen .t-y { color: #ffe900; }
-.lab-wg-screen .t-c { color: #37e6ff; }
-.lab-wg-screen .t-g { color: #3dff5a; }
-.lab-wg-screen .t-r { color: #ff5a4d; }
-.lab-wg-screen .t-m { color: #ff6bf0; }
-.lab-wg-screen .t-cursor { animation: lab-blink 1s steps(1) infinite; }
-
-.lab-wg-keys {
-    display: flex;
-    gap: 3px;
-    margin: 0 1.25rem;
-    padding: 6px 8px 7px;
-    border-radius: 0 0 8px 8px;
-    background: #2b2b2b;
-}
-.lab-wg-keys i {
-    flex: 1;
-    height: 9px;
-    border-radius: 2px;
-    background: #d9451f;
-    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.25);
-}
-
-.lab-wg-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 1.25rem;
-}
-.lab-wg-btn {
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 0.7rem 1.1rem;
-    border: 1.5px solid var(--border-color);
-    border-radius: 10px;
-    background: var(--background);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-    touch-action: manipulation;
-    -webkit-user-select: none;
-    user-select: none;
-}
-.lab-wg-btn:hover { border-color: var(--text-secondary); }
-.lab-wg-btn-main {
-    border-color: var(--primary-color);
-    background: var(--primary-color);
-    color: #fff;
-}
-.lab-wg-btn-main:hover { border-color: var(--primary-dark); background: var(--primary-dark); }
-.lab-wg-btn-main.is-pedal {
-    flex: 1 1 100%;
-    padding: 1.6rem 1rem;
-    border-color: #d9451f;
-    background: #d9451f;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-}
-.lab-wg-btn-main.is-pedal:active { transform: scale(0.985); background: #b93614; }
-.lab-wg-btn[hidden] { display: none; }
-
-.lab-wg-help {
-    margin-top: 0.9rem;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-}
-.lab-wg-help kbd {
-    display: inline-block;
-    min-width: 1.6em;
-    padding: 0 0.35em;
-    border: 1px solid var(--border-color);
-    border-bottom-width: 2px;
-    border-radius: 4px;
-    background: var(--background);
-    font-family: var(--lab-mono);
-    font-size: 0.8rem;
-    text-align: center;
-}
-
-/* The printer: paper feeds up and out of the platen, newest line lowest. */
-.lab-wg-printer { min-width: 0; }
-.lab-wg-paper {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    height: 21rem;
-    overflow: hidden;
-}
-.lab-wg-paper.is-torn { height: auto; min-height: 21rem; }
-.lab-wg-sheet {
-    margin: 0 1.25rem;
-    padding: 0 1.6rem;
-    /* green-bar fanfold with tractor-feed holes down both edges */
-    background:
-        radial-gradient(circle, #cfcabd 0 4px, transparent 4.5px) 0.25rem 0 / 1.1rem 1.4rem repeat-y,
-        radial-gradient(circle, #cfcabd 0 4px, transparent 4.5px) calc(100% - 0.25rem) 0 / 1.1rem 1.4rem repeat-y,
-        repeating-linear-gradient(#fdfcf7 0 4.2rem, #eaf3e6 4.2rem 8.4rem);
-    box-shadow: var(--shadow);
-    min-height: 2.5rem;
-}
-.lab-wg-paper.is-torn .lab-wg-sheet {
-    /* torn along the perforation */
-    clip-path: polygon(0 4px, 2% 0, 4% 4px, 6% 0, 8% 4px, 10% 0, 12% 4px, 14% 0, 16% 4px, 18% 0, 20% 4px, 22% 0, 24% 4px, 26% 0, 28% 4px, 30% 0, 32% 4px, 34% 0, 36% 4px, 38% 0, 40% 4px, 42% 0, 44% 4px, 46% 0, 48% 4px, 50% 0, 52% 4px, 54% 0, 56% 4px, 58% 0, 60% 4px, 62% 0, 64% 4px, 66% 0, 68% 4px, 70% 0, 72% 4px, 74% 0, 76% 4px, 78% 0, 80% 4px, 82% 0, 84% 4px, 86% 0, 88% 4px, 90% 0, 92% 4px, 94% 0, 96% 4px, 98% 0, 100% 4px, 100% 100%, 0 100%);
-}
-.lab-wg-roll {
-    container-type: inline-size;
-    padding: 1.2rem 0 0.4rem;
-}
-.lab-wg-roll > div {
-    font-family: var(--lab-mono);
-    font-size: 11px;
-    font-size: calc(100cqw / 24.6);
-    line-height: 1.5;
-    white-space: pre;
-    color: #2a2a3c;
-    /* a tired ribbon: the ink is never quite black or quite even */
-    opacity: 0.88;
-    letter-spacing: 0;
-}
-.lab-wg-head {
-    display: inline-block;
-    width: 0.7em;
-    height: 1.1em;
-    margin-left: 1px;
-    vertical-align: text-bottom;
-    background: #2b2b2b;
-    border-radius: 1px;
-}
-.lab-wg-platen {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.9rem 1.1rem;
-    border-radius: 6px 6px 12px 12px;
-    background: linear-gradient(#e6dfcd, #d2c9b2);
-    box-shadow: inset 0 5px 0 #2b2b2b, inset 0 -5px 0 rgb(0 0 0 / 0.08), var(--shadow-lg);
-    font-family: var(--lab-mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.25em;
-    color: #7a735f;
-}
-.lab-wg-platen i {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #5d5848;
-}
-.lab-wg-paper.is-printing + .lab-wg-platen i {
-    background: #3dff5a;
-    box-shadow: 0 0 6px #3dff5a;
-}
-
 /* While a room is open the lab takes the whole window behind the drawer, so
    the white name plate is not left hanging beside a night-time room. */
 @media (min-width: 901px) {
@@ -509,8 +297,6 @@
 
     .lab-room-head-in { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
     .lab-room-name { font-size: 2rem; }
-
-    .lab-wg-bench { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 760px) {
@@ -532,19 +318,16 @@
 @media (max-width: 480px) {
     .lab-live .hero-cta { flex-direction: row; flex-wrap: nowrap; gap: 0.4rem; }
     .lab-live .hero-cta .btn { width: auto; flex: 1; padding: 0.55rem 0.3rem; font-size: 0.8rem; }
-    .lab-wg-sheet { margin: 0 0.5rem; padding: 0 1.4rem; }
-    .lab-wg-monitor { padding: 0.7rem 0.7rem 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .lab-plan-kicker i,
-    .lab-wg-screen .t-cursor,
     .lab-room:not([hidden]) > .section,
     .lab-room:not([hidden]) > .lab-room-head { animation: none; }
     .lab-live:not(.lab-linear) .lab-drawer { transition: none; }
 }
 
 @media print {
-    .lab-plan, .lab-room-foot, .lab-wingate, .lab-drawer-bar { display: none; }
+    .lab-plan, .lab-room-foot, .lab-drawer-bar { display: none; }
     .lab-live .lab-drawer { position: static !important; transform: none !important; width: auto !important; }
 }
