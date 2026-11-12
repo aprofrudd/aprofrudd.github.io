@@ -3,8 +3,9 @@
  * A front-on illustrated physiology lab, built as inline SVG at run time.
  * Classic script, no dependencies, no image files. Exposes one global:
  *
- *   window.LabScene.mount(container, { sfx: fn(name), reduced: bool })
- *     -> { focus(zoneKey|null, inset), mark(zoneKey|null), play(bool), zones }
+ *   window.LabScene.mount(container, { sfx: fn(name), reduced: bool, onPick: fn({id, zone}) })
+ *     -> { focus(zoneKey|null, inset), mark(zoneKey|null), focusOn(id, inset), markObject(id|null),
+ *          visited(id), play(bool), zones, objects }
  *
  * Structure of the SVG, back to front:
  *   art      the room. Hotspots are <a href="#section"> wrapping their object;
@@ -13,7 +14,13 @@
  *   dark-off   sources are, so screens/window/lamp pool stay bright. Two veils,
  *            lamp-on and lamp-off, crossfaded, so the masks never re-render.
  *   glow     additive-looking soft light: lamp cone, screen halos, door spill.
- *   ui       floor labels (room links), hover rings and tags, toy bubbles.
+ *   ui       floor labels (room links), hover rings, toy sparkles, beacons, toy bubbles.
+ *
+ * CV hotspots announce themselves: each sits in a slow breathing pool of warm light
+ * (hotglow, drawn over the night veil) and carries a beacon, a ringed amber dot with its
+ * section's name, pinging on a staggered beat. Toys get none of that, only a faint cool
+ * sparkle on hover, so the two kinds never read alike. A beacon calms once its section
+ * has been opened (visited(id)), so the visitor can see what is still unread.
  * Scene units: 4520 x 1200. Floor meets wall at y=980.
  */
 (function () {
@@ -22,8 +29,7 @@
     var SW = 4520, SH = 1200, FL = 980;
     var ZONES = [
         { key: 'reception', name: 'Reception', x0: 0, x1: 700 },
-        { key: 'lab', name: 'Performance Lab', x0: 700, x1: 1490 },
-        { key: 'ergo', name: 'Ergometer Bay', x0: 1490, x1: 2100 },
+        { key: 'lab', name: 'Performance Lab', x0: 700, x1: 2100 },     // treadmill through the ergometer
         { key: 'office', name: 'Office', x0: 2100, x1: 2780 },
         { key: 'print', name: 'Print Room', x0: 2780, x1: 3320 },
         { key: 'seminar', name: 'Seminar Room', x0: 3320, x1: 3990 },
@@ -38,6 +44,17 @@
         media: { frame: [3814, 188, 3986, 362], parts: [[3814, 188, 3986, 362], [3810, 548, 3946, 1014]] },
         capability: { frame: [1048, 556, 1236, 1024], parts: [[1014, 236, 1210, 462], [1048, 556, 1236, 1026]] },
         publications: { frame: [2788, 212, 3022, 1008], parts: [[2788, 212, 3022, 1008], [3026, 776, 3212, 1026]] }
+    };
+    // Beacon anchors [x, y, side]: where each hotspot's beacon sits, and which side of it
+    // the name goes (u above, d below, l left, r right). Chosen by eye so that no name
+    // covers another object's beacon or a toy in the whole-room view.
+    var BEACON = {
+        'at-a-glance': [300, 246, 'l'], about: [292, 398, 'l'], now: [692, 420, 'r'],
+        collaboration: [871, 190, 'u'], capability: [1130, 566, 'u'], 'applied-projects': [1408, 204, 'u'],
+        software: [1406, 690, 'u'], education: [2194, 238, 'u'], skills: [2690, 222, 'u'],
+        experience: [2176, 616, 'r'], publications: [2905, 222, 'u'], grants: [3260, 826, 'u'],
+        talks: [3486, 136, 'u'], phds: [3742, 712, 'u'], media: [3900, 196, 'u'],
+        contact: [4196, 424, 'u'], available: [4190, 884, 'd'], faq: [4456, 284, 'u']
     };
     // Close-up scale cap (see focusOn).
     var CLOSE_MAX = 1.5, CLOSE_FILL = 0.55;
@@ -81,7 +98,8 @@
         function hole(x, y, w, h, rx) { holes.push(R(x, y, w, h, '#000', rx ? 'rx="' + rx + '"' : '')); }
         function shadow(cx, cy, rx, ry, op) { return E(cx, cy, rx, ry, U('shadow'), op ? 'opacity="' + op + '"' : ''); }
         function hot(id, label, aria, box, inner) {
-            hots.push({ id: id, label: label, box: box, fit: (FIT[id] || {}).frame || box, parts: (FIT[id] || {}).parts || [box], aria: aria });
+            var fit = (FIT[id] || {}).frame || box, bc = BEACON[id] || [(fit[0] + fit[2]) / 2, fit[1] + 8, 'u'];
+            hots.push({ id: id, label: label, box: box, fit: fit, parts: (FIT[id] || {}).parts || [box], aria: aria, bx: bc[0], by: bc[1], side: bc[2] });
             return '<a href="#' + id + '" class="lab-sc-hot" data-hot="' + id + '" aria-label="' + aria + '">' +
                 R(box[0], box[1], box[2] - box[0], box[3] - box[1], '#000', 'fill-opacity="0"') + inner + '</a>';
         }
@@ -124,6 +142,8 @@
             '<radialGradient id="' + I('white') + '"><stop offset="0" stop-color="#e8f0ff" stop-opacity=".3"/><stop offset="1" stop-color="#e8f0ff" stop-opacity="0"/></radialGradient>' +
             '<radialGradient id="' + I('dusk') + '"><stop offset="0" stop-color="#8a9be0" stop-opacity=".22"/><stop offset="1" stop-color="#8a9be0" stop-opacity="0"/></radialGradient>' +
             '<radialGradient id="' + I('tube') + '"><stop offset="0" stop-color="#fffbe8" stop-opacity=".55"/><stop offset="1" stop-color="#fffbe8" stop-opacity="0"/></radialGradient>' +
+            '<radialGradient id="' + I('hotglow') + '"><stop offset="0" stop-color="#ffd380" stop-opacity=".46"/><stop offset=".62" stop-color="#ffc062" stop-opacity=".3"/><stop offset=".85" stop-color="#ffb04a" stop-opacity=".08"/><stop offset="1" stop-color="#ffb04a" stop-opacity="0"/></radialGradient>' +
+            '<radialGradient id="' + I('bhalo') + '"><stop offset="0" stop-color="#ffd27a" stop-opacity=".75"/><stop offset=".45" stop-color="#ffb84f" stop-opacity=".28"/><stop offset="1" stop-color="#ffb04a" stop-opacity="0"/></radialGradient>' +
             '<radialGradient id="' + I('mark') + '"><stop offset="0" stop-color="#ffd58a" stop-opacity=".42"/><stop offset="1" stop-color="#ffd58a" stop-opacity="0"/></radialGradient>' +
             '<radialGradient id="' + I('hole') + '"><stop offset="0" stop-color="#000"/><stop offset=".3" stop-color="#151515"/><stop offset=".5" stop-color="#444"/><stop offset=".68" stop-color="#8c8c8c"/><stop offset=".84" stop-color="#cfcfcf"/><stop offset="1" stop-color="#fff"/></radialGradient>' +
             '<radialGradient id="' + I('holeSoft') + '"><stop offset="0" stop-color="#555"/><stop offset="1" stop-color="#fff"/></radialGradient>' +
@@ -282,7 +302,7 @@
             if (wi < 2) wb += S('M531 ' + (wy - 5) + ' L536 ' + wy + ' L545 ' + (wy - 16), '#2f8a57', 2.5);
         }
         wb += R(516, 648, 176, 9, '#9aa1a8', 'rx="2"') + R(540, 642, 30, 6, '#b8322b', 'rx="3"') + R(578, 642, 30, 6, '#2456a6', 'rx="3"') + R(640, 641, 24, 7, '#f4f4f4', 'rx="2"');
-        rec += hot('now', 'Now', 'Whiteboard, this week: now', [500, 388, 720, 1026], wb);
+        rec += hot('now', 'Right now', 'Whiteboard, this week: what I am doing now', [500, 388, 720, 1026], wb);
 
         // ================= 2 PERFORMANCE LAB =================
         var lab = '';
@@ -438,7 +458,7 @@
         soft(1406, 760, 140, 110, 0.45);
         lab += hot('software', 'Software', 'Laptop on the bench: software', [1324, 680, 1486, 1012], sw);
 
-        // ================= 3 ERGOMETER BAY =================
+        // ---- the far end of the lab: clock, readouts, ergometer (furniture, not a section) ----
         var erg = '';
         // clock (real time)
         erg += C(1630, 248, 62, '#000', 'opacity=".2"') + C(1626, 244, 62, '#25282d') + C(1626, 244, 54, '#f2eee5');
@@ -461,7 +481,7 @@
             E(1942, 272, 70, 27, 'none', 'stroke="#c8372d" stroke-width="2"') + E(1942, 272, 58, 18, '#7aa26f') +
             C(1880, 292, 4, '#1d1f24') + L(1876, 298, 1888, 296, '#1d1f24', 3) +
             T(1846, 214, 'TRACK', 11, '#2a2d33', BOLD + ' letter-spacing="3"');
-        // ergometer + micro + printer -> wingate
+        // ergometer + micro + printer (toy: spin the flywheel)
         var F = '#dfe2df', D = '#2a2d33';
         var wg = shadow(1665, 1016, 200, 13) + shadow(1970, 1016, 140, 11);
         wg += R(1520, 992, 104, 15, D, 'rx="7"') + R(1684, 992, 136, 15, D, 'rx="7"') +
@@ -473,7 +493,7 @@
         var holesFly = '';
         for (var fh = 0; fh < 5; fh++) { var fa = fh * Math.PI * 2 / 5; holesFly += C(1750 + Math.cos(fa) * 44, 880 + Math.sin(fa) * 44, 13, '#0d0e10'); }
         wg += C(1750, 880, 88, '#1b1d21') + C(1750, 880, 84, '#a2abb3') + C(1750, 880, 77, '#c8372d') + C(1750, 880, 62, '#a92d25') +
-            G(holesFly + C(1750, 880, 88, 'none'), 'class="lab-sc-fly"') +
+            G(G(holesFly + C(1750, 880, 88, 'none'), 'class="lab-sc-fly"'), 'class="lab-sc-flyspin"') +
             P('M1690 830 A 78 78 0 0 1 1800 822', 'none', 'stroke="#fff" stroke-opacity=".25" stroke-width="5" stroke-linecap="round"') +
             C(1750, 880, 17, '#a2abb3') + C(1750, 880, 6, D);
         wg += S('M1665 852 A 90 90 0 0 1 1836 852', '#c79b3c', 4) + L(1836, 852, 1842, 904, '#c79b3c', 3) +
@@ -510,7 +530,7 @@
         wg += R(1912, 744, 116, 12, '#b5a981', 'rx="3"') + R(1886, 578, 168, 170, '#cbbf9b', 'rx="12"') + R(2036, 584, 14, 160, '#b4a881', 'rx="6"') +
             R(1898, 590, 144, 126, '#2a2620', 'rx="9"') + R(1908, 600, 124, 106, U('crt'), 'rx="12"');
         hole(1908, 600, 124, 106, 12);
-        var crt = T(1916, 616, 'WINGATE  30 s', 9.5, '#7cf59a', 'class="lab-sc-mono"') + L(1916, 690, 2024, 690, '#2f7a3f', 1);
+        var crt = T(1916, 616, 'POWER OUTPUT', 9.5, '#7cf59a', 'class="lab-sc-mono"') + L(1916, 690, 2024, 690, '#2f7a3f', 1);
         [62, 68, 66, 60, 55, 50, 45, 41, 37, 34].forEach(function (h, i) {
             crt += R(1918 + i * 10.6, 690 - h, 8, h, '#6cf08a', 'class="lab-sc-bar" style="transition-delay:' + (i * 0.11).toFixed(2) + 's"');
         });
@@ -520,9 +540,9 @@
             C(1912, 732, 3, '#e2412e') + C(2010, 732, 5, '#8f8566') + C(2024, 732, 5, '#8f8566') + R(1936, 728, 50, 3, '#a89c78') + R(1936, 734, 50, 3, '#a89c78');
         glow += E(1970, 660, 190, 160, U('green')) + E(1970, 1030, 150, 14, '#6cf08a', 'opacity=".05" class="lab-sc-floorglow"');
         soft(1970, 690, 220, 190, 0.6);
-        erg += hot('wingate', 'Wingate test', 'Cycle ergometer, home computer and printer: the Wingate test', [1506, 572, 2094, 1022], wg);
+        erg += toy('ergo', 'Cycle ergometer and home computer: give the flywheel a spin', [1506, 572, 2094, 1022], wg);
 
-        // ================= 4 OFFICE =================
+        // ================= 3 OFFICE =================
         var off = '';
         // certificates -> education
         var ed = R(2132, 242, 136, 96, '#000', 'opacity=".2"') + R(2126, 236, 136, 96, '#22252a') + R(2134, 244, 120, 80, '#f3eee2') +
@@ -635,7 +655,7 @@
             R(2392, 712, 8, 12, '#d6d2c2') + R(2394, 704, 4, 9, '#f2f0ea'));
         hole(2378, 728, 34, 14, 2);
 
-        // ================= 5 PRINT ROOM =================
+        // ================= 4 PRINT ROOM =================
         var prn = '';
         var r5 = rng(61);
         var pb = shadow(2905, 1012, 120, 10) +
@@ -708,7 +728,7 @@
                 S('M0 -10 L0 -20 M9.5 -3 L20 -5 M6 8 L13 16 M-6 8 L-13 16 M-9.5 -3 L-20 -5', '#6d6d6d', 1.2), 'class="lab-sc-ballspin"'),
                 'class="lab-sc-ball" transform="translate(3152 986)"'));
 
-        // ================= 6 SEMINAR ROOM =================
+        // ================= 5 SEMINAR ROOM =================
         var sem = '';
         // projector screen + lectern -> talks
         var tk2 = R(3340, 126, 292, 22, '#24272c', 'rx="7"') + R(3352, 148, 268, 268, U('slide')) +
@@ -771,7 +791,7 @@
             S('M3856 590 Q3884 640 3910 660', '#1d1f24', 2);
         sem += hot('media', 'Media', 'Television, on-air light and microphone: media', [3818, 186, 3986, 1016], md);
 
-        // ================= 7 FRONT DESK =================
+        // ================= 6 FRONT DESK =================
         var dk = '';
         // sign hanging over the counter
         dk += L(4130, 56, 4130, 214, '#3a3d42', 2) + L(4250, 56, 4250, 214, '#3a3d42', 2) +
@@ -795,7 +815,7 @@
             R(4092, 798, 208, 84, '#000', 'opacity=".25"') + R(4086, 794, 208, 84, '#f3ecdc', 'rx="6"') +
             T(4190, 836, 'OPEN', 32, '#2f7d4f', MID + ' ' + BOLD + ' letter-spacing="3"') +
             T(4190, 862, 'CONSULTANCY · TALKS · COACHING', 9, '#5b5f66', MID + ' letter-spacing=".5"');
-        dk += hot('available', 'Available for', 'Front counter, open sign: available for', [3992, 724, 4392, 1014], av);
+        dk += hot('available', 'Work with me', 'Front counter, open sign: work with me', [3992, 724, 4392, 1014], av);
         // mobile phone (toy)
         dk += toy('mobile', 'Mobile phone: let it ring', [4020, 660, 4100, 744],
             G(P('M4040 730 L4050 690 L4082 690 L4078 730Z', '#2a2d33') + R(4046, 672, 32, 58, '#15171b', 'rx="6"') + R(4049, 678, 26, 46, '#2b2f5e', 'rx="2"') + R(4049, 700, 26, 24, '#5b3f7a', 'rx="2"', '') + T(4062, 694, '21:47', 6.5, '#e6e9ff', MID + ' class="lab-sc-mono"') +
@@ -868,9 +888,33 @@
             });
             rings += '</g>';
         });
+        // Toys: no ring, no beacon. Hover gives three faint cool sparkles at the corners.
+        var STAR = 'M0 -7L1.3 -1.3L7 0L1.3 1.3L0 7L-1.3 1.3L-7 0L-1.3 -1.3Z';
         d.toys.forEach(function (t) {
-            var b = t.box;
-            rings += '<g class="lab-sc-ring lab-sc-ring-toy" data-ring="toy-' + t.name + '"><rect class="lab-sc-ringline" x="' + (b[0] - 4) + '" y="' + (b[1] - 4) + '" width="' + (b[2] - b[0] + 8) + '" height="' + (b[3] - b[1] + 8) + '" rx="14"/></g>';
+            var b = t.box, w = b[2] - b[0], h = b[3] - b[1];
+            rings += '<g class="lab-sc-ring lab-sc-ring-toy" data-ring="toy-' + t.name + '">';
+            [[b[2] - w * 0.12, b[1] + h * 0.08, 1], [b[0] + w * 0.1, b[1] + h * 0.4, 0.7], [b[2] - w * 0.05, b[1] + h * 0.72, 0.55]].forEach(function (sp, i) {
+                rings += '<g class="lab-sc-spark" data-x="' + n(sp[0]) + '" data-y="' + n(sp[1]) + '" data-s="' + sp[2] + '">' +
+                    '<path class="lab-sc-star" d="' + STAR + '" style="animation-delay:' + (-i * 0.45).toFixed(2) + 's"/></g>';
+            });
+            rings += '</g>';
+        });
+        // CV hotspots: a breathing pool of warm light per part, and a beacon with the section's name.
+        // Both are staggered by the golden ratio so the room shimmers instead of strobing.
+        var hotglow = '', beacons = '';
+        d.hots.forEach(function (h, i) {
+            var ph = (i * 0.618034) % 1;
+            h.parts.forEach(function (b) {
+                var w = b[2] - b[0], hh = b[3] - b[1];
+                hotglow += '<ellipse class="lab-sc-hglow" data-hg="' + h.id + '" cx="' + n((b[0] + b[2]) / 2) + '" cy="' + n((b[1] + b[3]) / 2) + '" rx="' + n(w * 0.56 + 34) + '" ry="' + n(hh * 0.56 + 34) +
+                    '" fill="' + U('hotglow') + '" style="animation-delay:-' + (ph * 5.2).toFixed(2) + 's"/>';
+            });
+            beacons += '<a href="#' + h.id + '" class="lab-sc-bcn" data-bcn="' + h.id + '" tabindex="-1" aria-hidden="true" transform="translate(' + h.bx + ' ' + h.by + ')">' +
+                '<g class="lab-sc-bcn-lab"><rect class="lab-sc-bcn-pill" rx="9" ry="9"/><text class="lab-sc-bcn-text" text-anchor="middle">' + h.label + '</text></g>' +
+                '<circle class="lab-sc-bcn-halo" r="17" fill="' + U('bhalo') + '"/>' +
+                '<circle class="lab-sc-bcn-pulse" r="6.5" style="animation-delay:-' + (ph * 2.8).toFixed(2) + 's"/>' +
+                '<circle class="lab-sc-bcn-ring" r="7.5"/><circle class="lab-sc-bcn-core" r="4.4"/><circle class="lab-sc-bcn-dot" r="1.8"/>' +
+                '<circle class="lab-sc-bcn-hit" r="20"/></a>';
         });
 
         var root = document.createElement('div');
@@ -885,16 +929,16 @@
             '<rect class="lab-sc-dark lab-sc-dark-on" ' + BIG + ' mask="url(#' + pre + 'mOn)" aria-hidden="true"/>' +
             '<rect class="lab-sc-dark lab-sc-dark-off" ' + BIG + ' mask="url(#' + pre + 'mOff)" aria-hidden="true"/>' +
             '<g class="lab-sc-glow" aria-hidden="true">' + d.glow + '</g>' +
+            '<g class="lab-sc-hotglow" aria-hidden="true">' + hotglow + '</g>' +
             '<g class="lab-sc-reading" aria-hidden="true">' +
                 '<rect class="lab-sc-rdim" ' + BIG + ' fill="' + U('rdDim') + '"/>' +
                 '<ellipse class="lab-sc-rwarm" fill="' + U('rdWarm') + '"/>' +
                 '<g class="lab-sc-rparts"></g></g>' +
-            '<g class="lab-sc-ui">' + ui + '<g class="lab-sc-rings" aria-hidden="true">' + rings + '</g><g class="lab-sc-tags" aria-hidden="true"></g></g>' +
+            '<g class="lab-sc-ui">' + ui + '<g class="lab-sc-rings" aria-hidden="true">' + rings + '</g><g class="lab-sc-beacons">' + beacons + '</g></g>' +
             '</svg>' +
             '<div class="lab-sc-hint" aria-hidden="true"><span class="lab-sc-hint-arrows">← →</span> Drag to look around</div>';
         container.appendChild(root);
         var svg = root.querySelector('svg');
-        var tagsG = root.querySelector('.lab-sc-tags');
         var hint = root.querySelector('.lab-sc-hint');
         function q(sel) { return root.querySelector(sel); }
         function qa(sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); }
@@ -908,7 +952,7 @@
 
         // ---------------- camera ----------------
         var cam = { s: 1, tx: 0, ty: 0 }, base = 0;
-        var mode = { focus: null, inset: null, obj: null }, panning = false, panCx = 1790;
+        var mode = { focus: null, inset: null, obj: null }, panning = false, panCx = 350;      // phones start at Reception, where the CV begins
         var anim = null, momentum = null;
         function dims() { return { W: root.clientWidth || 1, H: root.clientHeight || 1 }; }
         function applyCam() { svg.style.transform = 'translate(' + cam.tx + 'px,' + cam.ty + 'px) scale(' + (cam.s / base) + ')'; }
@@ -918,7 +962,7 @@
             svg.setAttribute('height', Math.round(SH * base));
             svg.style.setProperty('--lab-sc-k', String(1 / base));
             applyCam();
-            refreshTag();
+            layoutUI();
             fitToyHits();
         }
         // Toy tap targets: at least 44 CSS px at the current scale (they are about 33px when the
@@ -1021,6 +1065,7 @@
             var t = mode.obj ? objectTarget(mode.obj, mode.inset) : mode.focus ? zoneTarget(mode.focus, mode.inset) : overviewTarget();
             if (!mode.focus) root.classList.toggle('lab-sc-panmode', panning);
             else root.classList.remove('lab-sc-panmode');
+            root.classList.toggle('lab-sc-focused', !!mode.focus);
             flyTo(t, dur);
         }
         function panBy(dx) {
@@ -1105,8 +1150,8 @@
             panBy(-dx * (ev.deltaMode === 1 ? 16 : 1));
         }, { passive: false });
 
-        // ---------------- hover rings and tags ----------------
-        var hotById = {}, curTag = null;
+        // ---------------- hover rings, beacons and their names ----------------
+        var hotById = {}, hovered = null, seen = {};
         function zoneOfBox(b) {
             var cx = (b[0] + b[2]) / 2;
             for (var i = 0; i < ZONES.length; i++) if (cx >= ZONES[i].x0 && cx < ZONES[i].x1) return ZONES[i].key;
@@ -1115,51 +1160,84 @@
         d.hots.forEach(function (h) { hotById[h.id] = h; });
         function ringEl(key) { return q('[data-ring="' + key + '"]'); }
         function showRing(key, on) { var r = ringEl(key); if (r) r.classList.toggle('is-on', on); }
+        var bcns = qa('.lab-sc-bcn').map(function (el) {
+            var id = el.getAttribute('data-bcn');
+            return { id: id, el: el, h: hotById[id], text: el.querySelector('.lab-sc-bcn-text'), pill: el.querySelector('.lab-sc-bcn-pill'), w: 0 };
+        });
+        var bcnById = {};
+        bcns.forEach(function (b) { bcnById[b.id] = b; });
+        var sparks = qa('.lab-sc-spark');
         function showTag(id) {
-            var h = hotById[id];
-            if (!h) return;
-            curTag = id;
-            refreshTag();
+            if (hovered && hovered !== id) hideTag();
+            hovered = id;
+            if (bcnById[id]) bcnById[id].el.classList.add('is-hover');
         }
-        function hideTag() { curTag = null; tagsG.textContent = ''; }
-        function refreshTag() {
-            tagsG.textContent = '';
-            if (!curTag || !base) return;
-            var h = hotById[curTag], k = 1 / base, b = h.fit;
-            var cx = (b[0] + b[2]) / 2, y = b[1] - 14 * k;
-            var dm = dims();
-            // keep the tag on screen
-            var topLimit = (-cam.ty / cam.s) + 30 * k;
-            if (y < topLimit) y = Math.min(b[3] - 10 * k, topLimit);
-            var g = mk('g', { 'class': 'lab-sc-tag' }, tagsG);
-            var rect = mk('rect', { rx: 6 * k, ry: 6 * k }, g);
-            var txt = mk('text', { x: cx, y: y - 8 * k, 'text-anchor': 'middle' }, g);
-            txt.textContent = h.label + '  →';
-            var w;
-            try { w = txt.getComputedTextLength(); } catch (e) { w = h.label.length * 7.5 * k; }
-            if (!w) w = (h.label.length + 3) * 7.5 * k;
-            var padX = 10 * k, hgt = 26 * k;
-            var left = cx - w / 2 - padX;
-            var viewL = -cam.tx / cam.s + 6 * k, viewR = (dm.W - cam.tx) / cam.s - 6 * k;
-            var shift = 0;
-            if (left < viewL) shift = viewL - left;
-            if (left + w + 2 * padX > viewR) shift = viewR - (left + w + 2 * padX);
-            txt.setAttribute('x', cx + shift);
-            rect.setAttribute('x', left + shift); rect.setAttribute('y', y - 8 * k - 18 * k);
-            rect.setAttribute('width', w + 2 * padX); rect.setAttribute('height', hgt);
+        function hideTag() {
+            if (hovered && bcnById[hovered]) bcnById[hovered].el.classList.remove('is-hover');
+            hovered = null;
+        }
+        // Beacons and sparkles are drawn in screen pixels: each group is scaled by 1/base so a
+        // beacon is the same size whether the room is shown whole or close up.
+        function layoutUI() {
+            if (!base) return;
+            var k = 1 / base, dm = dims();
+            var viewT = -cam.ty / cam.s, viewL = -cam.tx / cam.s, viewR = (dm.W - cam.tx) / cam.s;
+            bcns.forEach(function (b) {
+                var h = b.h;
+                if (!b.w) {
+                    try { b.w = b.text.getComputedTextLength(); } catch (e) { b.w = 0; }
+                    if (!b.w) b.w = h.label.length * 6.6;
+                }
+                var w = b.w + 18, ht = 19, side = h.side, lx, ly;
+                if (side === 'u' && h.by - (14 + ht) * k < viewT + 4 * k) side = 'd';
+                if (side === 'u') { lx = -w / 2; ly = -13 - ht; }
+                else if (side === 'd') { lx = -w / 2; ly = 13; }
+                else if (side === 'r') { lx = 13; ly = -ht / 2; }
+                else { lx = -13 - w; ly = -ht / 2; }
+                // keep the name inside the room, and inside the view while the camera is parked on a bay
+                var minX = mode.focus ? viewL + 6 * k : 6 * k, maxX = mode.focus ? viewR - 6 * k : SW - 6 * k;
+                var left = h.bx + lx * k, shift = 0;
+                if (mode.focus && (h.bx < viewL || h.bx > viewR)) { /* beacon out of frame: leave its name with it */ }
+                else if (left < minX) shift = (minX - left) / k;
+                else if (left + w * k > maxX) shift = (maxX - left - w * k) / k;
+                lx += shift;
+                b.el.setAttribute('transform', 'translate(' + h.bx + ' ' + h.by + ') scale(' + k + ')');
+                b.pill.setAttribute('x', n(lx)); b.pill.setAttribute('y', n(ly));
+                b.pill.setAttribute('width', n(w)); b.pill.setAttribute('height', ht);
+                b.text.setAttribute('x', n(lx + w / 2)); b.text.setAttribute('y', n(ly + 13.4));
+            });
+            sparks.forEach(function (sp) {
+                sp.setAttribute('transform', 'translate(' + sp.getAttribute('data-x') + ' ' + sp.getAttribute('data-y') + ') scale(' + (k * +sp.getAttribute('data-s')) + ')');
+            });
+        }
+        // Remembered for this page visit only: what the visitor has opened.
+        function markVisited(id) {
+            if (!id || !hotById[id]) return false;
+            if (seen[id]) return true;
+            seen[id] = true;
+            if (bcnById[id]) bcnById[id].el.classList.add('is-visited');
+            qa('[data-hg="' + id + '"]').forEach(function (e) { e.classList.add('is-visited'); });
+            return true;
+        }
+        function pick(id) {
+            markVisited(id);
+            if (typeof opts.onPick !== 'function') return;
+            try { opts.onPick({ id: id, zone: zoneOfBox(hotById[id].box) }); } catch (e) { /* ignore */ }
         }
         qa('.lab-sc-hot').forEach(function (a) {
             var id = a.getAttribute('data-hot');
             function on() { showRing(id, true); showTag(id); }
-            function off() { showRing(id, false); if (curTag === id) hideTag(); }
+            function off() { showRing(id, false); if (hovered === id) hideTag(); }
             a.addEventListener('mouseenter', on);
             a.addEventListener('mouseleave', off);
             a.addEventListener('focus', function () { on(); ensureVisible(hotById[id].box); });
-            a.addEventListener('click', function () {
-                if (typeof opts.onPick !== 'function') return;
-                try { opts.onPick({ id: id, zone: zoneOfBox(hotById[id].box) }); } catch (e) { /* ignore */ }
-            });
+            a.addEventListener('click', function () { pick(id); });
             a.addEventListener('blur', off);
+        });
+        bcns.forEach(function (b) {
+            b.el.addEventListener('mouseenter', function () { showRing(b.id, true); showTag(b.id); });
+            b.el.addEventListener('mouseleave', function () { showRing(b.id, false); if (hovered === b.id) hideTag(); });
+            b.el.addEventListener('click', function () { pick(b.id); });
         });
         function ensureVisible(b) {
             if (!panning || mode.focus) return;
@@ -1196,7 +1274,7 @@
             el.classList.add(cls);
             setTimeout(function () { el.classList.remove(cls); }, ms);
         }
-        var bagAnim = null, ballAnim = null, blindAnim = null, swTimer = null, swStart = 0, swRun = false, lacBusy = false, blindH = 96, tmOn = false;
+        var ergoAnim = null, ergoV = 0, ergoA = 0, bagAnim = null, ballAnim = null, blindAnim = null, swTimer = null, swStart = 0, swRun = false, lacBusy = false, blindH = 96, tmOn = false;
         var lacVals = ['1.4', '2.1', '3.8', '4.6', '7.9', '11.2'], lacI = 0;
         var actions = {
             lamp: function () {
@@ -1248,6 +1326,25 @@
                     else { g.removeAttribute('transform'); sh.removeAttribute('transform'); bagAnim = null; }
                 }
                 bagAnim = requestAnimationFrame(step);
+            },
+            ergo: function () {
+                sfx('whirr');
+                // a few hard pedal strokes: the flywheel spins up and coasts down; the monitor redraws
+                var el = q('.lab-sc-toy-ergo'), fly = q('.lab-sc-flyspin');
+                el.classList.add('lab-sc-barsreset');
+                setTimeout(function () { el.classList.remove('lab-sc-barsreset'); }, 260);
+                ergoV = Math.min(ergoV + (reduced ? 120 : 1100), reduced ? 120 : 1800);   // degrees per second
+                if (ergoAnim) return;
+                var last = performance.now();
+                function step(now) {
+                    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+                    ergoA = (ergoA + ergoV * dt) % 360;
+                    ergoV *= Math.exp(-dt / (reduced ? 0.25 : 1.5));
+                    fly.setAttribute('transform', 'rotate(' + ergoA.toFixed(2) + ' 1750 880)');
+                    if (ergoV > 4) ergoAnim = requestAnimationFrame(step);
+                    else { ergoAnim = null; ergoV = 0; }
+                }
+                ergoAnim = requestAnimationFrame(step);
             },
             bell: function () {
                 sfx('bell');
@@ -1399,11 +1496,14 @@
         var rdim = q('.lab-sc-rdim'), rwarm = q('.lab-sc-rwarm'), rparts = q('.lab-sc-rparts'), rgroup = q('.lab-sc-reading');
         var dimGrad = document.getElementById(pre + 'rdDim'), warmGrad = document.getElementById(pre + 'rdWarm');
         function markObject(id) {
-            if (id && !hotById[id]) id = null;
+            if (id && !hotById[id]) return false;      // unknown (or retired, like 'wingate'): change nothing
             reading = id || null;
             rgroup.classList.toggle('is-on', !!reading);
             qa('.lab-sc-hot').forEach(function (a) { a.classList.toggle('is-reading', a.getAttribute('data-hot') === reading); });
+            bcns.forEach(function (b) { b.el.classList.toggle('is-reading', b.id === reading); });
+            root.classList.toggle('lab-sc-isreading', !!reading);
             if (!reading) return;
+            markVisited(reading);
             var b = hotById[reading].fit, cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, w = b[2] - b[0], h = b[3] - b[1];
             // dimmer: clear over the object, soft falloff to the edge of an ellipse, flat dim beyond
             var rx = Math.max(w * 0.9, 260), ry = Math.max(h * 0.9, 260);
@@ -1431,17 +1531,20 @@
                 return true;
             },
             focus: function (key, inset) {
-                if (key && !zoneBy(key)) key = null;
+                if (key && !zoneBy(key)) return false;
                 mode.obj = null;
                 mode.focus = key || null;
                 mode.inset = inset || null;
                 hideTag();
                 settle(600);
+                return true;
             },
             mark: function (key) {
+                if (key && !zoneBy(key)) return false;
                 marked = key || null;
                 qa('.lab-sc-zone').forEach(function (g) { g.classList.toggle('is-marked', g.getAttribute('data-zone') === marked); });
             },
+            visited: markVisited,
             play: function (on) { want = !!on; update(); }
         };
     }

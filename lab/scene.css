@@ -167,11 +167,64 @@
 .lab-sc-rings .lab-sc-ring.is-on { opacity: 1; }
 .lab-sc-ringline { fill: none; stroke: var(--lab-sc-accent); stroke-width: calc(2px * var(--lab-sc-k)); }
 .lab-sc-ringglow { fill: #ffd58a; fill-opacity: .07; stroke: #ffd58a; stroke-opacity: .25; stroke-width: calc(7px * var(--lab-sc-k)); }
-.lab-sc-ring-toy .lab-sc-ringline { stroke: #fff; stroke-opacity: .55; stroke-dasharray: calc(5px * var(--lab-sc-k)) calc(4px * var(--lab-sc-k)); stroke-width: calc(1.5px * var(--lab-sc-k)); }
 
-.lab-sc-tag, .lab-sc-bubble { pointer-events: none; }
-.lab-sc-tag rect { fill: var(--lab-sc-tag-bg); stroke: var(--lab-sc-accent); stroke-width: calc(1.5px * var(--lab-sc-k)); }
-.lab-sc-tag text, .lab-sc-bubble text { font-size: calc(13px * var(--lab-sc-k)); font-weight: 600; fill: var(--lab-sc-tag-ink); }
+/* Toys: a faint cool sparkle on hover, never a beacon or a warm ring. */
+.lab-sc-star { fill: #d8ecff; transform-box: fill-box; transform-origin: 50% 50%; }
+.lab-sc-ring-toy.is-on .lab-sc-star { animation: lab-sc-twinkle 1.3s ease-in-out infinite; }
+@keyframes lab-sc-twinkle { 0%, 100% { opacity: .25; transform: scale(.6) rotate(0); } 50% { opacity: .85; transform: scale(1) rotate(45deg); } }
+
+/* ---------- CV hotspots: pools of warm light and beacons ---------- */
+/* The pool: a soft warm wash over the object, breathing slowly. Opacity only. */
+.lab-sc-hotglow { pointer-events: none; }
+.lab-sc-hglow { opacity: .8; animation: lab-sc-hbreathe 5.2s ease-in-out infinite; transition: opacity .5s ease; }
+@keyframes lab-sc-hbreathe { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+.lab-sc-hglow.is-visited { animation: none; opacity: .14; }
+.lab-sc-focused .lab-sc-hglow { animation: none; opacity: .18; }
+.lab-sc-day .lab-sc-hglow { opacity: .45; }
+
+/* The beacon: a ringed amber dot pinging on a staggered beat, with the section's name. */
+.lab-sc-bcn { transition: opacity .4s ease; }
+.lab-sc-bcn-hit { fill: #000; fill-opacity: 0; }
+.lab-sc-bcn-halo { opacity: .9; }
+.lab-sc-bcn-pulse { fill: none; stroke: #ffd58a; stroke-width: 1.8; transform-box: fill-box; transform-origin: 50% 50%; opacity: 0; animation: lab-sc-ping 2.8s cubic-bezier(.15, .6, .35, 1) infinite; }
+@keyframes lab-sc-ping { 0% { transform: scale(1); opacity: .95; } 75% { opacity: 0; } 100% { transform: scale(3.4); opacity: 0; } }
+.lab-sc-bcn-ring { fill: #1a1408; fill-opacity: .55; stroke: #ffd58a; stroke-width: 1.4; }
+.lab-sc-bcn-core { fill: #ffc65e; }
+.lab-sc-bcn-dot { fill: #fff8e6; }
+.lab-sc-bcn-pill { fill: #0c1222; fill-opacity: 0; stroke: #ffd58a; stroke-opacity: 0; stroke-width: 1.2; transition: fill .15s, fill-opacity .15s, stroke-opacity .15s; }
+.lab-sc-bcn-text {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    fill: #ffe7b8;
+    stroke: #070b17;
+    stroke-width: 3.4px;
+    stroke-opacity: .82;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    transition: fill .15s;
+}
+.lab-sc-bcn:hover .lab-sc-bcn-pill, .lab-sc-bcn.is-hover .lab-sc-bcn-pill { fill: var(--lab-sc-tag-bg); fill-opacity: 1; stroke-opacity: 1; }
+.lab-sc-bcn:hover .lab-sc-bcn-text, .lab-sc-bcn.is-hover .lab-sc-bcn-text { fill: var(--lab-sc-tag-ink); stroke-opacity: 0; }
+.lab-sc-bcn.is-hover .lab-sc-bcn-core { fill: #ffe2a0; }
+
+/* Already opened this visit: calm, dim, no ping. */
+.lab-sc-bcn.is-visited .lab-sc-bcn-pulse, .lab-sc-bcn.is-visited .lab-sc-bcn-halo { display: none; }
+.lab-sc-bcn.is-visited .lab-sc-bcn-core { fill: #a48d62; }
+.lab-sc-bcn.is-visited .lab-sc-bcn-ring { stroke: #a48d62; }
+.lab-sc-bcn.is-visited .lab-sc-bcn-text { fill: #c4b593; }
+.lab-sc-bcn.is-visited { opacity: .78; }
+
+/* A room is open: the other beacons stay, quietly, so the visitor can hop to them. */
+.lab-sc-focused .lab-sc-bcn { opacity: .55; }
+.lab-sc-focused .lab-sc-bcn-pulse { animation: none; display: none; }
+.lab-sc-focused .lab-sc-bcn-halo { opacity: .45; }
+.lab-sc-focused .lab-sc-bcn.is-hover, .lab-sc-focused .lab-sc-bcn:hover { opacity: 1; }
+.lab-sc-focused .lab-sc-bcn.is-visited { opacity: .4; }
+.lab-sc .lab-sc-svg .lab-sc-bcn.is-reading { opacity: 0; pointer-events: none; }     /* the reading rim takes over */
+
+.lab-sc-bubble { pointer-events: none; }
+.lab-sc-bubble text { font-size: calc(13px * var(--lab-sc-k)); font-weight: 600; fill: var(--lab-sc-tag-ink); }
 .lab-sc-bubble rect { fill: #1d1f24; fill-opacity: .9; stroke: #ffffff; stroke-opacity: .35; stroke-width: calc(1px * var(--lab-sc-k)); }
 .lab-sc-bubble text { fill: #f6f1e4; font-family: "SF Mono", Menlo, Consolas, monospace; font-weight: 500; }
 

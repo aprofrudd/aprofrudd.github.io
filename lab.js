@@ -30,13 +30,13 @@
     ];
 
     var LABELS = {
-        'at-a-glance': 'At a glance', 'about': 'About', 'now': 'Now',
+        'at-a-glance': 'At a glance', 'about': 'About', 'now': 'Right now',
         'applied-projects': 'Projects', 'capability': 'Capability',
         'collaboration': 'Collaborations', 'software': 'Software',
         'experience': 'Experience', 'education': 'Education', 'skills': 'Skills',
         'publications': 'Publications', 'grants': 'Grants',
         'phds': 'PhDs', 'talks': 'Talks', 'media': 'Media',
-        'available': 'Available for', 'faq': 'FAQ', 'contact': 'Contact'
+        'available': 'Work with me', 'faq': 'FAQ', 'contact': 'Contact'
     };
 
     function esc(s) {
