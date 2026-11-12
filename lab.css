@@ -112,7 +112,6 @@
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 .lab-pill:hover, .lab-pill.lab-all-toggle[aria-pressed="true"] { background: #ffd58a; border-color: #ffd58a; color: #12151d; }
-.lab-pill#lab-sound[aria-pressed="false"] { color: #8f95a3; }
 
 /* ---- the drawer ----------------------------------------------------------- */
 .lab-drawer-bar { display: none; }

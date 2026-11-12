@@ -602,7 +602,6 @@
     color: var(--sk-cream);
     text-shadow: 0 -1px 0 rgb(0 0 0 / 0.6);
 }
-.lab-live .lab-pill#lab-sound[aria-pressed="false"] { color: #b9b4a8; }
 .lab-live .lab-pill:hover { background: var(--ch-plate); color: var(--sk-amber); }
 .lab-live .lab-pill.lab-all-toggle[aria-pressed="true"] {
     background: radial-gradient(130% 120% at 50% 110%, rgb(255 179 71 / 0.3), rgb(255 179 71 / 0) 70%), linear-gradient(#3a3226, #29231b);

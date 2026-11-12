@@ -160,14 +160,14 @@ Both generated files carry their queries and fetch date in the header, so any nu
 
 ### The lab layout (`lab.js`, `lab.css`, `lab/`)
 
-The homepage is "the lab, after hours": a compact name plate, then one wide illustrated room seen front-on in the evening (door, treadmill and gas cart, heavy bag, ergometer with a BBC Micro (furniture and a toy, not a CV hotspot), desk and lamp, rainy window, shelves, seminar corner, front desk). The kit is the navigation: each object links to a CV section, and clicking one flies the camera to that bay and slides the room's sections in as a drawer beside it. Eleven props are toys that answer a click with a small motion and a sound (lamp, wall switch, treadmill, heavy bag, bell, mug and so on). The idea is borrowed from felixrieseberg.com (one coherent place, content in objects, a plain-version switch); none of its code or art is.
+The homepage is "the lab, after hours": a compact name plate, then one wide illustrated room seen front-on in the evening (door, treadmill and gas cart, heavy bag, ergometer with a BBC Micro (furniture and a toy, not a CV hotspot), desk and lamp, rainy window, shelves, seminar corner, front desk). The kit is the navigation: each object links to a CV section, and clicking one flies the camera to that bay and slides the room's sections in as a drawer beside it. Eleven props are toys that answer a click with a small motion (lamp, wall switch, treadmill, heavy bag, bell, mug and so on). The idea is borrowed from felixrieseberg.com (one coherent place, content in objects, a plain-version switch); none of its code or art is.
 
 ```
 lab.js            rooms, drawer, routing. Classic script, loaded last.
 lab.css           name plate, stage, drawer, room headers
 lab/scene.js      window.LabScene: the illustration, camera, toys, idle motion (hand-built SVG)
 lab/scene.css     its styles; everything prefixed lab-sc-, palette scoped to .lab-sc
-lab/sfx.js        window.LabSfx: synthesised WebAudio effects and a quiet rain bed. No audio files.
+lab/sfx.js        UNUSED: the old sound module. Not loaded by the page; safe to delete.
 lab/exhibits.js   window.LabExhibits: entrance effects for section content (count-ups, staggered lists)
 lab/exhibits.css  its styles; everything prefixed lab-ex-
 lab/skin.js       window.LabSkin: marks the drawer `data-skin` for rooms listed in SKINS, adds aria-hidden decor
@@ -191,7 +191,7 @@ lab/chrome.js     redraws the scene's ceiling into the header so there is no sea
 - **Closed rooms use `hidden="until-found"`**, so find-in-page still reaches them (`beforematch` opens the drawer). Do not add a `display` rule to `.lab-room`. Every `#section` link, including the ones inside the scene, is routed through `go()` by one document click handler.
 - **Scene contract:** `LabScene.mount(el, {sfx, reduced, onPick})` returns `focus(zoneKey|null, {right, bottom})`, `mark(zoneKey|null)`, `focusOn(sectionId, inset)`, `markObject(sectionId|null)`, `play(bool)`, `zones` and `objects`. Zone keys are the room keys in `ROOMS`. Below about 1220px wide the whole room does not fit and the scene pans by drag instead.
 - **The scoreboard in the scene hardcodes 38 / 15 / 7** (papers, title fights, funded projects). It is a fourth place those figures live, after `index.html`, `resume.json` and `llms.txt`; update it with them.
-- **Sound never starts on its own.** `LabSfx` creates its AudioContext only after a gesture; the rain bed starts only once the visitor has touched the scene, and the "Sound" pill stops everything.
+- **The site is silent.** All sound (prop effects and a rain bed) was removed at the owner's request: `lab/sfx.js` is no longer loaded and `lab.js` passes no `sfx` to the scene, so the scene's `opts.sfx(name)` calls on its toys do nothing. Do not wire it back up without being asked.
 - The scene and effects use `requestAnimationFrame`/CSS because they are decoration and should stop in a hidden tab.
 - The readouts in the scene (temperature, treadmill speed, lactate) are set dressing, not data.
 - `LabExhibits.enter(el)` must never leave content hidden: effects are CSS animations from a class, with a safety timeout that clears them, and counted numbers always end on their original text.

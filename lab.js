@@ -1,5 +1,5 @@
 /* The lab: turns the linear homepage into a room you can walk around. The
-   illustration is lab/scene.js, the sounds lab/sfx.js, the content entrance
+   illustration is lab/scene.js, the content entrance
    effects lab/exhibits.js; this file groups the sections into rooms, runs
    the drawer and the routing.
 
@@ -102,7 +102,6 @@
     // it links to sections; the camera walks to a bay when its room opens.
     // ------------------------------------------------------------------
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var sfx = window.LabSfx || null;
 
     function byKey(key) {
         for (var i = 0; i < ROOMS.length; i++) if (ROOMS[i].key === key) return ROOMS[i];
@@ -119,19 +118,16 @@
         '<div class="lab-plan-bar">' +
             '<p class="lab-plan-kicker"><i></i>The lab, after hours</p>' +
             '<p class="lab-plan-hint">Click the kit to read the CV. Try the lamp, the bag and the bell.</p>' +
-            (sfx ? '<button type="button" class="lab-pill" id="lab-sound" aria-pressed="true">Sound: on</button>' : '') +
             '<button type="button" class="lab-pill lab-all-toggle" id="lab-all" aria-pressed="false">Read as one page</button>' +
         '</div>';
     main.insertBefore(plan, article);
     var stage = plan.querySelector('#lab-stage');
 
     var scene = null;
-    var touchedScene = false;
     try {
         if (window.LabScene) {
             scene = window.LabScene.mount(stage, {
-                reduced: reduced,
-                sfx: function (name) { if (sfx) sfx.play(name); }
+                reduced: reduced
             });
             scene.play(true);
         }
@@ -142,31 +138,6 @@
         stage.innerHTML = ROOMS.map(function (room) {
             return '<a href="#room-' + room.key + '"><span>' + room.num + '</span>' + esc(room.name) + '</a>';
         }).join('');
-    }
-
-    // Rain is part of the room, but only once the visitor has touched it:
-    // nobody should get audio from a CV they have only looked at.
-    stage.addEventListener('pointerdown', function () {
-        if (touchedScene) return;
-        touchedScene = true;
-        if (sfx && sfx.isEnabled()) sfx.ambient(true);
-    });
-    var soundBtnLab = document.getElementById('lab-sound');
-    function syncLabSound() {
-        if (!soundBtnLab) return;
-        var on = sfx.isEnabled();
-        soundBtnLab.setAttribute('aria-pressed', String(on));
-        soundBtnLab.textContent = 'Sound: ' + (on ? 'on' : 'off');
-    }
-    if (soundBtnLab) {
-        soundBtnLab.addEventListener('click', function () {
-            var on = !sfx.isEnabled();
-            sfx.setEnabled(on);
-            if (on) { sfx.play('click'); if (touchedScene) sfx.ambient(true); }
-            else sfx.ambient(false);
-            syncLabSound();
-        });
-        syncLabSound();
     }
 
     // How much of the stage the open drawer covers, so the camera can
