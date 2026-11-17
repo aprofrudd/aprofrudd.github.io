@@ -119,6 +119,7 @@
             '<p class="lab-plan-kicker"><i></i>The lab, after hours</p>' +
             '<p class="lab-plan-hint">Click the kit to read the CV. Try the lamp, the bag and the bell.</p>' +
             '<button type="button" class="lab-pill lab-all-toggle" id="lab-all" aria-pressed="false">Read as one page</button>' +
+            '<a class="lab-pill lab-home-link" href="/">Plain CV</a>' +
         '</div>';
     main.insertBefore(plan, article);
     var stage = plan.querySelector('#lab-stage');
@@ -207,7 +208,7 @@
     if (navMenu) {
         navMenu.innerHTML = ROOMS.map(function (room) {
             return '<li><a href="#room-' + room.key + '" data-room="' + room.key + '">' + esc(room.name) + '</a></li>';
-        }).join('') + '<li><a href="/vo2max/">Learning</a></li>';
+        }).join('') + '<li><a href="/vo2max/">Learning</a></li><li><a href="/">Plain CV</a></li>';
         navMenu.classList.add('lab-nav');
         ROOMS.forEach(function (room) {
             room.navLink = navMenu.querySelector('a[data-room="' + room.key + '"]');
