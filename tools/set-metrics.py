@@ -4,9 +4,9 @@
     python3 tools/set-metrics.py                      # show what is there now
     python3 tools/set-metrics.py --h-index 28 --citations 1912 --i10 32
 
-The h-index, citation count and i10-index are typed by hand in eleven places
-across index.html (name plate, About, Publications stats, the FAQ and its
-JSON-LD copy), resume.json and llms.txt. They are Google Scholar's figures,
+The h-index, citation count and i10-index are typed by hand in twelve places
+across index.html (the bio, the Publications line, the FAQ and its JSON-LD
+copy), resume.json and llms.txt. They are Google Scholar's figures,
 and Scholar has no feed, so they cannot be fetched: read them off the Scholar
 profile and run this.
 
@@ -32,8 +32,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # (file, metric, expected matches, pattern with ONE capture group: the value)
 PLACES = [
-    ('index.html', 'h', 1, r'h-index (\d+) &middot;'),
-    ('index.html', 'c', 1, r'&middot; ([\d,]+\+) citations &middot;'),
     ('index.html', 'c', 1, r'with over ([\d,]+) citations and an h-index of'),
     ('index.html', 'h', 1, r'citations and an h-index of (\d+), and supervise'),
     ('index.html', 'c', 1, r'journal publications, ([\d,]+\+) citations, h-index'),

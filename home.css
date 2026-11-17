@@ -115,6 +115,7 @@ a:hover {
 .aside,
 .role,
 .links,
+.contents,
 .postnominals,
 footer {
     color: var(--grey);
@@ -178,16 +179,24 @@ ol {
     white-space: nowrap;
 }
 
-.links {
+.links,
+.contents {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.15em 1.1em;
+    gap: 0.1em 1em;
     margin: 0;
+}
+
+.links {
     color: var(--ink);
 }
 
-.links .email {
-    flex-basis: 100%;
+.contents {
+    margin: 0.35em 0 1.8em;
+}
+
+#about p:last-child {
+    margin-bottom: 1em;
 }
 
 /* ---- Lists ------------------------------------------------------------ */
@@ -415,6 +424,8 @@ footer p {
         height: 22mm;
     }
 
+    .contents,
+    footer p:first-child,
     #publications-attribution {
         display: none;
     }
@@ -434,6 +445,7 @@ footer p {
 
     .links {
         display: block;
+        margin-bottom: 1em;
     }
 
     .links a {

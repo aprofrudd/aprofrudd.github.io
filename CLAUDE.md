@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `aprofrudd.github.io` is served by GitHub Pages at **alanruddock.com** (see `CNAME`). It holds two unrelated things:
 
-1. **A personal academic site** — `index.html`, `styles.css`, `resume.json`, `llms.txt`, `sitemap.xml`.
+1. **A personal academic site** — `index.html` and `home.css` (the homepage), `lab/` with `lab.js` and `lab.css` (an optional illustrated version at `/lab/`), `styles.css` (shared by `/lab/` and `/vo2max/`, NOT by the homepage), `resume.json`, `llms.txt`, `sitemap.xml`.
 2. **A classroom polling platform** — `engine/`, `builder/`, and one folder per published presentation. A self-hosted Mentimeter alternative: students vote on their phones, live results appear on the projector, the teacher paces the stages.
 
 There is **no build step, no package manager, no test framework, and no CI**. Every file is served exactly as committed. Everything is vanilla ES modules and classic scripts.
@@ -156,20 +156,37 @@ Both generated files carry their queries and fetch date in the header, so any nu
 
 ## Personal site
 
-`index.html` is a single hand-written 2,000-line page with inline JSON-LD blocks and runtime `fetch()` calls to the OpenAlex API for live publication metrics. Three files describe the same person for different audiences and **drift apart unless updated together**: `index.html` (humans + JSON-LD), `resume.json` (JSON Resume schema, linked via `<link rel="alternate">` and not read by the page), and `llms.txt` (AI crawlers). A change to roles, metrics or projects belongs in all three.
+`index.html` is the homepage: one plain column of text, styled only by `home.css`. It carries three inline JSON-LD blocks and one inline script that fetches recent publications from the OpenAlex API into `#publications-list` (the typed list is the fallback, and the loader must write exactly the same markup as that list). Three files describe the same person for different audiences and **drift apart unless updated together**: `index.html` (humans + JSON-LD), `resume.json` (JSON Resume schema, linked via `<link rel="alternate">` and not read by the page), and `llms.txt` (AI crawlers). A change to roles, metrics or projects belongs in all three.
 
-**The h-index, citation count and i10-index are Google Scholar's figures, typed by hand.** Scholar has no feed, and the owner chose to keep them over OpenAlex's, which are lower for the same author (November 2026: h-index 23 against 27, 1,335 citations against 1,800+). Do not replace them with live OpenAlex numbers. To change them, run `python3 tools/set-metrics.py --h-index N --citations N --i10 N`: it rewrites all eleven places across `index.html`, `resume.json` and `llms.txt`, and refuses to write if any expected wording has moved.
+### Homepage design rules (`index.html`, `home.css`)
 
-### The lab layout (`lab.js`, `lab.css`, `lab/`)
+The homepage was deliberately reset, in November 2026, from an elaborate illustrated design to a text-first page in the manner of the personal sites of people at AI labs (darioamodei.com was the model). The owner's word for the previous state was "sloppy": many typefaces and sizes, hundreds of colours, shadows, gradients, glows and animation, a different visual metaphor per section. **Restraint is the design. When unsure, leave it out.** A change to the homepage must keep all of these true (each is checkable in the browser):
 
-The homepage is "the lab, after hours": a compact name plate, then one wide illustrated room seen front-on in the evening (door, treadmill and gas cart, heavy bag, ergometer with a BBC Micro (furniture and a toy, not a CV hotspot), desk and lamp, rainy window, shelves, seminar corner, front desk). The kit is the navigation: each object links to a CV section, and clicking one flies the camera to that bay and slides the room's sections in as a drawer beside it. Eleven props are toys that answer a click with a small motion (lamp, wall switch, treadmill, heavy bag, bell, mug and so on). The idea is borrowed from felixrieseberg.com (one coherent place, content in objects, a plain-version switch); none of its code or art is.
+- One font family (a system serif stack; no font files), at most five font sizes and two weights (400, 700) on the whole page. No letter-spaced or uppercase labels, no monospace.
+- Three colours: paper, ink, one muted grey-brown for dates and secondary lines, plus a hairline rule colour. Links are ink with a plain underline. No accent colour. `prefers-color-scheme: dark` swaps the same three roles.
+- No box-shadow, text-shadow, gradient, background image, border-radius (the V̇O₂max dot aside), icon, emoji, animation or transition. No cards, pills, chips, badges, stat tiles or coloured tags.
+- One column about 640px wide. No navigation bar: one row of essential links (email, Scholar, ORCID, LinkedIn) and one muted "On this page" line of at most six in-page links.
+- Each headline figure appears in the bio and in its own section, not as a separate statistics block.
+- Dated rows (grey left column, then title and a secondary line) for experience, education, grants, talks and PhDs; authors / linked title / venue for publications; bold run-in labels (Problem, Measured, Outcome) for projects; comma-separated prose for skills and capability. Headings are sentence case.
+- No JavaScript beyond the publications loader. No external requests beyond that one fetch.
+- It must print as a decent CV (print rules are in `home.css`).
+- Section ids are load-bearing for old links: about, now, applied-projects, capability, collaboration (on the Grants section), experience, publications, phds, grants, talks, skills, education, media, software, available, faq, contact.
+- The FAQ stays visible, last, because the page carries matching FAQPage structured data.
+- Wording is the owner's. Restructure freely, but do not rewrite, summarise or add adjectives; he has edited the copy for tone.
+
+**The h-index, citation count and i10-index are Google Scholar's figures, typed by hand.** Scholar has no feed, and the owner chose to keep them over OpenAlex's, which are lower for the same author (November 2026: h-index 23 against 27, 1,335 citations against 1,800+). Do not replace them with live OpenAlex numbers. To change them, run `python3 tools/set-metrics.py --h-index N --citations N --i10 N`: it rewrites every place across `index.html`, `resume.json` and `llms.txt`, and refuses to write if any expected wording has moved.
+
+### The lab (`lab/index.html`, `lab.js`, `lab.css`, `lab/`)
+
+The lab is an optional illustrated version of the CV at `/lab/`, linked by one line in the homepage footer. It used to BE the homepage and was moved out when the homepage was reset (see above). **`lab/index.html` is a snapshot of the CV content as it stood on 17 November 2026**, in the old markup that `lab.js` and the room skins depend on; it is `noindex` with its canonical pointing at `/`, carries no JSON-LD, and is not updated by changes to the homepage. Update it by hand only if the owner asks. Do not let its style leak back into the homepage. In everything below, "index.html" and "the page" mean `lab/index.html`.
+
+It is "the lab, after hours": a compact name plate, then one wide illustrated room seen front-on in the evening (door, treadmill and gas cart, heavy bag, ergometer with a BBC Micro (furniture and a toy, not a CV hotspot), desk and lamp, rainy window, shelves, seminar corner, front desk). The kit is the navigation: each object links to a CV section, and clicking one flies the camera to that bay and slides the room's sections in as a drawer beside it. Eleven props are toys that answer a click with a small motion (lamp, wall switch, treadmill, heavy bag, bell, mug and so on). The idea is borrowed from felixrieseberg.com (one coherent place, content in objects, a plain-version switch); none of its code or art is.
 
 ```
 lab.js            rooms, drawer, routing. Classic script, loaded last.
 lab.css           name plate, stage, drawer, room headers
 lab/scene.js      window.LabScene: the illustration, camera, toys, idle motion (hand-built SVG)
 lab/scene.css     its styles; everything prefixed lab-sc-, palette scoped to .lab-sc
-lab/sfx.js        UNUSED: the old sound module. Not loaded by the page; safe to delete.
 lab/exhibits.js   window.LabExhibits: entrance effects for section content (count-ups, staggered lists)
 lab/exhibits.css  its styles; everything prefixed lab-ex-
 lab/skin.js       window.LabSkin: marks the drawer `data-skin` for rooms listed in SKINS, adds aria-hidden decor
@@ -194,9 +211,9 @@ lab/chrome.js     redraws the scene's ceiling into the header so there is no sea
 - **Closed rooms use `hidden="until-found"`**, so find-in-page still reaches them (`beforematch` opens the drawer). Do not add a `display` rule to `.lab-room`. Every `#section` link, including the ones inside the scene, is routed through `go()` by one document click handler.
 - **Scene contract:** `LabScene.mount(el, {sfx, reduced, onPick})` returns `focus(zoneKey|null, {right, bottom})`, `mark(zoneKey|null)`, `focusOn(sectionId, inset)`, `markObject(sectionId|null)`, `play(bool)`, `zones` and `objects`. Zone keys are the room keys in `ROOMS`. Below about 1220px wide the whole room does not fit, and the stage becomes a NATIVE horizontal scroller (`.lab-sc-scroll`, gentle snap per room) with a room strip, edge chevrons, a one-off peek and a "Swipe to walk the lab" hint; `panTo(zoneKey)` glides to a room. Do not go back to moving the SVG by a transform while panning: a transform write re-lays-out every SVG `<text>` and re-rasterises the whole scene each frame, which is what made swiping jittery on phones (mean frame 35ms at 4x CPU throttle, against 17ms with native scroll). The transform camera is only for the zoomed `focus`/`focusOn` states. Idle animations pause while a finger is down or the room is moving (`lab-sc-moving`), and `lab/chrome.js` skips its header repaint until the move ends.
 - **The scoreboard in the scene hardcodes 38 / 15 / 7** (papers, title fights, funded projects). It is a fourth place those figures live, after `index.html`, `resume.json` and `llms.txt`; update it with them.
-- **The site is silent.** All sound (prop effects and a rain bed) was removed at the owner's request: `lab/sfx.js` is no longer loaded and `lab.js` passes no `sfx` to the scene, so the scene's `opts.sfx(name)` calls on its toys do nothing. Do not wire it back up without being asked.
+- **The site is silent.** All sound (prop effects and a rain bed) was removed at the owner's request: the sound module was deleted and `lab.js` passes no `sfx` to the scene, so the scene's `opts.sfx(name)` calls on its toys do nothing. Do not wire it back up without being asked.
 - The scene and effects use `requestAnimationFrame`/CSS because they are decoration and should stop in a hidden tab.
 - The readouts in the scene (temperature, treadmill speed, lactate) are set dressing, not data.
 - `LabExhibits.enter(el)` must never leave content hidden: effects are CSS animations from a class, with a safety timeout that clears them, and counted numbers always end on their original text.
 
-The comment block at the top of `index.html` is a manual off-site checklist (LinkedIn, ORCID, Scholar). It is a to-do list for the user, not instructions for you.
+A monthly automated job (commits titled "chore: monthly update of Now section and publication data [automated]") edits the homepage: it adds to the Now list and its "Last updated" date, to the typed publication list, and to the ScholarlyArticle entries in the JSON-LD, and bumps `dateModified` and the sitemap. It must follow the homepage design rules above and the existing markup patterns exactly.
