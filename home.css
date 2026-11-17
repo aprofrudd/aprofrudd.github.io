@@ -1,0 +1,465 @@
+/* The home page: one column of text.
+
+   One typeface (the system's book serif, nothing downloaded), two weights,
+   five sizes (name, section heading, text, secondary, and the V̇O₂max
+   subscript), three colours (paper, ink, a grey-brown for dates and
+   secondary lines) plus a hairline. Structure comes from type and space.
+   No shadows, gradients, rounded corners, animation or transitions.
+
+   Font stack, by platform:
+     macOS and iOS ......... Iowan Old Style
+     Windows ............... Palatino Linotype
+     older macOS ........... Palatino
+     Office installs ....... Book Antiqua
+     Linux ................. URW Palladio L / P052 (the Palatino metric clones)
+     Android ............... Noto Serif, via the generic serif
+*/
+
+:root {
+    --paper: #f6f3ec;
+    --ink: #1d1b17;
+    --grey: #6a6157;
+    --rule: #dcd5c9;
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --paper: #1a1815;
+        --ink: #e6e1d7;
+        --grey: #a1988b;
+        --rule: #3a352f;
+    }
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua",
+        "URW Palladio L", P052, Georgia, serif;
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 1.55;
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+}
+
+main,
+footer {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+main {
+    padding-top: 72px;
+}
+
+/* ---- Type ------------------------------------------------------------- */
+
+h1,
+h2,
+h3 {
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0;
+}
+
+h1 {
+    font-size: 1.6em;
+}
+
+h2 {
+    font-size: 1.25em;
+    margin: 2.6em 0 0.8em;
+}
+
+h3 {
+    font-size: 1em;
+    margin: 1.6em 0 0.4em;
+}
+
+h2 + h3,
+h2 + .aside + h3 {
+    margin-top: 0;
+}
+
+p {
+    margin: 0 0 0.8em;
+}
+
+b {
+    font-weight: 700;
+}
+
+a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.17em;
+}
+
+a:hover {
+    text-decoration-thickness: 2px;
+}
+
+/* Secondary lines, dates, the footer: the one grey, one size down. */
+.s,
+.when,
+.aside,
+.role,
+.links,
+.postnominals,
+footer {
+    color: var(--grey);
+    font-size: 0.895em;
+}
+
+.when,
+.s,
+.figures,
+.refs .j {
+    font-variant-numeric: tabular-nums;
+}
+
+ul,
+ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* ---- Intro ------------------------------------------------------------ */
+
+.masthead {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 1.6em;
+}
+
+.masthead img {
+    display: block;
+    flex: none;
+    width: 104px;
+    height: 104px;
+    object-fit: cover;
+}
+
+.role {
+    margin: 0.3em 0 0;
+    line-height: 1.45;
+}
+
+.figures {
+    margin: 0 0 1em;
+}
+
+.figures li {
+    padding-left: 1em;
+    text-indent: -1em;
+}
+
+.figures li::before {
+    content: "\2013\00a0\00a0";
+    color: var(--grey);
+}
+
+.postnominals {
+    font-weight: 400;
+    font-size: 0.559375em;      /* = the secondary size (0.895 / 1.6) */
+    margin-left: 0.3em;
+    white-space: nowrap;
+}
+
+.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15em 1.1em;
+    margin: 0;
+    color: var(--ink);
+}
+
+.links .email {
+    flex-basis: 100%;
+}
+
+/* ---- Lists ------------------------------------------------------------ */
+
+/* Dated rows: a narrow left column (date, amount or label) and the item. */
+.rows > li {
+    display: grid;
+    grid-template-columns: 8.4rem 1fr;
+    column-gap: 1.2rem;
+    margin-bottom: 0.9em;
+}
+
+.rows > li > .when {
+    line-height: 1.75;          /* sits on the first baseline of the 19px title */
+}
+
+.rows p {
+    margin: 0;
+}
+
+.rows ul {
+    margin: 0.35em 0 0;
+}
+
+.rows ul li,
+ul.bullets li {
+    position: relative;
+    padding-left: 1em;
+    margin-bottom: 0.2em;
+}
+
+.rows ul li::before {
+    content: "\2013";
+    position: absolute;
+    left: 0;
+    color: var(--grey);
+}
+
+/* Plain lists: an item, then its secondary line beneath. */
+.plain > li {
+    margin-bottom: 0.7em;
+}
+
+.plain > li > .s {
+    display: block;
+}
+
+#now .plain > li {
+    position: relative;
+    padding-left: 1em;
+}
+
+#now .plain > li::before {
+    content: "\2013";
+    position: absolute;
+    left: 0;
+    color: var(--grey);
+}
+
+/* Pairs: a name, then its note on the same line. */
+.pairs > li {
+    margin-bottom: 0.3em;
+}
+
+.pairs > li > .s {
+    margin-left: 0.6em;
+}
+
+/* Reference list: authors, title, venue. */
+.refs > li {
+    margin-bottom: 1em;
+}
+
+.refs .a,
+.refs .j {
+    display: block;
+    color: var(--grey);
+    font-size: 0.895em;
+}
+
+.refs a,
+.refs .t {
+    display: block;
+}
+
+/* Applied projects: a title, a partner, three run-in beats. */
+.project {
+    margin-bottom: 1.8em;
+}
+
+.project h3 {
+    margin: 0;
+}
+
+.project .s {
+    margin: 0 0 0.5em;
+}
+
+.project p {
+    margin-bottom: 0.45em;
+}
+
+#faq h3 {
+    margin-top: 1.3em;
+}
+
+/* ---- Footer ----------------------------------------------------------- */
+
+footer {
+    padding-top: 4em;
+    padding-bottom: 4em;
+}
+
+footer p {
+    margin: 0 0 0.3em;
+}
+
+/* ---- V̇O₂max ------------------------------------------------------------
+   A drawn dot over the V and "2max" as one subscript. Same rules as the
+   rest of the site (styles.css); a combining dot is not anchored to a
+   capital V by any font in the stack. */
+
+.v-vo2max {
+    white-space: nowrap;
+}
+
+.v-vdot {
+    position: relative;
+}
+
+.v-vdot::before {
+    content: "";
+    position: absolute;
+    top: 0.07em;
+    left: 50%;
+    width: 0.115em;
+    height: 0.115em;
+    margin-left: -0.0575em;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.v-sub {
+    font-size: 0.68em;
+    line-height: 0;
+    position: relative;
+    top: 0.22em;
+}
+
+/* ---- Phone ------------------------------------------------------------ */
+
+@media (max-width: 600px) {
+    body {
+        font-size: 17px;
+    }
+
+    main,
+    footer {
+        padding: 0 18px;
+    }
+
+    main {
+        padding-top: 40px;
+    }
+
+    .masthead {
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .masthead img {
+        width: 88px;
+        height: 88px;
+    }
+
+    .postnominals {
+        display: block;
+        margin: 0.35em 0 0;
+    }
+
+    h2 {
+        margin-top: 2.2em;
+    }
+
+    .rows > li {
+        display: block;
+    }
+
+    .rows > li > .when {
+        display: block;
+        line-height: 1.55;
+    }
+}
+
+/* ---- Print: a plain CV ------------------------------------------------ */
+
+@media print {
+    :root {
+        --paper: #fff;
+        --ink: #000;
+        --grey: #444;
+    }
+
+    @page {
+        margin: 18mm 18mm 20mm;
+    }
+
+    body {
+        font-size: 10.5pt;
+        line-height: 1.4;
+    }
+
+    main,
+    footer {
+        max-width: none;
+        padding: 0;
+    }
+
+    main {
+        padding-top: 0;
+    }
+
+    .masthead img {
+        width: 22mm;
+        height: 22mm;
+    }
+
+    #publications-attribution {
+        display: none;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    /* Profile links and references show where they go. */
+    .links a[href^="http"]::after,
+    .refs a[href^="http"]::after {
+        content: " " attr(href);
+        color: var(--grey);
+        font-size: 0.895em;
+        word-break: break-all;
+    }
+
+    .links {
+        display: block;
+    }
+
+    .links a {
+        display: block;
+    }
+
+    h2 {
+        margin-top: 1.8em;
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    h3 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    li,
+    .project,
+    #faq p {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    footer {
+        padding-top: 2em;
+        padding-bottom: 0;
+    }
+}
